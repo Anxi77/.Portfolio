@@ -13,8 +13,8 @@
                 "MinAmount": 1,
                 "MaxAmount": 1,
                 "baseStatTypes": [],
-                "iconPath": "Assets/External/JacksonKing/JacksonKingsSword.png",
-                "iconGuid": "193ffe2b21a2f784da8e0a2547c1efe9"
+                "iconPath": "Items/Icons/123_Icon.png",
+                "iconGuid": "15bd41d983b89e24cabd914e5f15a4c8"
             },
             "statRanges": {
                 "itemId": "123",
@@ -62,6 +62,48 @@
                         ]
                     }
                 ],
+                "minEffectCount": 1,
+                "maxEffectCount": 3
+            },
+            "effectTypes": []
+        },
+        {
+            "metadata": {
+                "ID": "sword_01",
+                "Name": "Basic Sword",
+                "Description": "A simple sword",
+                "Type": 1,
+                "Rarity": 0,
+                "Element": 0,
+                "MaxStack": 1,
+                "DropRate": 0.10000000149011612,
+                "MinAmount": 1,
+                "MaxAmount": 1,
+                "baseStatTypes": [],
+                "iconPath": "",
+                "iconGuid": ""
+            },
+            "statRanges": {
+                "itemId": "sword_01",
+                "itemType": 1,
+                "possibleStats": [
+                    {
+                        "statType": 3,
+                        "minValue": 5.0,
+                        "maxValue": 10.0,
+                        "weight": 1.0,
+                        "minRarity": 0,
+                        "increaseType": 0,
+                        "sourceType": 5
+                    }
+                ],
+                "minStatCount": 1,
+                "maxStatCount": 3
+            },
+            "effectRanges": {
+                "itemId": "",
+                "itemType": 0,
+                "possibleEffects": [],
                 "minEffectCount": 1,
                 "maxEffectCount": 3
             },

@@ -58,12 +58,46 @@ MonoBehaviour:
       minEffectCount: 1
       maxEffectCount: 3
     effectTypes: []
+  - metadata:
+      ID: sword_01
+      Name: Basic Sword
+      Description: A simple sword
+      Type: 1
+      Rarity: 0
+      Element: 0
+      MaxStack: 1
+      DropRate: 0.1
+      MinAmount: 1
+      MaxAmount: 1
+      baseStatTypes: 
+      iconPath: 
+      iconGuid: 
+    statRanges:
+      itemId: sword_01
+      itemType: 1
+      possibleStats:
+      - statType: 3
+        minValue: 5
+        maxValue: 10
+        weight: 1
+        minRarity: 0
+        increaseType: 0
+        sourceType: 5
+      minStatCount: 1
+      maxStatCount: 3
+    effectRanges:
+      itemId: 
+      itemType: 0
+      possibleEffects: []
+      minEffectCount: 1
+      maxEffectCount: 3
+    effectTypes: []
   _dropTableList: []
   _iconEntries:
   - itemId: 123
     icon: {fileID: 21300000, guid: 193ffe2b21a2f784da8e0a2547c1efe9, type: 3}
   lastSelectedItemId: 123
-  currentTab: 1
+  currentTab: 0
   itemListScrollPosition: {x: 0, y: 0}
   itemDetailScrollPosition: {x: 0, y: 0}
   dropTableScrollPosition: {x: 0, y: 0}

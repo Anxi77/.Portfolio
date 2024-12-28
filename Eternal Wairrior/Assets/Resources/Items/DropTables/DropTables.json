@@ -2,29 +2,9 @@
     "dropTables": [
         {
             "enemyType": 1,
-            "dropEntries": [
-                {
-                    "itemId": "123",
-                    "dropRate": 1.0,
-                    "rarity": 0,
-                    "minAmount": 1,
-                    "maxAmount": 1
-                }
-            ],
-            "guaranteedDropRate": 1.0,
+            "dropEntries": [],
+            "guaranteedDropRate": 0.10000000149011612,
             "maxDrops": 2
-        },
-        {
-            "enemyType": 2,
-            "dropEntries": [],
-            "guaranteedDropRate": 0.30000001192092898,
-            "maxDrops": 3
-        },
-        {
-            "enemyType": 4,
-            "dropEntries": [],
-            "guaranteedDropRate": 1.0,
-            "maxDrops": 5
         }
     ]
 }

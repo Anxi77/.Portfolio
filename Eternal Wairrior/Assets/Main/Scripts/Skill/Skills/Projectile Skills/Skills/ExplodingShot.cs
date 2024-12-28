@@ -17,7 +17,7 @@ public class ExplodingShot : ProjectileSkills
         );
 
         if (proj != null)
-        {
+        { 
             InitializeProjectile(proj);
             proj.SetDirection(fireDir);
             proj.transform.localScale = Vector3.one * ProjectileScale;

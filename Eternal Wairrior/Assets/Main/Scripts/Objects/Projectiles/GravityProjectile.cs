@@ -5,7 +5,7 @@ using UnityEngine;
 public class GravityProjectile : Projectile
 {
     [Header("Gravity Settings")]
-    [SerializeField] private float _gravityForce = 5f;
+    [SerializeField] private float _gravityForce =  5f;
     [SerializeField] private float _gravityDamageInterval = 0.5f;
     [SerializeField] private float _startSize = 1f;
     [SerializeField] private float _endSize = 3f;
