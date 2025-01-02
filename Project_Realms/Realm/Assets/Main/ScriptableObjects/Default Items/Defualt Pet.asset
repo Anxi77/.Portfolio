@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43823a802b2f4f14d8fcb3972fb9337c, type: 3}
+  m_Name: Defualt Pet
+  m_EditorClassIdentifier: 
+  itemID: 4
+  itemType: 6
+  rarity: 0
+  itemName: Rabito
+  description: 
+  icon: {fileID: 21300000, guid: 8f67aad633e5ada4289490cc8654e64f, type: 3}
+  stats: []
+  itemPrefab: {fileID: 4242314086637178008, guid: d50bf4f2beb3c36499b2169611cc40ff, type: 3}
+  worldDropPrefab: {fileID: 4242314086637178008, guid: 8cbfa4cdacdde5943b094a26ab2ec2cb, type: 3}
+  nameColor: {r: 1, g: 1, b: 1, a: 1}
+  defaultWeaponSkill: {fileID: 0}

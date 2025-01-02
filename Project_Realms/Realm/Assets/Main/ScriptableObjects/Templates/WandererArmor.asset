@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43823a802b2f4f14d8fcb3972fb9337c, type: 3}
+  m_Name: WandererArmor
+  m_EditorClassIdentifier: 
+  itemID: 7
+  itemType: 4
+  rarity: 3
+  itemName: WandererArmor
+  description: this WandererArmor
+  icon: {fileID: 21300000, guid: 2048592004a7a5c499b60ca7e634300d, type: 3}
+  stats: []
+  itemPrefab: {fileID: 1607683148790200204, guid: fd77c17507472b945a5121954114c5a0, type: 3}
+  worldDropPrefab: {fileID: 1607683148790200204, guid: 842c5d63244d26e408689ba9c3188fa1, type: 3}
+  nameColor: {r: 1, g: 1, b: 1, a: 1}
+  defaultWeaponSkill: {fileID: 0}

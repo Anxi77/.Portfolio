@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43823a802b2f4f14d8fcb3972fb9337c, type: 3}
+  m_Name: KnightArmor
+  m_EditorClassIdentifier: 
+  itemID: 6
+  itemType: 4
+  rarity: 2
+  itemName: KnightArmor
+  description: this KnightArmor
+  icon: {fileID: 21300000, guid: f4bb8979804b2fb4fbb1f590ef429081, type: 3}
+  stats: []
+  itemPrefab: {fileID: 7491226406975659503, guid: 60a945903a0dc4e479dfbe562ecaeee8, type: 3}
+  worldDropPrefab: {fileID: 7491226406975659503, guid: 910ebc50ac403524db6dc93831325596, type: 3}
+  nameColor: {r: 1, g: 1, b: 1, a: 1}
+  defaultWeaponSkill: {fileID: 0}

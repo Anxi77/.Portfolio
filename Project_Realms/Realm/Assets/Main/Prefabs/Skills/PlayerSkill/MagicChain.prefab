@@ -1,0 +1,124 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &190125308229457458
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1349824556367697965}
+  - component: {fileID: 3614430637397753839}
+  - component: {fileID: 6048696843086911448}
+  - component: {fileID: 86021560679512469}
+  m_Layer: 0
+  m_Name: MagicChain
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1349824556367697965
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190125308229457458}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3614430637397753839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190125308229457458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dc90109cb6387e4b9b78522413358cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  data: {fileID: 6048696843086911448}
+  skillStat: {fileID: 86021560679512469}
+  animaClip: {fileID: -203655887218126122, guid: 37251f406784c044e92c7efc93f8ffd1, type: 3}
+  areaPrefab: {fileID: 4818918737149278404, guid: 9d0201bb4d9eb284092cab8939f8b873, type: 3}
+  spawnPoint: {x: 0, y: 0, z: 0}
+--- !u!114 &6048696843086911448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190125308229457458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4d63cb37ddeb1f4086d92b2f68e5387, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skillIcon: {fileID: 21300000, guid: ee1dbff151266ee46a3efd85476f1e8e, type: 3}
+  skillID: 9
+--- !u!114 &86021560679512469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190125308229457458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b07b8e235e29edd4e87755ab879e5ab9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  initialStats:
+  - Type: 2
+    BaseValue: 900
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 1
+    BaseValue: 0
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 3
+    BaseValue: 5
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 16
+    BaseValue: 5
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 17
+    BaseValue: 1
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 18
+    BaseValue: 1
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 19
+    BaseValue: 0.5
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 20
+    BaseValue: 0
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 21
+    BaseValue: 1
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 0
+    BaseValue: 1
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 4
+    BaseValue: 0.5
+    GrowthValue: 0
+    growthPercent: 0

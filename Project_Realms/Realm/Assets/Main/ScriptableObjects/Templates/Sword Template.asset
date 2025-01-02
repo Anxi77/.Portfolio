@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43823a802b2f4f14d8fcb3972fb9337c, type: 3}
+  m_Name: Sword Template
+  m_EditorClassIdentifier: 
+  itemID: 0
+  itemType: 2
+  rarity: 0
+  itemName: Sword
+  description: 
+  icon: {fileID: 21300000, guid: b259bce8f8c0e374f80aada828bcba93, type: 3}
+  stats: []
+  itemPrefab: {fileID: 2647840669800535580, guid: 0b5c1134315c0a440afaf8deefed3925, type: 3}
+  worldDropPrefab: {fileID: 1686114658746240551, guid: 0d80bcb8f639b5e41b2969138a65de9e, type: 3}
+  nameColor: {r: 1, g: 1, b: 1, a: 1}
+  defaultWeaponSkill: {fileID: 5711356680332546663, guid: 8b2559ac32855c344a4b968747b663ad, type: 3}

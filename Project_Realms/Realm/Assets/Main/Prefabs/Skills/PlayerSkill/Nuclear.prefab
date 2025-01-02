@@ -1,0 +1,123 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8824277323535994491
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6480055286877946882}
+  - component: {fileID: 1222195112558889353}
+  - component: {fileID: 949999402352698975}
+  - component: {fileID: 8221618179515991847}
+  m_Layer: 0
+  m_Name: Nuclear
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6480055286877946882
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8824277323535994491}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1222195112558889353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8824277323535994491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dc90109cb6387e4b9b78522413358cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  data: {fileID: 8221618179515991847}
+  skillStat: {fileID: 949999402352698975}
+  animaClip: {fileID: -203655887218126122, guid: 8528d52d90ed41b45ac801957d4a899e, type: 3}
+  areaPrefab: {fileID: 6133853423296785967, guid: 8250723f7ab50b84bbb248fc32ac657b, type: 3}
+--- !u!114 &949999402352698975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8824277323535994491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b07b8e235e29edd4e87755ab879e5ab9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  initialStats:
+  - Type: 0
+    BaseValue: 1
+    GrowthValue: 1
+    growthPercent: 0
+  - Type: 2
+    BaseValue: 500
+    GrowthValue: 50
+    growthPercent: 0
+  - Type: 1
+    BaseValue: 200
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 3
+    BaseValue: 10
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 16
+    BaseValue: 15
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 17
+    BaseValue: 5.1
+    GrowthValue: 0.3
+    growthPercent: 0
+  - Type: 18
+    BaseValue: 1
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 19
+    BaseValue: 1
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 20
+    BaseValue: 1
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 21
+    BaseValue: 0
+    GrowthValue: 0
+    growthPercent: 0
+  - Type: 4
+    BaseValue: 30
+    GrowthValue: 0
+    growthPercent: 0
+--- !u!114 &8221618179515991847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8824277323535994491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4d63cb37ddeb1f4086d92b2f68e5387, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skillIcon: {fileID: 21300000, guid: 31dfcdf9c368b1b478eba97dfab00aa6, type: 3}
+  skillID: 11
