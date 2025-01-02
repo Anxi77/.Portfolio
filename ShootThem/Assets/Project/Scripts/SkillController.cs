@@ -23,7 +23,6 @@ public class SkillController : MonoBehaviour
         SkillUI.enabled = false;
         testButton = SkillUI.GetComponentInChildren<Button>();
         testButton.onClick.AddListener(() => SetSkill(skills[0]));
-        print(controller.name);
     }
 
     public void SetSkill(Skill skill)

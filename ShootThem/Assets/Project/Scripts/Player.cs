@@ -7,5 +7,6 @@ public class Player : MonoBehaviour
     public float Mana;
     public float EXP;
     public int Level;
+    public Transform playerPos;
 
 }

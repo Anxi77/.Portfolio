@@ -64034,6 +64034,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  skill: {fileID: 1716430824720744832}
 --- !u!1 &8834751714554245877
 GameObject:
   m_ObjectHideFlags: 0
