@@ -4,9 +4,10 @@ public class Skill : MonoBehaviour
 {
     private Player player;
     private SkillController skillController;
-    private float damage;
-    private float manaCost;
-    private float cooldown;
+    public SkillController SkillController => skillController;
+    public float damage;
+    public float manaCost;
+    public float cooldown;
 
     public void Init(Player player, SkillController skillController)
     {
