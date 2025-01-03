@@ -122,11 +122,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b96338bd9bd600f47b3fa1c3f097a144, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 0
   speed: 1
   attackSpeed: 1
-  attackRange: 15
-  attackDamage: 0
+  attackRange: 3
+  attackDamage: 1
   maxHealth: 1000
   anim: {fileID: 0}
   healthSlider: {fileID: 5976957146980556440}
@@ -336,7 +335,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_Material: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}

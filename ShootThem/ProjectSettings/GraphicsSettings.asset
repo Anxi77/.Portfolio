@@ -32,7 +32,13 @@ GraphicsSettings:
   - {fileID: 15105, guid: 0000000000000000f000000000000000, type: 0}
   - {fileID: 15106, guid: 0000000000000000f000000000000000, type: 0}
   - {fileID: 10753, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10770, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 4800000, guid: 7b46feef41c14aab869cccc4b73026c8, type: 3}
+  - {fileID: 4800000, guid: 72945eb2e5e0443187540a294f6a5193, type: 3}
+  - {fileID: 4800000, guid: 8784c96d808277d4d8eb791f0f4683d2, type: 3}
+  - {fileID: 4800000, guid: 18358a27a82c41b2998edb4231d61765, type: 3}
+  - {fileID: 4800000, guid: 1791021d903f4124afa3c31fb365a0ee, type: 3}
+  - {fileID: 4800000, guid: 1508ffa566714a4fbf6d5fb957318377, type: 3}
+  - {fileID: 4800000, guid: 606463fc53474cef84d134e134c0bbf2, type: 3}
   m_PreloadedShaders: []
   m_PreloadShadersBatchTimeLimit: -1
   m_SpritesDefaultMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
@@ -56,8 +62,8 @@ GraphicsSettings:
   m_FogKeepExp: 1
   m_FogKeepExp2: 1
   m_AlbedoSwatchInfos: []
-  m_LightsUseLinearIntensity: 0
-  m_LightsUseColorTemperature: 0
+  m_LightsUseLinearIntensity: 1
+  m_LightsUseColorTemperature: 1
   m_DefaultRenderingLayerMask: 1
   m_LogWhenShaderIsCompiled: 0
   m_SRPDefaultSettings:

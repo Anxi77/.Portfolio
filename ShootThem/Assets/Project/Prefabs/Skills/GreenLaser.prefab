@@ -9780,7 +9780,7 @@ MonoBehaviour:
   particleMeshLength: 2
   scalingWithSize: 1
   finalSize: 1
-  skill: {fileID: 1716430824720744832}
+  skill: {fileID: 0}
 --- !u!199 &2885407888718843251
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -9966,7 +9966,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6853104728898163378}
-  - component: {fileID: 1716430824720744832}
+  - component: {fileID: 7668101944988903185}
   m_Layer: 0
   m_Name: GreenLaser
   m_TagString: Untagged
@@ -9992,7 +9992,7 @@ Transform:
   - {fileID: 2546028987625135452}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
---- !u!114 &1716430824720744832
+--- !u!114 &7668101944988903185
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10001,12 +10001,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 2525603185750012879}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4afaffff61ce41a42931d48492c448b9, type: 3}
+  m_Script: {fileID: 11500000, guid: bc920421091ed98428cc70c0f933b648, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 25
+  damage: 5
   manaCost: 0
   cooldown: 0
+  progressControl: {fileID: 0}
+  endPointEffect: {fileID: 0}
 --- !u!1 &2532924776491710816
 GameObject:
   m_ObjectHideFlags: 0
@@ -34507,7 +34509,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10301, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: e823cd5b5d27c0f4b8256e7c12ee3e6d, type: 2}
   - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -49275,14 +49277,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dbb8691d7544962857c6d74c85aa081, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skill: {fileID: 1716430824720744832}
+  skill: {fileID: 0}
   changeAllMaxLength: 1
   maxLength: 32
   globalProgressSpeed: 1
   globalImpactProgressSpeed: 1.5
-  always: 0
   colorizeAll: 1
-  finalColor: {r: 0, g: 1, b: 0.2237246, a: 1}
   gammaLinear: 1
   meshRend: {fileID: 0}
   meshRendPower: 3
@@ -49291,6 +49291,9 @@ MonoBehaviour:
   endPointEffect: {fileID: 4027525401917195110}
   smartWaveParticles: {fileID: 7868707293043174858}
   sfxcontroller: {fileID: 3641398139996473734}
+  globalProgress: 1
+  globalImpactProgress: 1
+  finalColor: {r: 0, g: 1, b: 0.2237246, a: 1}
 --- !u!1 &6905096331851477780
 GameObject:
   m_ObjectHideFlags: 0
@@ -64034,7 +64037,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  skill: {fileID: 1716430824720744832}
+  skill: {fileID: 0}
 --- !u!1 &8834751714554245877
 GameObject:
   m_ObjectHideFlags: 0

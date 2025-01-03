@@ -4,7 +4,6 @@ using UnityEngine.UI;
 public class Monster : MonoBehaviour
 {
     public float health { get; set; }
-    public float damage;
     public float speed;
     public float attackSpeed;
     public float attackRange;
@@ -15,8 +14,6 @@ public class Monster : MonoBehaviour
     public Animator anim;
 
     public Slider healthSlider;
-
-    private bool isAttacking = false;
 
     public float currentHealth { get { return health / maxHealth; } }
 
@@ -36,8 +33,7 @@ public class Monster : MonoBehaviour
 
         if (anim != null)
         {
-            anim.SetTrigger("Move");
-            anim.SetFloat("Speed", rb.velocity.magnitude);
+            anim.SetBool("Moving", true);
         }
     }
 
@@ -71,7 +67,6 @@ public class Monster : MonoBehaviour
         }
         else
         {
-            isAttacking = false;
             MoveToPlayer();
         }
     }
@@ -85,21 +80,26 @@ public class Monster : MonoBehaviour
             GameManager.Instance.monsterManager.enemies.Remove(this);
         }
 
+        if (anim != null)
+        {
+            anim.SetBool("Moving", false);
+            anim.SetTrigger("Damage");
+        }
+
         healthSlider.value = currentHealth;
     }
 
     public void Attack()
     {
-        print("Attack");
         if (canAttack)
         {
-            isAttacking = true;
-
             if (anim != null)
             {
+                anim.SetBool("Moving", false);
                 anim.SetTrigger("Attack");
             }
-            //player.TakeDamage(attackDamage);
+
+            player.TakeDamage(attackDamage);
 
             canAttack = false;
             attackTimer = 0f;

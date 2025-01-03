@@ -16,11 +16,15 @@ public class GameManager : MonoBehaviour
             return instance;
         }
     }
-    public Player player { get; }
+    public Player player { get; private set; }
     public MonsterManager monsterManager;
     public PlayerManager playerManager;
 
     public Transform playerSpawnPoint;
+
+    public Transform wandSpawnPoint;
+
+    public Transform wand;
 
     private void Awake()
     {
@@ -37,12 +41,19 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        AudioListener.volume = 0.5f;
         monsterManager = Instantiate(monsterManager, transform, false);
         playerManager = Instantiate(playerManager, transform, false);
         playerManager.spawnPoint = playerSpawnPoint;
         playerManager.SpawnPlayer();
+        this.player = playerManager.player;
         monsterManager.Init(playerManager.player);
-        monsterManager.SpawnMonster();
+        wand = Instantiate(wand, wandSpawnPoint.position, wandSpawnPoint.rotation, wandSpawnPoint);
     }
 
+    public void ResetWand()
+    {
+        wand.gameObject.transform.position = wandSpawnPoint.position;
+        wand.gameObject.transform.rotation = wandSpawnPoint.rotation;
+    }
 }
