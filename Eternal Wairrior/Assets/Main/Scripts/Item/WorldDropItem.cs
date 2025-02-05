@@ -55,19 +55,19 @@ public class WorldDropItem : MonoBehaviour
         itemData = data;
         if (spriteRenderer != null)
         {
-            if (data.metadata?.Icon != null)
+            if (data.Icon != null)
             {
-                spriteRenderer.sprite = data.metadata.Icon;
-                Debug.Log($"Set icon from metadata for item: {data.id}");
+                spriteRenderer.sprite = data.Icon;
+                Debug.Log($"Set icon from metadata for item: {data.ID}");
             }
-            else if (data.icon != null)
+            else if (data.Icon != null)
             {
-                spriteRenderer.sprite = data.icon;
-                Debug.Log($"Set icon from itemData for item: {data.id}");
+                spriteRenderer.sprite = data.Icon;
+                Debug.Log($"Set icon from itemData for item: {data.ID}");
             }
             else
             {
-                Debug.LogWarning($"No icon found for item: {data.id}");
+                Debug.LogWarning($"No icon found for item: {data.ID}");
             }
         }
         else

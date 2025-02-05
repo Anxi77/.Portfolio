@@ -6,7 +6,7 @@ public class ItemEffectApplier
 
     public void ApplyItemEffects(ItemData item, EquipmentSlot slot)
     {
-        foreach (var stat in item.stats)
+        foreach (var stat in item.Stats)
         {
             var sourceType = GetSourceTypeForSlot(slot);
             playerStat.AddStatModifier(
@@ -20,7 +20,7 @@ public class ItemEffectApplier
 
     public void RemoveItemEffects(ItemData item, EquipmentSlot slot)
     {
-        foreach (var stat in item.stats)
+        foreach (var stat in item.Stats)
         {
             var sourceType = GetSourceTypeForSlot(slot);
             playerStat.RemoveStatModifier(

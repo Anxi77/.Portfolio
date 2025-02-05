@@ -4,9 +4,9 @@ public class ArmorItem : EquipmentItem
 {
     public ArmorItem(ItemData itemData) : base(itemData)
     {
-        if (itemData.type != ItemType.Armor)
+        if (itemData.Type != ItemType.Armor)
         {
-            Debug.LogError($"Attempted to create ArmorItem with non-armor ItemData: {itemData.type}");
+            Debug.LogError($"Attempted to create ArmorItem with non-armor ItemData: {itemData.Type}");
         }
     }
 

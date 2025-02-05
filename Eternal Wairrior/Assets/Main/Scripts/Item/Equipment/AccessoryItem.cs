@@ -7,9 +7,9 @@ public class AccessoryItem : EquipmentItem
 
     public AccessoryItem(ItemData itemData) : base(itemData)
     {
-        if (itemData.type != ItemType.Accessory)
+        if (itemData.Type != ItemType.Accessory)
         {
-            Debug.LogError($"Attempted to create AccessoryItem with non-accessory ItemData: {itemData.type}");
+            Debug.LogError($"Attempted to create AccessoryItem with non-accessory ItemData: {itemData.Type}");
         }
     }
 
@@ -21,7 +21,7 @@ public class AccessoryItem : EquipmentItem
 
     private void DetermineAccessoryType(ItemData data)
     {
-        accessoryType = data.id switch
+        accessoryType = data.ID switch
         {
             var id when id.Contains("necklace") || id.Contains("amulet") || id.Contains("pendant")
                 => AccessoryType.Necklace,
@@ -32,7 +32,7 @@ public class AccessoryItem : EquipmentItem
 
         if (accessoryType == AccessoryType.None)
         {
-            Debug.LogWarning($"Cannot determine accessory type for item: {data.id}");
+            Debug.LogWarning($"Cannot determine accessory type for item: {data.ID}");
         }
     }
 

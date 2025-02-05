@@ -627,5 +627,3 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
         Debug.Log("PathFindingManager initialized with new camera");
     }
 }
-
-

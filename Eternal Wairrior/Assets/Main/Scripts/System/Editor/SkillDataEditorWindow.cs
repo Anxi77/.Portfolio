@@ -12,7 +12,7 @@ public class SkillDataEditorWindow : EditorWindow
     private GUIStyle headerStyle;
     private SkillEditorDataContainer editorData;
 
-    [MenuItem("Tools/NEW Skill Data Editor")]
+    [MenuItem("Tools/Skill Data Editor")]
     public static void ShowWindow()
     {
         GetWindow<SkillDataEditorWindow>("Skill Data Editor");
@@ -36,7 +36,7 @@ public class SkillDataEditorWindow : EditorWindow
 
     private void LoadEditorData()
     {
-        // ¸ÕÀú SkillDataManager ÃÊ±âÈ­
+        // ë¨¼ì € SkillDataManager ì´ˆê¸°í™”
         var skillDataManager = FindObjectOfType<SkillDataManager>();
         if (skillDataManager == null)
         {
@@ -82,33 +82,33 @@ public class SkillDataEditorWindow : EditorWindow
             if (editorData == null) return;
         }
 
-        // ÀüÃ¼ À©µµ¿ì¸¦ ¼öÁ÷À¸·Î ºĞÇÒ
+        // ì „ì²´ ìœˆë„ìš°ë¥¼ ìˆ˜ì§ìœ¼ë¡œ ë¶„í• 
         EditorGUILayout.BeginVertical();
         {
-            // ¸ŞÀÎ ¿µ¿ª (»ó´Ü)
+            // ë©”ì¸ ì˜ì—­ (ìƒë‹¨)
             EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
             {
-                // ¿ŞÂÊ ÆĞ³Î (°íÁ¤ ³Êºñ)
+                // ì™¼ìª½ íŒ¨ë„ (ê³ ì • ë„ˆë¹„)
                 EditorGUILayout.BeginVertical(GUILayout.Width(250));
                 DrawLeftPanel();
                 EditorGUILayout.EndVertical();
 
-                // ±¸ºĞ¼±
+                // êµ¬ë¶„ì„ 
                 EditorGUILayout.Space(2);
                 DrawVerticalLine(Color.gray);
                 EditorGUILayout.Space(2);
 
-                // ¿À¸¥ÂÊ ÆĞ³Î (³ª¸ÓÁö °ø°£)
+                // ì˜¤ë¥¸ìª½ íŒ¨ë„ (ë‚˜ë¨¸ì§€ ê³µê°„)
                 EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
                 DrawRightPanel();
                 EditorGUILayout.EndVertical();
             }
             EditorGUILayout.EndHorizontal();
 
-            // ±¸ºĞ¼±
+            // êµ¬ë¶„ì„ 
             DrawHorizontalLine(Color.gray);
 
-            // ÇÏ´Ü ¹öÆ° ¿µ¿ª
+            // í•˜ë‹¨ ë²„íŠ¼ ì˜ì—­
             EditorGUILayout.BeginVertical(GUILayout.Height(40));
             DrawBottomPanel();
             EditorGUILayout.EndVertical();
@@ -225,7 +225,7 @@ public class SkillDataEditorWindow : EditorWindow
 
     private void CreateNewSkill()
     {
-        // »õ ½ºÅ³ »ı¼º ½Ã¿¡´Â ÀÓ½Ã·Î None ID »ç¿ë
+        // ìƒˆ ìŠ¤í‚¬ ìƒì„± ì‹œì—ëŠ” ì„ì‹œë¡œ None ID ì‚¬ìš©
         var newSkill = new SkillData
         {
             metadata = new SkillMetadata
@@ -233,7 +233,7 @@ public class SkillDataEditorWindow : EditorWindow
                 Name = "New Skill",
                 Description = "New skill description",
                 Type = SkillType.None,
-                ID = SkillID.None,  // ÀÓ½Ã·Î None ÇÒ´ç
+                ID = SkillID.None,  // ì„ì‹œë¡œ None í• ë‹¹
                 Element = ElementType.None
             }
         };
@@ -247,7 +247,7 @@ public class SkillDataEditorWindow : EditorWindow
         currentSkill = newSkill;
         editorData.lastSelectedSkillID = newSkill.metadata.ID;
 
-        // ±âº» ·¹º§ 1 ½ºÅÈ »ı¼º
+        // ê¸°ë³¸ ë ˆë²¨ 1 ìŠ¤íƒ¯ ìƒì„±
         var defaultStat = new SkillStatData
         {
             skillID = newSkill.metadata.ID,
@@ -276,7 +276,7 @@ public class SkillDataEditorWindow : EditorWindow
     private SkillID GetNextAvailableSkillID()
     {
         var existingIDs = editorData.skillList
-            .Where(s => s.metadata.ID != SkillID.None)  // None ID´Â Á¦¿Ü
+            .Where(s => s.metadata.ID != SkillID.None)  // None IDëŠ” ì œì™¸
             .Select(s => (int)s.metadata.ID)
             .ToList();
 
@@ -336,12 +336,12 @@ public class SkillDataEditorWindow : EditorWindow
 
         int newLevel = stats.levelStats.Count + 1;
 
-        // ÀÌÀü ·¹º§ÀÇ ½ºÅÈÀ» º¹»çÇÏ¿© »õ ·¹º§ »ı¼º
+        // ì´ì „ ë ˆë²¨ì˜ ìŠ¤íƒ¯ì„ ë³µì‚¬í•˜ì—¬ ìƒˆ ë ˆë²¨ ìƒì„±
         var prevStat = stats.levelStats.LastOrDefault()?.Clone() ?? new SkillStatData();
         prevStat.level = newLevel;
         prevStat.skillID = currentSkill.metadata.ID;
 
-        // ±âº»ÀûÀÎ ½ºÅÈ Áõ°¡
+        // ê¸°ë³¸ì ì¸ ìŠ¤íƒ¯ ì¦ê°€
         prevStat.damage *= 1.1f;
         prevStat.elementalPower *= 1.1f;
 
@@ -361,14 +361,14 @@ public class SkillDataEditorWindow : EditorWindow
 
         try
         {
-            // ÀúÀå Àü¿¡ None ID¸¦ °¡Áø ½ºÅ³µé¿¡ ´ëÇØ »õ·Î¿î ID ÇÒ´ç
+            // ì €ì¥ ì „ì— None IDë¥¼ ê°€ì§„ ìŠ¤í‚¬ë“¤ì— ëŒ€í•´ ìƒˆë¡œìš´ ID í• ë‹¹
             foreach (var skill in editorData.skillList)
             {
                 if (skill.metadata.ID == SkillID.None)
                 {
                     skill.metadata.ID = GetNextAvailableSkillID();
 
-                    // °ü·ÃµÈ ½ºÅÈ µ¥ÀÌÅÍÀÇ IDµµ ¾÷µ¥ÀÌÆ®
+                    // ê´€ë ¨ëœ ìŠ¤íƒ¯ ë°ì´í„°ì˜ IDë„ ì—…ë°ì´íŠ¸
                     var stats = editorData.skillStats.Find(s => s.skillID == SkillID.None);
                     if (stats != null)
                     {
@@ -383,7 +383,7 @@ public class SkillDataEditorWindow : EditorWindow
 
             Debug.Log($"Attempting to save {editorData.skillList.Count} skills and {editorData.skillStats?.Count ?? 0} stat entries");
 
-            // SkillDataManager Ã£±â ¶Ç´Â »ı¼º
+            // SkillDataManager ì°¾ê¸° ë˜ëŠ” ìƒì„±
             var skillDataManager = FindObjectOfType<SkillDataManager>();
             if (skillDataManager == null)
             {
@@ -391,11 +391,11 @@ public class SkillDataEditorWindow : EditorWindow
                 skillDataManager = go.AddComponent<SkillDataManager>();
             }
 
-            // ÃÊ±âÈ­ ½Ãµµ
+            // ì´ˆê¸°í™” ì‹œë„
             EditorUtility.DisplayProgressBar("Saving Data", "Initializing SkillDataManager...", 0.2f);
             skillDataManager.InitializeDefaultData();
 
-            // ÃÊ±âÈ­ È®ÀÎ
+            // ì´ˆê¸°í™” í™•ì¸
             if (!skillDataManager.IsInitialized)
             {
                 throw new System.Exception("Failed to initialize SkillDataManager");
@@ -403,7 +403,7 @@ public class SkillDataEditorWindow : EditorWindow
 
             EditorUtility.DisplayProgressBar("Saving Data", "Saving skill data...", 0.4f);
 
-            // µ¥ÀÌÅÍ À¯È¿¼º °Ë»ç ¹× Á÷·ÄÈ­ ÁØºñ
+            // ë°ì´í„° ìœ íš¨ì„± ê²€ì‚¬ ë° ì§ë ¬í™” ì¤€ë¹„
             foreach (var skill in editorData.skillList)
             {
                 if (skill?.metadata == null)
@@ -412,7 +412,7 @@ public class SkillDataEditorWindow : EditorWindow
                     continue;
                 }
 
-                // ISerializationCallbackReceiver ÀÎÅÍÆäÀÌ½º ±¸Çö È®ÀÎ ¹× È£Ãâ
+                // ISerializationCallbackReceiver ì¸í„°í˜ì´ìŠ¤ êµ¬í˜„ í™•ì¸ ë° í˜¸ì¶œ
                 if (skill is ISerializationCallbackReceiver receiver)
                 {
                     receiver.OnBeforeSerialize();
@@ -421,11 +421,11 @@ public class SkillDataEditorWindow : EditorWindow
                 Debug.Log($"Preparing to save skill: {skill.metadata.Name} (ID: {skill.metadata.ID})");
             }
 
-            // ½ÇÁ¦ µ¥ÀÌÅÍ ÀúÀå
+            // ì‹¤ì œ ë°ì´í„° ì €ì¥
             EditorUtility.DisplayProgressBar("Saving Data", "Writing files...", 0.6f);
             skillDataManager.SaveAllData(editorData.skillList, editorData.skillStats);
 
-            // ¿¡µğÅÍ µ¥ÀÌÅÍ ÀúÀå
+            // ì—ë””í„° ë°ì´í„° ì €ì¥
             EditorUtility.DisplayProgressBar("Saving Data", "Saving editor data...", 0.8f);
             EditorUtility.SetDirty(editorData);
             AssetDatabase.SaveAssets();
@@ -448,7 +448,7 @@ public class SkillDataEditorWindow : EditorWindow
         EditorGUILayout.Space(10);
         EditorGUILayout.LabelField("Basic Information", headerStyle);
 
-        // ¸ŞÅ¸µ¥ÀÌÅÍ Á¤º¸
+        // ë©”íƒ€ë°ì´í„° ì •ë³´
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
             EditorGUILayout.LabelField("Metadata", EditorStyles.boldLabel);
@@ -457,7 +457,7 @@ public class SkillDataEditorWindow : EditorWindow
             currentSkill.metadata.Name = EditorGUILayout.TextField("Name", currentSkill.metadata.Name);
             currentSkill.metadata.Description = EditorGUILayout.TextField("Description", currentSkill.metadata.Description);
 
-            // ½ºÅ³ Å¸ÀÔÀÌ º¯°æµÇ¸é ½ºÅÈ ÃÊ±âÈ­
+            // ìŠ¤í‚¬ íƒ€ì…ì´ ë³€ê²½ë˜ë©´ ìŠ¤íƒ¯ ì´ˆê¸°í™”
             SkillType newType = (SkillType)EditorGUILayout.EnumPopup("Skill Type", currentSkill.metadata.Type);
             if (newType != currentSkill.metadata.Type)
             {
@@ -472,7 +472,7 @@ public class SkillDataEditorWindow : EditorWindow
         }
         EditorGUILayout.EndVertical();
 
-        // ±âº» ½ºÅÈ Á¤º¸
+        // ê¸°ë³¸ ìŠ¤íƒ¯ ì •ë³´
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
             EditorGUILayout.LabelField("Base Stats", EditorStyles.boldLabel);
@@ -489,7 +489,7 @@ public class SkillDataEditorWindow : EditorWindow
             currentSkill.baseStats.element = (ElementType)EditorGUILayout.EnumPopup("Base Element", currentSkill.baseStats.element);
             currentSkill.baseStats.elementalPower = EditorGUILayout.FloatField("Elemental Power", currentSkill.baseStats.elementalPower);
 
-            // ¸ŞÅ¸µ¥ÀÌÅÍ¿Í º£ÀÌ½º ½ºÅÈÀÇ ¿¤¸®¸ÕÆ® µ¿±âÈ­
+            // ë©”íƒ€ë°ì´í„°ì™€ ë² ì´ìŠ¤ ìŠ¤íƒ¯ì˜ ì—˜ë¦¬ë¨¼íŠ¸ ë™ê¸°í™”
             if (currentSkill.baseStats.element != currentSkill.metadata.Element)
             {
                 if (EditorUtility.DisplayDialog("Element Mismatch",
@@ -515,7 +515,7 @@ public class SkillDataEditorWindow : EditorWindow
         EditorGUILayout.Space(10);
         EditorGUILayout.LabelField("Prefab Settings", headerStyle);
 
-        // ¾ÆÀÌÄÜ ¼³Á¤
+        // ì•„ì´ì½˜ ì„¤ì •
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
             EditorGUILayout.LabelField("Icon", EditorStyles.boldLabel);
@@ -542,7 +542,7 @@ public class SkillDataEditorWindow : EditorWindow
         }
         EditorGUILayout.EndVertical();
 
-        // ¸ŞÅ¸µ¥ÀÌÅÍ ÇÁ¸®ÆÕ
+        // ë©”íƒ€ë°ì´í„° í”„ë¦¬íŒ¹
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
             EditorGUILayout.LabelField("Metadata Prefab", EditorStyles.boldLabel);
@@ -555,7 +555,7 @@ public class SkillDataEditorWindow : EditorWindow
         }
         EditorGUILayout.EndVertical();
 
-        // ÇÁ·ÎÁ§Å¸ÀÏ ÇÁ¸®ÆÕ (ÇØ´çÇÏ´Â °æ¿ì)
+        // í”„ë¡œì íƒ€ì¼ í”„ë¦¬íŒ¹ (í•´ë‹¹í•˜ëŠ” ê²½ìš°)
         if (currentSkill.metadata.Type == SkillType.Projectile)
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -571,12 +571,12 @@ public class SkillDataEditorWindow : EditorWindow
             EditorGUILayout.EndVertical();
         }
 
-        // ·¹º§º° ÇÁ¸®ÆÕ
+        // ë ˆë²¨ë³„ í”„ë¦¬íŒ¹
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
             EditorGUILayout.LabelField("Level Prefabs", EditorStyles.boldLabel);
 
-            // ·¹º§º° ÇÁ¸®ÆÕ ¹è¿­ Å©±â Á¶Á¤
+            // ë ˆë²¨ë³„ í”„ë¦¬íŒ¹ ë°°ì—´ í¬ê¸° ì¡°ì •
             int newSize = EditorGUILayout.IntField("Level Count", currentSkill.prefabsByLevel?.Length ?? 0);
             if (newSize != currentSkill.prefabsByLevel?.Length)
             {
@@ -615,10 +615,10 @@ public class SkillDataEditorWindow : EditorWindow
             editorData.skillStats.Add(stats);
         }
 
-        // ±âÁ¸ ½ºÅÈ ÃÊ±âÈ­
+        // ê¸°ì¡´ ìŠ¤íƒ¯ ì´ˆê¸°í™”
         stats.levelStats.Clear();
 
-        // ·¹º§ 1 ±âº» ½ºÅÈ »ı¼º
+        // ë ˆë²¨ 1 ê¸°ë³¸ ìŠ¤íƒ¯ ìƒì„±
         var defaultStat = new SkillStatData
         {
             skillID = currentSkill.metadata.ID,
@@ -670,12 +670,12 @@ public class SkillDataEditorWindow : EditorWindow
 
     private void DrawStatFields(SkillStatData stat)
     {
-        // ±âº» ½ºÅÈ
+        // ê¸°ë³¸ ìŠ¤íƒ¯
         stat.damage = EditorGUILayout.FloatField("Damage", stat.damage);
         stat.maxSkillLevel = EditorGUILayout.IntField("Max Level", stat.maxSkillLevel);
         stat.elementalPower = EditorGUILayout.FloatField("Elemental Power", stat.elementalPower);
 
-        // ½ºÅ³ Å¸ÀÔº° Æ¯¼ö ½ºÅÈ
+        // ìŠ¤í‚¬ íƒ€ì…ë³„ íŠ¹ìˆ˜ ìŠ¤íƒ¯
         switch (currentSkill.metadata.Type)
         {
             case SkillType.Projectile:
@@ -786,10 +786,10 @@ public class SkillDataEditorWindow : EditorWindow
             skillDataManager = go.AddComponent<SkillDataManager>();
         }
 
-        // ¿¡µğÅÍ µ¥ÀÌÅÍ ¸®·Îµå
+        // ì—ë””í„° ë°ì´í„° ë¦¬ë¡œë“œ
         LoadEditorData();
 
-        // º¯°æ»çÇ× ÀúÀå
+        // ë³€ê²½ì‚¬í•­ ì €ì¥
         EditorUtility.SetDirty(editorData);
         AssetDatabase.SaveAssets();
     }

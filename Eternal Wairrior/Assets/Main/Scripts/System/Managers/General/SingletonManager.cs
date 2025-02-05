@@ -2,7 +2,7 @@ using UnityEngine;
 
 public abstract class SingletonManager<T> : MonoBehaviour where T : MonoBehaviour
 {
-    protected static T instance;  // private를 protected로 변경
+    protected static T instance;
     public static T Instance { get { return instance; } }
 
     protected virtual void Awake()
@@ -14,7 +14,7 @@ public abstract class SingletonManager<T> : MonoBehaviour where T : MonoBehaviou
         }
         else
         {
-            DestroyImmediate(this);
+            Destroy(this);
         }
     }
 }

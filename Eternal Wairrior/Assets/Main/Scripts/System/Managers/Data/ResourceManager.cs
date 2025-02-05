@@ -5,73 +5,72 @@ using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
 
-public class ResourceManager<T> : IDataManager<T> where T : UnityEngine.Object
+public static class ResourceIO<T> where T : UnityEngine.Object
 {
-    private readonly string basePath;
-    private readonly Dictionary<string, T> cache;
+    private static readonly Dictionary<string, T> cache = new Dictionary<string, T>();
 
-    public ResourceManager(string basePath)
+    public static void SaveData(string path, T data)
     {
-        this.basePath = basePath;
-        this.cache = new Dictionary<string, T>();
-    }
-
-    public void SaveData(string key, T data)
-    {
-        if (data == null) return;
+        if (data == null || string.IsNullOrEmpty(path)) return;
 
         try
         {
-            // ÅØ½ºÃ³ °æ·Î »ı¼º
-            string fullPath = Path.Combine(Application.dataPath, "Resources", basePath);
-            if (!Directory.Exists(fullPath))
+            string directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
             {
-                Directory.CreateDirectory(fullPath);
-                Debug.Log($"Created directory: {fullPath}");
+                Directory.CreateDirectory(directory);
             }
 
-            string assetPath = $"Assets/Resources/{basePath}/{key}";
 #if UNITY_EDITOR
-            // ½ºÇÁ¶óÀÌÆ®ÀÎÁö °ÔÀÓ¿ÀºêÁ§Æ®ÀÎÁö È®ÀÎ
+            // ì—ì…‹ íƒ€ì…ì— ë”°ë¥¸ ì €ì¥ ì²˜ë¦¬
             if (data is Sprite sprite)
             {
-                SaveSprite(assetPath, sprite);
+                SaveSprite(path, sprite);
             }
             else if (data is GameObject prefab)
             {
-                SavePrefab(assetPath, prefab);
+                SavePrefab(path, prefab);
             }
 
             AssetDatabase.Refresh();
 #endif
-            cache[key] = data;
-
-            Debug.Log($"Saved resource to: {assetPath}");
+            cache[path] = data;
+            Debug.Log($"Saved resource to: {path}");
         }
         catch (System.Exception e)
         {
             Debug.LogError($"Error saving resource: {e.Message}\n{e.StackTrace}");
         }
     }
-    public T LoadData(string key)
+
+    public static T LoadData(string key)
     {
-        if (cache.TryGetValue(key, out T cachedData))
-            return cachedData;
+        if (string.IsNullOrEmpty(key)) return null;
 
-        string resourcePath = Path.Combine(basePath, key);
-        T data = Resources.Load<T>(resourcePath);
+        try
+        {
+            if (cache.TryGetValue(key, out T cachedData))
+                return cachedData;
 
-        if (data != null)
-            cache[key] = data;
+            T data = Resources.Load<T>(key);
 
-        return data;
+            if (data != null)
+                cache[key] = data;
+
+            return data;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error loading resource: {e.Message}\n{e.StackTrace}");
+            return null;
+        }
     }
 
-    public bool DeleteData(string key)
+    public static bool DeleteData(string key)
     {
         try
         {
-            string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, key);
+            string fullPath = Path.Combine(Application.dataPath, "Resources", "Items", "Icons", key);
             if (File.Exists(fullPath))
             {
                 File.Delete(fullPath);
@@ -89,11 +88,11 @@ public class ResourceManager<T> : IDataManager<T> where T : UnityEngine.Object
         return false;
     }
 
-    public void ClearAll()
+    public static void ClearAll()
     {
         try
         {
-            string directory = Path.Combine(Application.dataPath, "Resources", basePath);
+            string directory = Path.Combine(Application.dataPath, "Resources", "Items", "Icons");
             if (Directory.Exists(directory))
             {
                 Directory.Delete(directory, true);
@@ -110,29 +109,34 @@ public class ResourceManager<T> : IDataManager<T> where T : UnityEngine.Object
         }
     }
 #if UNITY_EDITOR
-    private void SaveSprite(string path, Sprite sprite)
+    private static void SaveSprite(string path, Sprite sprite)
     {
         try
         {
+            Debug.Log($"SaveSprite called with path: {path}");
+
             string directory = Path.GetDirectoryName(path);
             if (!Directory.Exists(directory))
             {
+                Debug.Log($"Creating directory: {directory}");
                 Directory.CreateDirectory(directory);
             }
 
-            string fullPath = $"{path}.png";
-            // ÅØ½ºÃ³ ¿øº» °æ·Î °¡Á®¿À±â
+            // í…ìŠ¤ì²˜ íŒŒì¼ ê²½ë¡œ ê°€ì ¸ì˜¤ê¸°
             string texturePath = AssetDatabase.GetAssetPath(sprite.texture);
+            Debug.Log($"Texture path: {texturePath}");
 
-            // ¿øº» ÆÄÀÏÀÌ Á¸ÀçÇÏ¸é Á÷Á¢ º¹»ç
+            // íŒŒì¼ì´ ì¡´ì¬í•˜ë©´ ë³µì‚¬
             if (File.Exists(texturePath))
             {
-                File.Copy(texturePath, fullPath, true);
-                Debug.Log($"Copied sprite from {texturePath} to {fullPath}");
+                Debug.Log($"Copying sprite from {texturePath} to {path}");
+                File.Copy(texturePath, path, true);
+                Debug.Log($"Copied sprite from {texturePath} to {path}");
             }
             else
             {
-                // ¿øº» ÆÄÀÏÀÌ ¾ø´Â °æ¿ì¿¡¸¸ ÅØ½ºÃ³ º¯È¯ ¼öÇà
+                Debug.Log($"Creating new texture from sprite");
+                // í…ìŠ¤ì²˜ ì„í¬í„° ì„¤ì • ë³€ê²½
                 TextureImporter importer = AssetImporter.GetAtPath(texturePath) as TextureImporter;
                 if (importer != null)
                 {
@@ -144,8 +148,9 @@ public class ResourceManager<T> : IDataManager<T> where T : UnityEngine.Object
                         importer.isReadable = true;
                         importer.textureCompression = TextureImporterCompression.Uncompressed;
                         importer.SaveAndReimport();
+                        Debug.Log("Texture importer settings updated");
 
-                        // ½ºÇÁ¶óÀÌÆ®ÀÇ ½ÇÁ¦ Å©±â·Î »õ ÅØ½ºÃ³ »ı¼º
+                        // ìŠ¤í”„ë¼ì´íŠ¸ì˜ ì‹¤ì œ í¬ê¸°ë¡œ ìƒˆ í…ìŠ¤ì²˜ ìƒì„±
                         Rect spriteRect = sprite.rect;
                         Texture2D tempTexture = new Texture2D(
                             (int)spriteRect.width,
@@ -153,7 +158,7 @@ public class ResourceManager<T> : IDataManager<T> where T : UnityEngine.Object
                             TextureFormat.RGBA32,
                             false);
 
-                        // ½ºÇÁ¶óÀÌÆ®ÀÇ ÇÈ¼¿ µ¥ÀÌÅÍ Á÷Á¢ º¹»ç
+                        // ìŠ¤í”„ë¼ì´íŠ¸ì˜ í”½ì…€ ë°ì´í„°ë¥¼ ìƒˆë¡œ ë³µì‚¬
                         var pixels = sprite.texture.GetPixels(
                             (int)spriteRect.x,
                             (int)spriteRect.y,
@@ -165,8 +170,8 @@ public class ResourceManager<T> : IDataManager<T> where T : UnityEngine.Object
                         byte[] bytes = tempTexture.EncodeToPNG();
                         if (bytes != null && bytes.Length > 0)
                         {
-                            File.WriteAllBytes(fullPath, bytes);
-                            Debug.Log($"Saved sprite to: {fullPath}");
+                            File.WriteAllBytes(path, bytes);
+                            Debug.Log($"Saved sprite to: {path}");
                         }
                         else
                         {
@@ -177,10 +182,11 @@ public class ResourceManager<T> : IDataManager<T> where T : UnityEngine.Object
                     }
                     finally
                     {
-                        // ¿ø·¡ ¼³Á¤ º¹±¸
+                        // ì›ë˜ ì„¤ì • ë³µêµ¬
                         importer.isReadable = originalReadable;
                         importer.textureCompression = originalCompression;
                         importer.SaveAndReimport();
+                        Debug.Log("Texture importer settings restored");
                     }
                 }
                 else
@@ -188,9 +194,8 @@ public class ResourceManager<T> : IDataManager<T> where T : UnityEngine.Object
                     Debug.LogError($"Could not get TextureImporter for sprite: {texturePath}");
                 }
             }
-#if UNITY_EDITOR
+
             AssetDatabase.Refresh();
-#endif
         }
         catch (System.Exception e)
         {
@@ -198,7 +203,7 @@ public class ResourceManager<T> : IDataManager<T> where T : UnityEngine.Object
         }
     }
 
-    private void SavePrefab(string path, GameObject prefab)
+    private static void SavePrefab(string path, GameObject prefab)
     {
         try
         {
@@ -208,27 +213,25 @@ public class ResourceManager<T> : IDataManager<T> where T : UnityEngine.Object
                 Directory.CreateDirectory(directory);
             }
 
-            string fullPath = $"{path}.prefab";
-
-            // ÇÁ¸®ÆÕ ÆÄÀÏÀÌ Á¸ÀçÇÏ¸é »èÁ¦
-            if (File.Exists(fullPath))
+            // ê¸°ì¡´ íŒŒì¼ì´ ìˆìœ¼ë©´ ì‚­ì œ
+            if (File.Exists(path))
             {
-                AssetDatabase.DeleteAsset(fullPath);
+                AssetDatabase.DeleteAsset(path);
             }
 
-            // ÇÁ¸®ÆÕ ÀÎ½ºÅÏ½º »ı¼º
+            // í”„ë¦¬íŒ¹ ì¸ìŠ¤í„´ìŠ¤ ìƒì„±
             GameObject prefabInstance = Object.Instantiate(prefab);
-            bool success = PrefabUtility.SaveAsPrefabAsset(prefabInstance, fullPath, out bool prefabSuccess);
+            bool success = PrefabUtility.SaveAsPrefabAsset(prefabInstance, path, out bool prefabSuccess);
             Object.DestroyImmediate(prefabInstance);
 
             if (success)
             {
-                Debug.Log($"Saved prefab to: {fullPath}");
+                Debug.Log($"Saved prefab to: {path}");
                 AssetDatabase.Refresh();
             }
             else
             {
-                Debug.LogError($"Failed to save prefab to: {fullPath}");
+                Debug.LogError($"Failed to save prefab to: {path}");
             }
         }
         catch (System.Exception e)

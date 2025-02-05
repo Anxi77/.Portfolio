@@ -4,16 +4,16 @@ public class WeaponItem : EquipmentItem
 {
     public WeaponItem(ItemData itemData) : base(itemData)
     {
-        if (itemData.type != ItemType.Weapon)
+        if (itemData.Type != ItemType.Weapon)
         {
-            Debug.LogError($"Attempted to create WeaponItem with non-weapon ItemData: {itemData.type}");
+            Debug.LogError($"Attempted to create WeaponItem with non-weapon ItemData: {itemData.Type}");
         }
     }
     public override void Initialize(ItemData data)
     {
         base.Initialize(data);
         equipmentSlot = EquipmentSlot.Weapon;
-        ValidateItemType(data.type);
+        ValidateItemType(data.Type);
     }
 
     protected override void ValidateItemType(ItemType type)

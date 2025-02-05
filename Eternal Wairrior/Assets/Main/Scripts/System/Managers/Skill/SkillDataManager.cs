@@ -9,10 +9,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 {
     public new bool IsInitialized { get; private set; }
 
-    private ResourceManager<GameObject> prefabManager;
-    private ResourceManager<Sprite> iconManager;
     private CSVManager<SkillStatData> statManager;
-    private JSONManager<SkillData> jsonManager;
     private BackupManager backupManager;
     private DataValidator dataValidator;
 
@@ -34,7 +31,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
         base.Awake();
     }
 
-    public void Initialize() 
+    public void Initialize()
     {
         if (Application.isEditor && !Application.isPlaying)
         {
@@ -334,10 +331,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
             // 각 매니저 초기화 전에 폴더 생성 확인
             CreateResourceFolders();
 
-            prefabManager = new ResourceManager<GameObject>(PREFAB_PATH);
-            iconManager = new ResourceManager<Sprite>(ICON_PATH);
             statManager = new CSVManager<SkillStatData>(STAT_PATH);
-            jsonManager = new JSONManager<SkillData>(JSON_PATH);
             backupManager = new BackupManager();
             dataValidator = new DataValidator();
 
@@ -481,10 +475,8 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
             {
                 base.ClearAllData();
 
-                prefabManager?.ClearAll();
-                iconManager?.ClearAll();
                 statManager?.ClearAll();
-                jsonManager?.ClearAll();
+                JSONIO<SkillData>.ClearAll();
 
                 skillDatabase?.Clear();
                 statDatabase?.Clear();
@@ -516,17 +508,17 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
             skillDatabase[id] = skillData;
 
             // JSON 데이터 저장
-            jsonManager?.SaveData($"{id}_Data", skillData);
+            JSONIO<SkillData>.SaveData($"{id}_Data", skillData);
 
             // 리소스 저장
             if (skillData.icon != null)
             {
-                iconManager?.SaveData($"{id}_Icon", skillData.icon);
+                ResourceIO<Sprite>.SaveData($"{id}_Icon", skillData.icon);
             }
 
             if (skillData.metadata.Prefab != null)
             {
-                prefabManager?.SaveData($"{id}_Prefab", skillData.metadata.Prefab);
+                ResourceIO<GameObject>.SaveData($"{id}_Prefab", skillData.metadata.Prefab);
             }
 
             // 레벨별 프리팹 저장
@@ -537,7 +529,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
                     if (skillData.prefabsByLevel[i] != null)
                     {
                         string prefabPath = $"{id}_Level_{i + 1}_Prefab";
-                        prefabManager?.SaveData(prefabPath, skillData.prefabsByLevel[i]);
+                        ResourceIO<GameObject>.SaveData(prefabPath, skillData.prefabsByLevel[i]);
                         Debug.Log($"Saved level {i + 1} prefab for {skillData.metadata.Name}");
                     }
                 }
@@ -545,7 +537,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 
             if (skillData.metadata.Type == SkillType.Projectile && skillData.projectile != null)
             {
-                prefabManager?.SaveData($"{id}_Projectile", skillData.projectile);
+                ResourceIO<GameObject>.SaveData($"{id}_Projectile", skillData.projectile);
             }
 
             Debug.Log($"Successfully saved skill data for {skillData.metadata.Name}");
@@ -748,16 +740,16 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
         try
         {
             // JSON에서 데이터 로드
-            var skillData = jsonManager.LoadData($"{id}_Data");
+            var skillData = JSONIO<SkillData>.LoadData($"{id}_Data");
             if (skillData != null)
             {
                 // 리소스 로드
-                skillData.icon = iconManager.LoadData($"{id}_Icon");
-                skillData.metadata.Prefab = prefabManager.LoadData($"{id}_Metadata");
+                skillData.icon = ResourceIO<Sprite>.LoadData($"{id}_Icon");
+                skillData.metadata.Prefab = ResourceIO<GameObject>.LoadData($"{id}_Metadata");
 
                 if (skillData.metadata.Type == SkillType.Projectile)
                 {
-                    skillData.projectile = prefabManager.LoadData($"{id}_Projectile");
+                    skillData.projectile = ResourceIO<GameObject>.LoadData($"{id}_Projectile");
                 }
 
                 skillDatabase[id] = skillData;
@@ -868,15 +860,15 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
         {
             // JSON에서 데이터 로드
             string resourcePath = $"{id}_Data";
-            var skillData = jsonManager?.LoadData(resourcePath);
+            var skillData = JSONIO<SkillData>.LoadData(resourcePath);
 
             if (skillData != null)
             {
                 Debug.Log($"Loading resources for skill {id}...");
 
                 // 기본 리소스 로드
-                skillData.icon = iconManager?.LoadData($"{id}_Icon");
-                skillData.metadata.Prefab = prefabManager?.LoadData($"{id}_Prefab");
+                skillData.icon = ResourceIO<Sprite>.LoadData($"{id}_Icon");
+                skillData.metadata.Prefab = ResourceIO<GameObject>.LoadData($"{id}_Prefab");
 
                 // 레벨별 프리팹 로드
                 var stats = GetSkillStats(id, 1);  // 레벨 1의 스탯으로 최대 레벨 확인
@@ -887,7 +879,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 
                     for (int i = 0; i < maxLevel; i++)
                     {
-                        skillData.prefabsByLevel[i] = prefabManager?.LoadData($"{id}_Level_{i + 1}");
+                        skillData.prefabsByLevel[i] = ResourceIO<GameObject>.LoadData($"{id}_Level_{i + 1}");
 
                         if (skillData.prefabsByLevel[i] != null)
                         {
@@ -903,7 +895,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
                 // 프로젝타일 스킬의 경우 추가 프리팹 로드
                 if (skillData.metadata.Type == SkillType.Projectile)
                 {
-                    skillData.projectile = prefabManager?.LoadData($"{id}_Projectile");
+                    skillData.projectile = ResourceIO<GameObject>.LoadData($"{id}_Projectile");
                 }
 
                 Debug.Log($"Successfully loaded skill data for {skillData.metadata.Name}");

@@ -34,7 +34,7 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
     {
         try
         {
-            // ItemDataManager ÃÊ±âÈ­ ´ë±â
+            // ItemDataManager ì´ˆê¸°í™” ëŒ€ê¸°
             while (ItemDataManager.Instance == null)
             {
                 Debug.Log("Waiting for ItemDataManager...");
@@ -48,11 +48,11 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
                 return;
             }
 
-            // ItemGenerator ÃÊ±âÈ­
+            // ItemGenerator ì´ˆê¸°í™”
             var itemDatabase = itemDataManager.GetAllItemData();
             if (itemDatabase != null && itemDatabase.Any())
             {
-                itemGenerator = new ItemGenerator(itemDatabase.ToDictionary(item => item.id));
+                itemGenerator = new ItemGenerator(itemDatabase.ToDictionary(item => item.ID));
                 Debug.Log("ItemGenerator initialized successfully");
             }
             else
@@ -77,10 +77,10 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
         {
             worldDropItem.Initialize(itemData);
 
-            // ¹°¸® È¿°ú Á¦°ÅÇÏ°Å³ª, ¾ÆÁÖ ÀÛÀº ·£´ı ¿ÀÇÁ¼Â¸¸ Ãß°¡
+            // ë¬¼ë¦¬ íš¨ê³¼ ì œê±°í•˜ê±°ë‚˜, ì•„ì£¼ ì‘ì€ ëœë¤ ì˜¤í”„ì…‹ë§Œ ì¶”ê°€
             if (worldDropItem.TryGetComponent<Rigidbody2D>(out var rb))
             {
-                // ¾ÆÁÖ ÀÛÀº ·£´ı ¿ÀÇÁ¼Â Àû¿ë (¼±ÅÃ»çÇ×)
+                // ì•„ì£¼ ì‘ì€ ëœë¤ ì˜¤í”„ì…‹ ì ìš© (ì„ íƒì‚¬í•­)
                 Vector2 smallRandomOffset = Random.insideUnitCircle * 0.3f;
                 rb.AddForce(smallRandomOffset, ForceMode2D.Impulse);
             }
@@ -102,7 +102,7 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
             return null;
         }
 
-        // ¾ÆÀÌÅÛ »ı¼º
+        // ì•„ì´í…œ ìƒì„±
         var item = itemGenerator.GenerateItem(itemId);
         if (item == null)
         {
@@ -110,14 +110,14 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
             return null;
         }
 
-        Debug.Log($"Generated item: {item.name} with {item.stats?.Count ?? 0} stats and {item.effects?.Count ?? 0} effects");
+        Debug.Log($"Generated item: {item.Name} with {item.Stats?.Count ?? 0} stats and {item.Effects?.Count ?? 0} effects");
         return item;
     }
 
     public List<ItemData> GetItemsByType(ItemType type)
     {
         return itemDataManager.GetAllItemData()
-            .Where(item => item.type == type)
+            .Where(item => item.Type == type)
             .Select(item => item.Clone())
             .ToList();
     }
@@ -125,7 +125,7 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
     public List<ItemData> GetItemsByRarity(ItemRarity rarity)
     {
         return itemDataManager.GetAllItemData()
-            .Where(item => item.rarity == rarity)
+            .Where(item => item.Rarity == rarity)
             .Select(item => item.Clone())
             .ToList();
     }

@@ -16,7 +16,7 @@ public abstract class EquipmentItem : Item, ISkillModifier
     public override void Initialize(ItemData data)
     {
         base.Initialize(data);
-        ValidateItemType(data.type);
+        ValidateItemType(data.Type);
         InitializeSkillEffects(data);
     }
 

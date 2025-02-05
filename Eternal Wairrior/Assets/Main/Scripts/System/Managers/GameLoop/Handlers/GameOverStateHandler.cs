@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameOverStateHandler : IGameStateHandler
@@ -8,22 +9,22 @@ public class GameOverStateHandler : IGameStateHandler
     {
         Debug.Log("Entering Game Over state");
 
-        // UI Ç¥½Ã
+        // UI í‘œì‹œ
         UIManager.Instance?.ShowGameOverScreen();
 
-        // ÇÃ·¹ÀÌ¾î°¡ ¾ø´Ù¸é ´Ù½Ã ½ºÆù
+        // í”Œë ˆì´ì–´ê°€ ì—†ë‹¤ë©´ ë‹¤ì‹œ ìŠ¤í°
         if (GameManager.Instance?.player == null)
         {
-            // Á×Àº À§Ä¡ ±ÙÃ³¿¡ ÇÃ·¹ÀÌ¾î ¸®½ºÆù;
+            // ì£½ì€ ìœ„ì¹˜ ê·¼ì²˜ì— í”Œë ˆì´ì–´ ë¦¬ìŠ¤í°;
             PlayerUnitManager.Instance.SpawnPlayer(Vector3.zero);
 
-            // ÇÃ·¹ÀÌ¾î »óÅÂ º¹¿ø
+            // í”Œë ˆì´ì–´ ìƒíƒœ ë³µì›
             PlayerUnitManager.Instance.LoadGameState();
 
             Debug.Log("Player respawned at death location");
         }
 
-        // Æ÷Å»ÀÌ ¾ÆÁ÷ »ı¼ºµÇÁö ¾Ê¾ÒÀ» ¶§¸¸ »ı¼º
+        // í¬íƒˆì´ ì•„ì§ ìƒì„±ë˜ì§€ ì•Šì•˜ì„ ë•Œë§Œ ìƒì„±
         if (!portalSpawned && GameManager.Instance?.player != null)
         {
             SpawnTownPortal();
@@ -48,7 +49,7 @@ public class GameOverStateHandler : IGameStateHandler
         UIManager.Instance?.HideGameOverScreen();
         portalSpawned = false;
 
-        // GameOver »óÅÂ¸¦ ³ª°¥ ¶§ ÇÃ·¹ÀÌ¾î Á¤¸®
+        // GameOver ìƒíƒœë¥¼ ë‚˜ê°ˆ ë•Œ í”Œë ˆì´ì–´ ì •ë¦¬
         if (GameManager.Instance?.player != null)
         {
             GameObject.Destroy(GameManager.Instance.player.gameObject);

@@ -6,7 +6,7 @@ public static class SkillEffectFactory
     {
         var effects = new List<ISkillInteractionEffect>();
 
-        foreach (var effectData in itemData.effects)
+        foreach (var effectData in itemData.Effects)
         {
             var effect = CreateEffectFromData(effectData);
             if (effect != null)

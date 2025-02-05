@@ -31,7 +31,7 @@ public abstract class Item
             }
 
             // 새 장비 장착
-            playerStat.EquipItem(itemData.stats, slot);
+            playerStat.EquipItem(itemData.Stats, slot);
             isEquipped = true;
             currentSlot = slot;
             inventory.EquipToSlot(this, slot);
@@ -60,7 +60,7 @@ public abstract class Item
 
     private bool CanEquipToSlot(EquipmentSlot slot)
     {
-        return (itemData.type, slot) switch
+        return (itemData.Type, slot) switch
         {
             (ItemType.Weapon, EquipmentSlot.Weapon) => true,
             (ItemType.Armor, EquipmentSlot.Armor) => true,

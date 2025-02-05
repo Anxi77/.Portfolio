@@ -15,17 +15,17 @@ public class InitializationManager : MonoBehaviour
 
     [SerializeField] private ManagerPrefabData[] managerPrefabs;
     [SerializeField] private GameObject eventSystemPrefab;
-    [SerializeField] private bool loadTestScene = false; // Å×½ºÆ® ¾À ·Îµå ¿©ºÎ
+    [SerializeField] private bool loadTestScene = false; // í…ŒìŠ¤íŠ¸ ì”¬ ë¡œë“œ ì—¬ë¶€
 
     private void Start()
     {
-        // 1. EventSystem ÃÊ±âÈ­
+        // 1. EventSystem ì´ˆê¸°í™”
         InitializeEventSystem();
 
-        // 2. ¸Å´ÏÀú ¿ÀºêÁ§Æ®µé¸¸ »ı¼º (ÃÊ±âÈ­´Â ¾ÆÁ÷ ¾ÈÇÔ)
+        // 2. ë§¤ë‹ˆì € ì˜¤ë¸Œì íŠ¸ë“¤ë§Œ ìƒì„± (ì´ˆê¸°í™”ëŠ” ì•„ì§ ì•ˆí•¨)
         CreateManagerObjects();
 
-        // 3. GameLoopManager¸¦ ÅëÇÑ ¼øÂ÷ ÃÊ±âÈ­ ½ÃÀÛ
+        // 3. GameLoopManagerë¥¼ í†µí•œ ìˆœì°¨ ì´ˆê¸°í™” ì‹œì‘
         if (GameLoopManager.Instance != null)
         {
             GameLoopManager.Instance.StartInitialization();
@@ -35,13 +35,13 @@ public class InitializationManager : MonoBehaviour
 
     private IEnumerator WaitForInitialization()
     {
-        // ¸ğµç ¸Å´ÏÀúÀÇ ÃÊ±âÈ­°¡ ¿Ï·áµÉ ¶§±îÁö ´ë±â
+        // ëª¨ë“  ë§¤ë‹ˆì €ì˜ ì´ˆê¸°í™”ê°€ ì™„ë£Œë  ë•Œê¹Œì§€ ëŒ€ê¸°
         while (!GameLoopManager.Instance.IsInitialized)
         {
             yield return null;
         }
 
-        // ÃÊ±âÈ­ ¿Ï·á ÈÄ Å×½ºÆ® ¾À ¶Ç´Â ¸ŞÀÎ ¸Ş´º·Î ÀÌµ¿
+        // ì´ˆê¸°í™” ì™„ë£Œ í›„ í…ŒìŠ¤íŠ¸ ì”¬ ë˜ëŠ” ë©”ì¸ ë©”ë‰´ë¡œ ì´ë™
         if (loadTestScene)
         {
             Debug.Log("Loading test scene...");
@@ -65,7 +65,7 @@ public class InitializationManager : MonoBehaviour
                 manager.name = managerData.managerName;
                 DontDestroyOnLoad(manager);
 
-                // PathFindingManager´Â ÃÊ±â¿¡ ºñÈ°¼ºÈ­
+                // PathFindingManagerëŠ” ì´ˆê¸°ì— ë¹„í™œì„±í™”
                 if (managerData.managerName == "PathFindingManager")
                 {
                     manager.SetActive(false);

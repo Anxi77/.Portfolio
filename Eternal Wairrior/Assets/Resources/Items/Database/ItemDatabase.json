@@ -1,113 +1,57 @@
 {
-    "items": [
-        {
-            "metadata": {
-                "ID": "123",
-                "Name": "123",
-                "Description": "123",
-                "Type": 1,
-                "Rarity": 0,
-                "Element": 0,
-                "MaxStack": 1,
-                "DropRate": 0.0,
-                "MinAmount": 1,
-                "MaxAmount": 1,
-                "baseStatTypes": [],
-                "iconPath": "Items/Icons/123_Icon.png",
-                "iconGuid": "15bd41d983b89e24cabd914e5f15a4c8"
-            },
-            "statRanges": {
-                "itemId": "123",
-                "itemType": 1,
-                "possibleStats": [
-                    {
-                        "statType": 0,
-                        "minValue": 1.0,
-                        "maxValue": 6.0,
-                        "weight": 0.4659999907016754,
-                        "minRarity": 0,
-                        "increaseType": 0,
-                        "sourceType": 5
-                    }
-                ],
-                "minStatCount": 1,
-                "maxStatCount": 4
-            },
-            "effectRanges": {
-                "itemId": "123",
-                "itemType": 1,
-                "possibleEffects": [
-                    {
-                        "effectId": "Damage",
-                        "effectName": "Damage",
-                        "description": "Damage",
-                        "effectType": 1,
-                        "minValue": 0.0,
-                        "maxValue": 10.0,
-                        "weight": 1.0,
-                        "minRarity": 0,
-                        "applicableTypes": [
-                            1
-                        ],
-                        "applicableSkills": [
-                            1,
-                            2,
-                            3
-                        ],
-                        "applicableElements": [
-                            1,
-                            3,
-                            4,
-                            2
-                        ]
-                    }
-                ],
-                "minEffectCount": 1,
-                "maxEffectCount": 3
-            },
-            "effectTypes": []
-        },
-        {
-            "metadata": {
-                "ID": "sword_01",
-                "Name": "Basic Sword",
-                "Description": "A simple sword",
-                "Type": 1,
-                "Rarity": 0,
-                "Element": 0,
-                "MaxStack": 1,
-                "DropRate": 0.10000000149011612,
-                "MinAmount": 1,
-                "MaxAmount": 1,
-                "baseStatTypes": [],
-                "iconPath": "",
-                "iconGuid": ""
-            },
-            "statRanges": {
-                "itemId": "sword_01",
-                "itemType": 1,
-                "possibleStats": [
-                    {
-                        "statType": 3,
-                        "minValue": 5.0,
-                        "maxValue": 10.0,
-                        "weight": 1.0,
-                        "minRarity": 0,
-                        "increaseType": 0,
-                        "sourceType": 5
-                    }
-                ],
-                "minStatCount": 1,
-                "maxStatCount": 3
-            },
-            "effectRanges": {
-                "itemId": "",
-                "itemType": 0,
-                "possibleEffects": [],
-                "minEffectCount": 1,
-                "maxEffectCount": 3
-            },
-            "effectTypes": []
+  "$id": "1",
+  "items": [
+    {
+      "$id": "2",
+      "ID": "NEW_ITEM_cc1537d6",
+      "Name": "New Item",
+      "Description": "New item description",
+      "Type": 0,
+      "Rarity": 0,
+      "Element": 0,
+      "MaxStack": 1,
+      "DropRate": 0.0,
+      "MinAmount": 1,
+      "MaxAmount": 1,
+      "BaseStatTypes": [],
+      "IconPath": "Items/Icons/NEW_ITEM_cc1537d6_Icon",
+      "StatRanges": {
+        "$id": "3",
+        "itemId": null,
+        "itemType": 0,
+        "possibleStats": [],
+        "minStatCount": 1,
+        "maxStatCount": 4,
+        "additionalStatsByRarity": {
+          "$id": "4",
+          "Common": 0,
+          "Uncommon": 1,
+          "Rare": 2,
+          "Epic": 3,
+          "Legendary": 4
         }
-    ]
+      },
+      "Stats": [],
+      "EffectRanges": {
+        "$id": "5",
+        "itemId": null,
+        "itemType": 0,
+        "possibleEffects": [],
+        "minEffectCount": 1,
+        "maxEffectCount": 3,
+        "additionalEffectsByRarity": {
+          "$id": "6",
+          "Common": 0,
+          "Uncommon": 1,
+          "Rare": 2,
+          "Epic": 3,
+          "Legendary": 4
+        }
+      },
+      "Effects": [],
+      "EffectValues": {
+        "$id": "7"
+      }
+    }
+  ]
 }

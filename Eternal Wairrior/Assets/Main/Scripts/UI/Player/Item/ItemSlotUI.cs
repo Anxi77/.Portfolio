@@ -38,16 +38,16 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         if (itemData == null) return;
 
         itemIcon.enabled = true;
-        itemIcon.sprite = itemData.icon;
+        itemIcon.sprite = itemData.Icon;
 
-        amountText.enabled = itemData.maxStack > 1;
+        amountText.enabled = itemData.MaxStack > 1;
         if (amountText.enabled)
         {
             amountText.text = slot.amount.ToString();
         }
 
         equippedIndicator.SetActive(slot.isEquipped);
-        backgroundImage.color = GetRarityColor(itemData.rarity);
+        backgroundImage.color = GetRarityColor(itemData.Rarity);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -115,7 +115,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             return;
         }
 
-        Debug.Log($"Clicked item: {itemData.name} of type {itemData.type}");
+        Debug.Log($"Clicked item: {itemData.Name} of type {itemData.Type}");
 
         // 장비 슬롯인 경우 - 장비 해제
         if (slotIndex == -1)
@@ -124,12 +124,12 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             inventory.UnequipFromSlot(GetEquipmentSlot());
         }
         // 일반 슬롯인 경우 - 장비 장착
-        else if (itemData.type == ItemType.Weapon || itemData.type == ItemType.Armor || itemData.type == ItemType.Accessory)
+        else if (itemData.Type == ItemType.Weapon || itemData.Type == ItemType.Armor || itemData.Type == ItemType.Accessory)
         {
-            var equipSlot = GetEquipmentSlotForItemType(itemData.type);
+            var equipSlot = GetEquipmentSlotForItemType(itemData.Type);
             if (equipSlot != EquipmentSlot.None)
             {
-                Debug.Log($"Equipping {itemData.name} to slot {equipSlot}");
+                Debug.Log($"Equipping {itemData.Name} to slot {equipSlot}");
 
                 // 기존에 장착된 아이템이 있다면 인벤토리로 되돌림
                 var equippedItem = inventory.GetEquippedItem(equipSlot);
@@ -160,7 +160,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             // UI 업데이트
             UIManager.Instance.UpdateInventoryUI();
 
-            Debug.Log($"Dropped item: {itemData.name}");
+            Debug.Log($"Dropped item: {itemData.Name}");
         }
     }
 

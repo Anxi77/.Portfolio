@@ -22,18 +22,18 @@ public class ItemGenerator : MonoBehaviour
 
         var newItem = baseItem.Clone();
 
-        // ·¹¾î¸®Æ¼ ¼³Á¤
+        // ï¿½ï¿½ï¿½î¸®Æ¼ ï¿½ï¿½ï¿½ï¿½
         if (targetRarity.HasValue)
         {
-            newItem.rarity = targetRarity.Value;
+            newItem.Rarity = targetRarity.Value;
         }
 
-        Debug.Log($"Generating item: {newItem.name} with rarity: {newItem.rarity}");
+        Debug.Log($"Generating item: {newItem.Name} with rarity: {newItem.Rarity}");
 
-        // ½ºÅÈ »ý¼º
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         GenerateStats(newItem);
 
-        // ÀÌÆåÆ® »ý¼º
+        // ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
         GenerateEffects(newItem);
 
         return newItem;
@@ -41,27 +41,27 @@ public class ItemGenerator : MonoBehaviour
 
     private void GenerateStats(ItemData item)
     {
-        if (item.statRanges == null || item.statRanges.possibleStats == null)
+        if (item.StatRanges == null || item.StatRanges.possibleStats == null)
         {
-            Debug.LogWarning($"No stat ranges defined for item: {item.id}");
+            Debug.LogWarning($"No stat ranges defined for item: {item.ID}");
             return;
         }
 
-        item.stats.Clear();
+        item.Stats.Clear();
 
-        // ·¹¾î¸®Æ¼¿¡ µû¸¥ Ãß°¡ ½ºÅÈ ¼ö °è»ê
-        int additionalStats = item.statRanges.additionalStatsByRarity.GetValueOrDefault(item.rarity, 0);
+        // î¸®Æ¼  ß°   
+        int additionalStats = item.StatRanges.additionalStatsByRarity.GetValueOrDefault(item.Rarity, 0);
         int statCount = random.Next(
-            item.statRanges.minStatCount,
-            Mathf.Min(item.statRanges.maxStatCount + additionalStats + 1,
-                     item.statRanges.possibleStats.Count)
+            item.StatRanges.minStatCount,
+            Mathf.Min(item.StatRanges.maxStatCount + additionalStats + 1,
+                     item.StatRanges.possibleStats.Count)
         );
 
-        Debug.Log($"Generating {statCount} stats for item {item.id}");
+        Debug.Log($"Generating {statCount} stats for item {item.ID}");
 
-        // °¡ÁßÄ¡ ±â¹Ý ½ºÅÈ ¼±ÅÃ
-        var availableStats = item.statRanges.possibleStats
-            .Where(stat => stat.minRarity <= item.rarity)
+        // ï¿½ï¿½ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        var availableStats = item.StatRanges.possibleStats
+            .Where(stat => stat.minRarity <= item.Rarity)
             .ToList();
 
         for (int i = 0; i < statCount && availableStats.Any(); i++)
@@ -69,7 +69,7 @@ public class ItemGenerator : MonoBehaviour
             var selectedStat = SelectStatByWeight(availableStats);
             if (selectedStat != null)
             {
-                float value = GenerateStatValue(selectedStat, item.rarity);
+                float value = GenerateStatValue(selectedStat, item.Rarity);
                 item.AddStat(new StatContainer
                 {
                     statType = selectedStat.statType,
@@ -85,27 +85,27 @@ public class ItemGenerator : MonoBehaviour
 
     private void GenerateEffects(ItemData item)
     {
-        if (item.effectRanges == null || item.effectRanges.possibleEffects == null)
+        if (item.EffectRanges == null || item.EffectRanges.possibleEffects == null)
         {
-            Debug.LogWarning($"No effect ranges defined for item: {item.id}");
+            Debug.LogWarning($"No effect ranges defined for item: {item.ID}");
             return;
         }
 
-        item.effects.Clear();
+        item.Effects.Clear();
 
-        // ·¹¾î¸®Æ¼¿¡ µû¸¥ Ãß°¡ ÀÌÆåÆ® ¼ö °è»ê
-        int additionalEffects = item.effectRanges.additionalEffectsByRarity.GetValueOrDefault(item.rarity, 0);
+        // î¸®Æ¼  ß° Æ®  
+        int additionalEffects = item.EffectRanges.additionalEffectsByRarity.GetValueOrDefault(item.Rarity, 0);
         int effectCount = random.Next(
-            item.effectRanges.minEffectCount,
-            Mathf.Min(item.effectRanges.maxEffectCount + additionalEffects + 1,
-                     item.effectRanges.possibleEffects.Count)
+            item.EffectRanges.minEffectCount,
+            Mathf.Min(item.EffectRanges.maxEffectCount + additionalEffects + 1,
+                     item.EffectRanges.possibleEffects.Count)
         );
 
-        Debug.Log($"Generating {effectCount} effects for item {item.id}");
+        Debug.Log($"Generating {effectCount} effects for item {item.ID}");
 
-        // °¡ÁßÄ¡ ±â¹Ý ÀÌÆåÆ® ¼±ÅÃ
-        var availableEffects = item.effectRanges.possibleEffects
-            .Where(effect => effect.minRarity <= item.rarity)
+        // ï¿½ï¿½ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
+        var availableEffects = item.EffectRanges.possibleEffects
+            .Where(effect => effect.minRarity <= item.Rarity)
             .ToList();
 
         for (int i = 0; i < effectCount && availableEffects.Any(); i++)
@@ -113,7 +113,7 @@ public class ItemGenerator : MonoBehaviour
             var selectedEffect = SelectEffectByWeight(availableEffects);
             if (selectedEffect != null)
             {
-                float value = GenerateEffectValue(selectedEffect, item.rarity);
+                float value = GenerateEffectValue(selectedEffect, item.Rarity);
                 var effectData = new ItemEffectData
                 {
                     effectId = selectedEffect.effectId,
@@ -172,11 +172,11 @@ public class ItemGenerator : MonoBehaviour
     {
         float baseValue = (float)(random.NextDouble() * (statRange.maxValue - statRange.minValue) + statRange.minValue);
 
-        // ·¹¾î¸®Æ¼¿¡ µû¸¥ °ª Áõ°¡
+        // ï¿½ï¿½ï¿½î¸®Æ¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         float rarityMultiplier = 1 + ((int)rarity * 0.2f);
         float finalValue = baseValue * rarityMultiplier;
 
-        // Áõ°¡ Å¸ÀÔ¿¡ µû¸¥ Ã³¸®
+        // ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½Ô¿ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
         switch (statRange.increaseType)
         {
             case IncreaseType.Add:
@@ -208,7 +208,7 @@ public class ItemGenerator : MonoBehaviour
         var drops = new List<ItemData>();
         int dropCount = 0;
 
-        // º¸ÀåµÈ µå·Ó Ã¼Å©
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ Ã¼Å©
         if (random.NextDouble() < dropTable.guaranteedDropRate)
         {
             var guaranteedDrop = GenerateGuaranteedDrop(dropTable);
@@ -219,7 +219,7 @@ public class ItemGenerator : MonoBehaviour
             }
         }
 
-        // ÀÏ¹Ý µå·Ó »ý¼º
+        // ï¿½Ï¹ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         foreach (var entry in dropTable.dropEntries)
         {
             if (dropCount >= dropTable.maxDrops) break;
@@ -230,11 +230,11 @@ public class ItemGenerator : MonoBehaviour
                 var item = GenerateItem(entry.itemId, entry.rarity);
                 if (item != null)
                 {
-                    // ¾ÆÀÌÅÛ ¼ö·® °áÁ¤
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                     item.amount = random.Next(entry.minAmount, entry.maxAmount + 1);
                     drops.Add(item);
                     dropCount++;
-                    Debug.Log($"Generated drop: {item.name} x{item.amount}");
+                    Debug.Log($"Generated drop: {item.Name} x{item.amount}");
                 }
             }
         }
@@ -244,11 +244,11 @@ public class ItemGenerator : MonoBehaviour
 
     private ItemData GenerateGuaranteedDrop(DropTableData dropTable)
     {
-        // °¡ÁßÄ¡ ÇÕ°è °è»ê
+        // ï¿½ï¿½ï¿½ï¿½Ä¡ ï¿½Õ°ï¿½ ï¿½ï¿½ï¿½
         float totalWeight = dropTable.dropEntries.Sum(entry => entry.dropRate);
         float randomValue = (float)(random.NextDouble() * totalWeight);
 
-        // °¡ÁßÄ¡ ±â¹Ý ¾ÆÀÌÅÛ ¼±ÅÃ
+        // ï¿½ï¿½ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         float currentWeight = 0;
         foreach (var entry in dropTable.dropEntries)
         {
@@ -259,7 +259,7 @@ public class ItemGenerator : MonoBehaviour
                 if (item != null)
                 {
                     item.amount = random.Next(entry.minAmount, entry.maxAmount + 1);
-                    Debug.Log($"Generated guaranteed drop: {item.name} x{item.amount}");
+                    Debug.Log($"Generated guaranteed drop: {item.Name} x{item.amount}");
                     return item;
                 }
             }

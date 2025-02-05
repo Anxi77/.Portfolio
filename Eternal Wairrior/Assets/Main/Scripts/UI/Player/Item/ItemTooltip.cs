@@ -33,26 +33,26 @@ public class ItemTooltip : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Setting up tooltip for item: {itemData.name}");
-        Debug.Log($"Item stats count: {itemData.stats?.Count ?? 0}");
+        Debug.Log($"Setting up tooltip for item: {itemData.Name}");
+        Debug.Log($"Item stats count: {itemData.Stats?.Count ?? 0}");
 
-        // ±âº» Á¤º¸ ¼³Á¤
-        itemNameText.text = $"{GetRarityColor(itemData.rarity)}{itemData.name}</color>";
-        itemTypeText.text = $"Type: {itemData.type}";
-        itemRarityText.text = $"Rarity: {itemData.rarity}";
+        // ï¿½âº» ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        itemNameText.text = $"{GetRarityColor(itemData.Rarity)}{itemData.Name}</color>";
+        itemTypeText.text = $"Type: {itemData.Type}";
+        itemRarityText.text = $"Rarity: {itemData.Rarity}";
 
-        // ¾ÆÀÌÄÜ ¼³Á¤
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (itemIcon != null)
         {
-            itemIcon.sprite = itemData.icon;
-            itemIcon.enabled = itemData.icon != null;
+            itemIcon.sprite = itemData.Icon;
+            itemIcon.enabled = itemData.Icon != null;
         }
 
-        // ½ºÅÈ Á¤º¸ ¼³Á¤
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         var statsBuilder = new System.Text.StringBuilder("Stats:\n");
-        if (itemData.stats != null && itemData.stats.Any())
+        if (itemData.Stats != null && itemData.Stats.Any())
         {
-            foreach (var stat in itemData.stats)
+            foreach (var stat in itemData.Stats)
             {
                 string valueStr = stat.amount >= 0 ? "+" + stat.amount : stat.amount.ToString();
                 statsBuilder.AppendLine($"{stat.statType}: {valueStr}");
@@ -66,11 +66,11 @@ public class ItemTooltip : MonoBehaviour
         }
         itemStatsText.text = statsBuilder.ToString();
 
-        // È¿°ú Á¤º¸ ¼³Á¤
+        // È¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         var effectsBuilder = new System.Text.StringBuilder("Effects:\n");
-        if (itemData.effects != null && itemData.effects.Any())
+        if (itemData.Effects != null && itemData.Effects.Any())
         {
-            foreach (var effect in itemData.effects)
+            foreach (var effect in itemData.Effects)
             {
                 effectsBuilder.AppendLine($"{effect.effectName}");
                 Debug.Log($"Adding effect to tooltip: {effect.effectName}");
@@ -83,7 +83,7 @@ public class ItemTooltip : MonoBehaviour
         }
         itemEffectsText.text = effectsBuilder.ToString();
 
-        Debug.Log($"Tooltip setup complete for {itemData.name}");
+        Debug.Log($"Tooltip setup complete for {itemData.Name}");
     }
 
     private string GetRarityColor(ItemRarity rarity)
@@ -91,10 +91,10 @@ public class ItemTooltip : MonoBehaviour
         return rarity switch
         {
             ItemRarity.Common => "<color=white>",
-            ItemRarity.Uncommon => "<color=#00FF00>",  // ÃÊ·Ï»ö
-            ItemRarity.Rare => "<color=#0080FF>",      // ÆÄ¶õ»ö
-            ItemRarity.Epic => "<color=#CC33FF>",      // º¸¶ó»ö
-            ItemRarity.Legendary => "<color=#FFD700>",  // ±Ý»ö
+            ItemRarity.Uncommon => "<color=#00FF00>",  // ï¿½Ê·Ï»ï¿½
+            ItemRarity.Rare => "<color=#0080FF>",      // ï¿½Ä¶ï¿½ï¿½ï¿½
+            ItemRarity.Epic => "<color=#CC33FF>",      // ï¿½ï¿½ï¿½ï¿½ï¿½
+            ItemRarity.Legendary => "<color=#FFD700>",  // ï¿½Ý»ï¿½
             _ => "<color=white>"
         };
     }

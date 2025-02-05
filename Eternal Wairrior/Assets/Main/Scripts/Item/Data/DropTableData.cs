@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
-[System.Serializable]
+[Serializable]
 public class DropTableData
 {
+    [SerializeField]
     public EnemyType enemyType;
     [SerializeField]
     public List<DropTableEntry> dropEntries = new();
@@ -13,7 +15,7 @@ public class DropTableData
     public int maxDrops = 3;
 }
 
-[System.Serializable]
+[Serializable]
 public class DropTableEntry
 {
     [SerializeField]

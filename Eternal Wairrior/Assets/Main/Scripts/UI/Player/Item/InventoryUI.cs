@@ -220,10 +220,10 @@ public class InventoryUI : MonoBehaviour, IInitializable
                 var itemData = equippedItem.GetItemData();
                 if (itemData != null)
                 {
-                    Debug.Log($"Updating equipment slot {equipSlot} with item: {itemData.name}");
+                    Debug.Log($"Updating equipment slot {equipSlot} with item: {itemData.Name}");
                     slot.UpdateUI(new InventorySlot
                     {
-                        itemId = itemData.id,
+                        itemId = itemData.ID,
                         amount = 1,
                         isEquipped = true
                     });

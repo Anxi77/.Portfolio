@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using UnityEngine.SceneManagement;
+using System;
 
 public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
 {
@@ -13,8 +12,6 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
     private PlayerStatData currentPlayerStatData;
     private InventoryData currentInventoryData;
     private LevelData currentLevelData = new LevelData { level = 1, exp = 0f };
-
-    private JSONManager<PlayerSaveData> saveManager;
     private BackupManager backupManager;
 
     public new bool IsInitialized { get; private set; }
@@ -52,7 +49,6 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
 
     protected override void InitializeManagers()
     {
-        saveManager = new JSONManager<PlayerSaveData>(SAVE_PATH);
         backupManager = new BackupManager();
     }
 
@@ -118,13 +114,11 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
 
     public override void ClearAllData()
     {
-        if (saveManager != null)
-        {
-            saveManager.ClearAll();
-        }
+        currentPlayerStatData = null;
         currentPlayerStatData = ScriptableObject.CreateInstance<PlayerStatData>();
         currentInventoryData = new InventoryData();
         currentLevelData = new LevelData { level = 1, exp = 0f };
+        JSONIO<PlayerSaveData>.DeleteData(DEFAULT_SAVE_SLOT);
     }
 
     public void LoadPlayerStatData(PlayerStatData data)
@@ -143,14 +137,14 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
     public void SavePlayerData(string saveSlot, PlayerSaveData data)
     {
         if (!IsInitialized) Initialize();
-        saveManager.SaveData(saveSlot, data);
+        JSONIO<PlayerSaveData>.SaveData(saveSlot, data);
         SaveWithBackup();
     }
 
     public PlayerSaveData LoadPlayerData(string saveSlot)
     {
         if (!IsInitialized) Initialize();
-        var data = saveManager.LoadData(saveSlot);
+        var data = JSONIO<PlayerSaveData>.LoadData(saveSlot);
         if (data != null)
         {
             LoadPlayerStatData(data.stats);
