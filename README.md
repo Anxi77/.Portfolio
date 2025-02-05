@@ -7,25 +7,19 @@
 
 ## 🎮 About Me
 
-예술과 기술을 융합하며 끊임없이 성장하는 게임 프로그래머입니다. 음향 엔지니어로서의 경험은 제게 기술을 통한 예술 구현의 가능성을 보여주었고, 이제는 게임 개발이라는 더 넓은 기술의 영역에서 저의 역량을 확장해 나가고 있습니다.
+음향 엔지니어 출신 게임 프로그래머입니다. 기술을 통한 예술 구현의 가능성을 추구하며, 게임이라는 매체를 통해 새로운 경험을 창조하고자 합니다.
 
 > "기술적 도전을 즐기고, 끊임없는 학습을 추구하며, 매 프로젝트마다 한계를 뛰어넘는 성장을 이뤄내고자 합니다."
 
-## 💫 Journey
-
-음악 분야에서도 순수 창작보다는 음향 공학적 접근에 더 큰 매력을 느꼈고, 이는 `Logic Pro와 FL Studio를 활용한 전문적인 음원 프로듀싱`으로 이어졌습니다. 다양한 오디오 프로세싱을 연구하며 기술을 통한 예술 표현의 가능성을 탐구했고, 이는 `엔터테인먼트 업계에서 작/편곡가와 믹스/마스터 엔지니어로서 2년간의 경력`으로 이어졌습니다.
-
-게임 업계 작곡가와의 협업 과정에서 발견한 인터랙티브 미디어의 가능성에 매료되어 게임 개발에 관심을 갖게 되었고, 이는 게임 개발 부트캠프 참여로 이어져 Unity 엔진과 C# 프로그래밍을 시작으로 게임 개발의 세계에 첫 발을 내딛게 되었습니다.
-
 ## 🚀 Technical Achievements
 
-### 몬스터 AI 시스템 최적화
+### [몬스터 AI 시스템 최적화](https://github.com/Anxi77/.Portfolio/blob/Unity2DProject_EternalWarrior/Eternal%20Wairrior/Assets/Main/Scripts/System/Managers/General/PathFindingManager.cs)
 
 - 2D 그리드 기반의 커스텀 패스파인딩 시스템 개발
 - 오브젝트 풀링과 LOD 시스템 도입으로 성능 최적화
 - Unity NavMesh Agent의 3D 한계 극복
 
-### 실시간 네트워크 최적화
+### [실시간 네트워크 최적화](https://github.com/Anxi77/UnityMultiProject_Salon/blob/main/Salon/Assets/Project/Scripts/System/Database/NetworkPositionCompressor.cs#L13-L46)
 
 - Firebase Realtime DB 기반 실시간 멀티플레이어 구현
 - ASCII 코드 기반 커스텀 직렬화 시스템 설계
@@ -42,13 +36,13 @@
 
 ## 🎯 Current Focus
 
-### 엔진 아키텍처 연구
+### [엔진 아키텍처 연구](https://github.com/Anxi77/.UnityEngine/tree/main/Procedural%20Generation/ProceduralGeneration)
 
 - DOTS와 ECS 아키텍처 심층 분석
 - GameObject 기반 시스템과의 성능 비교 연구
 - 대규모 시뮬레이션 최적화 연구
 
-### 그래픽스 프로그래밍
+### [그래픽스 프로그래밍]()
 
 - DirectX11 기반 3D 렌더링 구현
 - 커스텀 셰이더 프로그래밍
