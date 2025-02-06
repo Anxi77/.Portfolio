@@ -1,3 +1,46 @@
 {
-  "items": []
+  "items": [
+    {
+      "ID": "NEW_ITEM_a2fb0cd4",
+      "Name": "New Item",
+      "Description": "New item description",
+      "Type": 0,
+      "Rarity": 0,
+      "Element": 0,
+      "MaxStack": 1,
+      "DropRate": 0.0,
+      "MinAmount": 1,
+      "MaxAmount": 1,
+      "IconPath": "Items/Icons/NEW_ITEM_a2fb0cd4_Icon",
+      "StatRanges": {
+        "possibleStats": [],
+        "minStatCount": 1,
+        "maxStatCount": 4,
+        "additionalStatsByRarity": {
+          "Common": 0,
+          "Uncommon": 1,
+          "Rare": 2,
+          "Epic": 3,
+          "Legendary": 4
+        }
+      },
+      "Stats": [],
+      "EffectRanges": {
+        "itemId": null,
+        "itemType": 0,
+        "possibleEffects": [],
+        "minEffectCount": 1,
+        "maxEffectCount": 3,
+        "additionalEffectsByRarity": {
+          "Common": 0,
+          "Uncommon": 1,
+          "Rare": 2,
+          "Epic": 3,
+          "Legendary": 4
+        }
+      },
+      "Effects": [],
+      "EffectValues": {}
+    }
+  ]
 }

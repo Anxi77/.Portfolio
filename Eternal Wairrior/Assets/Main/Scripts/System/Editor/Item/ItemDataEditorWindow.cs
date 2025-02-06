@@ -334,18 +334,6 @@ public class ItemDataEditorWindow : EditorWindow
     {
         EditorGUILayout.BeginVertical();
         {
-            // 드롭테이블 헤더
-            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
-            {
-                GUILayout.Label("Enemy Drop Tables", headerStyle);
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Save All", EditorStyles.toolbarButton, GUILayout.Width(80)))
-                {
-                    ItemDataEditorUtility.SaveDropTables();
-                }
-            }
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.Space(10);
             dropTableScrollPosition = EditorGUILayout.BeginScrollView(
                 dropTableScrollPosition,
                 GUILayout.Height(position.height - 100)
