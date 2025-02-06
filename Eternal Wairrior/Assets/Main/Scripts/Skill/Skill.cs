@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
+using System;
 
-[System.Serializable]
+[Serializable]
 public abstract class Skill : MonoBehaviour
 {
     [SerializeField] protected SkillData skillData;
@@ -10,10 +10,8 @@ public abstract class Skill : MonoBehaviour
 
     protected virtual void Awake()
     {
-        // Awake ʱȭ ʱ
     }
 
-    // ʹ ʱȭ ޼
     public virtual void Initialize()
     {
         InitializeSkillData();

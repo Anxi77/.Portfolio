@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Unity.VisualScripting;
 
 public abstract class PassiveSkills : Skill
 {
@@ -13,7 +12,7 @@ public abstract class PassiveSkills : Skill
     {
         if (skillData == null) return;
 
-        var playerStat = GameManager.Instance?.player?.GetComponent<PlayerStat>();
+        var playerStat = GameManager.Instance?.player?.GetComponent<PlayerStatSystem>();
         if (playerStat != null)
         {
             float currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
@@ -209,7 +208,7 @@ public abstract class PassiveSkills : Skill
 
     protected virtual IEnumerator ApplyTemporaryEffects(Player player)
     {
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         if (playerStat == null) yield break;
 
         float currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
@@ -309,7 +308,7 @@ public abstract class PassiveSkills : Skill
             return;
         }
 
-        var playerStat = GameManager.Instance?.player?.GetComponent<PlayerStat>();
+        var playerStat = GameManager.Instance?.player?.GetComponent<PlayerStatSystem>();
         float currentHpRatio = 1f;
         if (playerStat != null)
         {
@@ -366,7 +365,7 @@ public abstract class PassiveSkills : Skill
         {
             StopAllCoroutines();
             Player player = GameManager.Instance.player;
-            var playerStat = player.GetComponent<PlayerStat>();
+            var playerStat = player.GetComponent<PlayerStatSystem>();
 
             playerStat.RemoveStatsBySource(SourceType.Passive);
             if (_homingActivate)
@@ -376,13 +375,13 @@ public abstract class PassiveSkills : Skill
         }
     }
 
-    protected virtual void ApplyStatModifier(PlayerStat playerStat, StatType statType, float percentageIncrease)
+    protected virtual void ApplyStatModifier(PlayerStatSystem playerStat, StatType statType, float percentageIncrease)
     {
         if (percentageIncrease <= 0) return;
 
         float currentStat = playerStat.GetStat(statType);
         float increase = currentStat * (percentageIncrease / 100f);
-        playerStat.AddStatModifier(statType, SourceType.Passive, IncreaseType.Add, increase);
+        playerStat.AddModifier(new StatModifier(statType, SourceType.Passive, IncreaseType.Flat, increase));
         Debug.Log($"Applied {statType} increase: Current({currentStat}) + {percentageIncrease}% = {currentStat + increase}");
     }
 }

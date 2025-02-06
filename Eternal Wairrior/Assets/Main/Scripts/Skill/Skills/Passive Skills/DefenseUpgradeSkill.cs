@@ -4,19 +4,19 @@ public class DefenseUpgradeSkill : PermanentPassiveSkill
 {
     public override void ApplyEffectToPlayer(Player player)
     {
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return;
 
         float currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
 
         if (_defenseIncrease > 0)
         {
-            ApplyStatModifier(playerStat, StatType.Defense, _defenseIncrease);
+            playerStat.AddModifier(new StatModifier(StatType.Defense, SourceType.Passive, IncreaseType.Flat, _defenseIncrease));
         }
 
         if (_hpIncrease > 0)
         {
-            ApplyStatModifier(playerStat, StatType.MaxHp, _hpIncrease);
+            playerStat.AddModifier(new StatModifier(StatType.MaxHp, SourceType.Passive, IncreaseType.Flat, _hpIncrease));
             float newMaxHp = playerStat.GetStat(StatType.MaxHp);
             float newCurrentHp = Mathf.Max(1f, newMaxHp * currentHpRatio);
             playerStat.SetCurrentHp(newCurrentHp);
@@ -25,20 +25,20 @@ public class DefenseUpgradeSkill : PermanentPassiveSkill
 
     public override void RemoveEffectFromPlayer(Player player)
     {
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return;
 
         float currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
 
         if (_defenseIncrease > 0)
         {
-            playerStat.RemoveStatModifier(StatType.Defense, SourceType.Passive);
+            playerStat.RemoveModifier(new StatModifier(StatType.Defense, SourceType.Passive, IncreaseType.Flat, _defenseIncrease));
         }
 
         if (_hpIncrease > 0)
         {
-            playerStat.RemoveStatModifier(StatType.MaxHp, SourceType.Passive);
-            
+            playerStat.RemoveModifier(new StatModifier(StatType.MaxHp, SourceType.Passive, IncreaseType.Flat, _hpIncrease));
+
             float newMaxHp = playerStat.GetStat(StatType.MaxHp);
             float newCurrentHp = newMaxHp * currentHpRatio;
             playerStat.SetCurrentHp(newCurrentHp);
@@ -66,7 +66,7 @@ public class DefenseUpgradeSkill : PermanentPassiveSkill
 
     public override string GetDetailedDescription()
     {
-        var playerStat = GameManager.Instance.player?.GetComponent<PlayerStat>();
+        var playerStat = GameManager.Instance.player?.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return "Permanently increases defense and maximum HP";
 
         string baseDesc = "Permanently increases defense and maximum HP";

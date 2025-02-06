@@ -205,7 +205,7 @@ public class SkillDataEditorWindow : EditorWindow
             if (GUILayout.Button("Create Backup", EditorStyles.toolbarButton, GUILayout.Width(100)))
             {
                 var skillDataManager = FindObjectOfType<SkillDataManager>();
-                skillDataManager?.SaveWithBackup();
+                skillDataManager?.SaveAllData(editorData.skillList, editorData.skillStats);
             }
         }
         EditorGUILayout.EndHorizontal();

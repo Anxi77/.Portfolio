@@ -121,11 +121,6 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
                 }
                 else
                 {
-                    var defaultStatData = Resources.Load<PlayerStatData>("DefaultPlayerStats");
-                    if (defaultStatData != null)
-                    {
-                        PlayerDataManager.Instance.LoadPlayerStatData(Instantiate(defaultStatData));
-                    }
                     PlayerUnitManager.Instance.InitializePlayer(player);
                 }
             }

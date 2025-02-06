@@ -39,7 +39,7 @@ public class WorldDropItem : MonoBehaviour
         var player = GameManager.Instance?.player;
         if (player != null)
         {
-            float pickupRange = player.GetComponent<PlayerStat>().GetStat(StatType.ExpCollectionRadius);
+            float pickupRange = player.GetComponent<PlayerStatSystem>().GetStat(StatType.ExpCollectionRadius);
             float distance = Vector2.Distance(transform.position, player.transform.position);
 
             if (distance <= pickupRange)

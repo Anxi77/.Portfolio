@@ -2,9 +2,10 @@ using UnityEngine;
 using System.IO;
 using System;
 
-public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
-{
 
+
+public class PlayerDataManager : DataManager<PlayerDataManager>
+{
     private const string SAVE_FOLDER = "PlayerData";
     private string SAVE_PATH => Path.Combine(Application.persistentDataPath, SAVE_FOLDER);
     private const string DEFAULT_SAVE_SLOT = "DefaultSave";
@@ -12,102 +13,59 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
     private PlayerStatData currentPlayerStatData;
     private InventoryData currentInventoryData;
     private LevelData currentLevelData = new LevelData { level = 1, exp = 0f };
-
-    public new bool IsInitialized { get; private set; }
     public PlayerStatData CurrentPlayerStatData => currentPlayerStatData;
     public InventoryData CurrentInventoryData => currentInventoryData;
 
-    [System.Serializable]
-    public class PlayerSaveData
-    {
-        public PlayerStatData stats;
-        public InventoryData inventory;
-        public LevelData levelData;
-    }
-
-    protected override void Awake()
-    {
-        base.Awake();
-    }
-
-    public void Initialize()
+    protected override void LoadRuntimeData()
     {
         try
         {
-            Debug.Log("Initializing PlayerDataManager...");
-            InitializeDefaultData();
-            IsInitialized = true;
-            Debug.Log("PlayerDataManager initialized successfully");
+            var data = JSONIO<PlayerData>.LoadData(DEFAULT_SAVE_SLOT);
+            if (data != null)
+            {
+                currentPlayerStatData = data.stats;
+                currentInventoryData = data.inventory;
+                currentLevelData = data.levelData;
+            }
+            else
+            {
+                CreateDefaultFiles();
+            }
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"Error initializing PlayerDataManager: {e.Message}");
-            IsInitialized = false;
+            Debug.LogError($"Error loading PlayerData: {e.Message}");
         }
     }
 
-    protected override void InitializeManagers()
+    protected virtual void CreateDefaultFiles()
     {
+        currentPlayerStatData = new PlayerStatData();
+        currentInventoryData = new InventoryData();
+        currentLevelData = new LevelData { level = 1, exp = 0f };
+        JSONIO<PlayerData>.SaveData(DEFAULT_SAVE_SLOT, new PlayerData { stats = currentPlayerStatData, inventory = currentInventoryData, levelData = currentLevelData });
     }
 
-    protected override void CreateResourceFolders()
+    public virtual void SaveWithBackup()
     {
         try
         {
             if (!Directory.Exists(SAVE_PATH))
-            {
                 Directory.CreateDirectory(SAVE_PATH);
-                Debug.Log($"Created save directory at: {SAVE_PATH}");
-            }
-
-            string resourcePath = Path.Combine(Application.dataPath, "Resources", SAVE_FOLDER);
-            if (!Directory.Exists(resourcePath))
-            {
-                Directory.CreateDirectory(resourcePath);
-                Debug.Log($"Created resource directory at: {resourcePath}");
-            }
+            BackupIO.CreateBackup(SAVE_PATH);
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"Error creating directories: {e.Message}");
+            Debug.LogError($"Error during backup: {e.Message}");
         }
     }
 
-    protected override void CreateDefaultFiles()
+    public virtual void ClearAllRuntimeData()
     {
-        var defaultStatData = Resources.Load<PlayerStatData>("DefaultPlayerStats");
-        if (defaultStatData == null)
-        {
-            Debug.LogWarning("Default player stats not found, creating new...");
-            defaultStatData = ScriptableObject.CreateInstance<PlayerStatData>();
-        }
-        currentPlayerStatData = Instantiate(defaultStatData);
-        currentInventoryData = new InventoryData();
-    }
-
-    public override void SaveWithBackup()
-    {
-        {
-            try
-            {
-                if (!Directory.Exists(SAVE_PATH))
-                    Directory.CreateDirectory(SAVE_PATH);
-                BackupIO.CreateBackup(SAVE_PATH);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Error during backup: {e.Message}");
-            }
-        }
-    }
-
-    public override void ClearAllRuntimeData()
-    {
-        currentPlayerStatData = null;
-        currentPlayerStatData = ScriptableObject.CreateInstance<PlayerStatData>();
+        currentPlayerStatData = new PlayerStatData();
         currentInventoryData = new InventoryData();
         currentLevelData = new LevelData { level = 1, exp = 0f };
-        JSONIO<PlayerSaveData>.DeleteData(DEFAULT_SAVE_SLOT);
+        JSONIO<PlayerData>.DeleteData(DEFAULT_SAVE_SLOT);
     }
 
     public void LoadPlayerStatData(PlayerStatData data)
@@ -120,20 +78,24 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
 
     public void SaveCurrentPlayerStatData()
     {
-        currentPlayerStatData.SavePermanentStats();
+        var player = FindObjectOfType<Player>();
+        if (player != null && player.TryGetComponent<PlayerStatSystem>(out var statSystem))
+        {
+            currentPlayerStatData = statSystem.CreateSaveData();
+        }
     }
 
-    public void SavePlayerData(string saveSlot, PlayerSaveData data)
+    public void SavePlayerData(string saveSlot, PlayerData data)
     {
         if (!IsInitialized) Initialize();
-        JSONIO<PlayerSaveData>.SaveData(saveSlot, data);
+        JSONIO<PlayerData>.SaveData(saveSlot, data);
         SaveWithBackup();
     }
 
-    public PlayerSaveData LoadPlayerData(string saveSlot)
+    public PlayerData LoadPlayerData(string saveSlot)
     {
         if (!IsInitialized) Initialize();
-        var data = JSONIO<PlayerSaveData>.LoadData(saveSlot);
+        var data = JSONIO<PlayerData>.LoadData(saveSlot);
         if (data != null)
         {
             LoadPlayerStatData(data.stats);
@@ -185,9 +147,3 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
     }
 }
 
-[System.Serializable]
-public class LevelData
-{
-    public int level = 1;
-    public float exp = 0f;
-}

@@ -123,7 +123,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         {
             Debug.Log($"Adding/Upgrading skill: {skillData.metadata.Name} (ID: {skillData.metadata.ID})");
 
-            var playerStat = GameManager.Instance.player.GetComponent<PlayerStat>();
+            var playerStat = GameManager.Instance.player.GetComponent<PlayerStatSystem>();
             float currentHpRatio = 1f;
             if (playerStat != null)
             {
@@ -202,7 +202,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         Transform parent = existingSkill.transform.parent;
 
         // 현재 HP 비율 저장
-        var playerStat = GameManager.Instance.player.GetComponent<PlayerStat>();
+        var playerStat = GameManager.Instance.player.GetComponent<PlayerStatSystem>();
         float currentHpRatio = 1f;
         float currentHp = 0f;
         float maxHp = 0f;

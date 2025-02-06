@@ -34,7 +34,7 @@ public class PlayerUIPanel : MonoBehaviour
     private Slider expBarImage;
 
     private Player player;
-    private PlayerStat playerStat;
+    private PlayerStatSystem playerStat;
     private Coroutine updateCoroutine;
     private bool isUIReady = false;
 
@@ -89,8 +89,8 @@ public class PlayerUIPanel : MonoBehaviour
 
         StopUIUpdate();
         this.player = player;
-        this.playerStat = player.GetComponent<PlayerStat>();
-        if (this.playerStat == null)
+        playerStat = player.GetComponent<PlayerStatSystem>();
+        if (playerStat == null)
         {
             Debug.LogError("PlayerStat component not found on player!");
             return;

@@ -38,7 +38,7 @@ public class Player : MonoBehaviour
     #endregion
 
     #region References
-    public PlayerStat playerStat;  // PlayerStat 참조
+    public PlayerStatSystem playerStat;  // PlayerStat 참조
     private Rigidbody2D rb;
     private float x = 0;
     private float y = 0;
@@ -57,7 +57,7 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         // 기본 컴포넌트 참조만 가져오기
-        playerStat = GetComponent<PlayerStat>();
+        playerStat = GetComponent<PlayerStatSystem>();
         rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -284,7 +284,6 @@ public class Player : MonoBehaviour
         }
     }
 
-
     public void TakeHeal(float heal)
     {
         float currentHp = playerStat.GetStat(StatType.CurrentHp);
@@ -324,7 +323,6 @@ public class Player : MonoBehaviour
     private Coroutine autoAttackCoroutine;
     private float attackAngle = 120f;  // 공격 각도는 상수로 유지하거나 PlayerStatData로 이동 가능
 
-
     private IEnumerator PerformAttack(Enemy targetEnemy)
     {
         if (characterControl == null) yield break; // 안전 체크 추가
@@ -348,7 +346,8 @@ public class Player : MonoBehaviour
 
         var enemiesInRange = GameManager.Instance.enemies
             .Where(enemy => enemy != null)
-            .Where(enemy => {
+            .Where(enemy =>
+            {
                 Vector2 directionToEnemy = enemy.transform.position - transform.position;
                 float distanceToEnemy = directionToEnemy.magnitude;
                 float angle = Vector2.Angle(directionToTarget, directionToEnemy);
@@ -385,7 +384,6 @@ public class Player : MonoBehaviour
     public void ResetPassiveEffects()
     {
         playerStat.RemoveStatsBySource(SourceType.Passive);
-        playerStat.ActivateHoming(false);
     }
     #endregion
 
@@ -419,17 +417,6 @@ public class Player : MonoBehaviour
         }
     }
     #endregion
-
-    #endregion
-
-    #region Initializing
-    public void ResetAllStats()
-    {
-        playerStat?.ResetToBase();
-        playerStatus = Status.Alive;
-        exp = 0;
-        level = 1;
-    }
 
     #endregion
 
@@ -490,7 +477,6 @@ public class Player : MonoBehaviour
                 }
             }
 
-            // 공격 속도에 따른 대기
             float attackDelay = 1f / playerStat.GetStat(StatType.AttackSpeed);
             yield return new WaitForSeconds(attackDelay);
         }

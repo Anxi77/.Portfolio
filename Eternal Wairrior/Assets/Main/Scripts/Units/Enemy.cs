@@ -779,7 +779,7 @@ public class Enemy : MonoBehaviour
 
     protected virtual void DropItems()
     {
-        float playerLuck = GameManager.Instance.player.GetComponent<PlayerStat>().GetStat(StatType.Luck);
+        float playerLuck = GameManager.Instance.player.GetComponent<PlayerStatSystem>().GetStat(StatType.Luck);
 
         var drops = ItemManager.Instance.GetDropsForEnemy(enemyType, 1f + playerLuck);
 
@@ -1028,6 +1028,5 @@ public class Enemy : MonoBehaviour
         }
     }
     #endregion
-
 
 }

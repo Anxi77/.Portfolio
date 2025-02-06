@@ -51,7 +51,7 @@ public class ItemData
     [JsonProperty] public int MaxAmount { get; set; } = 1;
     [JsonProperty] public string IconPath { get; set; }
     [JsonProperty] public ItemStatRangeData StatRanges { get; set; } = new();
-    [JsonProperty] public List<StatContainer> Stats { get; set; } = new();
+    [JsonProperty] public List<StatModifier> Stats { get; set; } = new();
     [JsonProperty] public ItemEffectRangeData EffectRanges { get; set; } = new();
     [JsonProperty] public List<ItemEffectData> Effects { get; set; } = new();
     [JsonProperty] public Dictionary<string, float> EffectValues { get; set; } = new();
@@ -65,18 +65,18 @@ public class ItemData
     [JsonIgnore] public int amount = 1;
 
     #region Stats Management
-    public void AddStat(StatContainer stat)
+    public void AddStat(StatModifier stat)
     {
         if (stat == null) return;
-        Stats.RemoveAll(s => s.statType == stat.statType);
+        Stats.RemoveAll(s => s.Type == stat.Type && s.Source == stat.Source && s.IncreaseType == stat.IncreaseType && Math.Abs(s.Value - stat.Value) < float.Epsilon);
         Stats.Add(stat);
     }
 
-    public StatContainer GetStat(StatType statType) =>
-        Stats.FirstOrDefault(s => s.statType == statType);
+    public StatModifier GetStat(StatType statType) =>
+        Stats.FirstOrDefault(s => s.Type == statType);
 
     public float GetStatValue(StatType statType) =>
-        GetStat(statType)?.amount ?? 0f;
+        GetStat(statType)?.Value ?? 0f;
 
     public void ClearStats() => Stats.Clear();
     #endregion
@@ -209,27 +209,6 @@ public class ItemStatData
     public float lifeSteal;
     public float reflectDamage;
     public float dodgeChance;
-
-    public List<StatContainer> ConvertToStatContainers()
-    {
-        var containers = new List<StatContainer>();
-
-        if (damage > 0) containers.Add(new StatContainer(StatType.Damage, SourceType.Weapon, IncreaseType.Add, damage));
-        if (defense > 0) containers.Add(new StatContainer(StatType.Defense, SourceType.Armor, IncreaseType.Add, defense));
-        if (hp > 0) containers.Add(new StatContainer(StatType.MaxHp, SourceType.Armor, IncreaseType.Add, hp));
-        if (moveSpeed > 0) containers.Add(new StatContainer(StatType.MoveSpeed, SourceType.Accessory, IncreaseType.Mul, moveSpeed));
-        if (attackSpeed > 0) containers.Add(new StatContainer(StatType.AttackSpeed, SourceType.Weapon, IncreaseType.Mul, attackSpeed));
-        if (attackRange > 0) containers.Add(new StatContainer(StatType.AttackRange, SourceType.Weapon, IncreaseType.Mul, attackRange));
-        if (hpRegen > 0) containers.Add(new StatContainer(StatType.HpRegenRate, SourceType.Accessory, IncreaseType.Add, hpRegen));
-
-        if (criticalChance > 0) containers.Add(new StatContainer(StatType.CriticalChance, SourceType.Weapon, IncreaseType.Add, criticalChance));
-        if (criticalDamage > 0) containers.Add(new StatContainer(StatType.CriticalDamage, SourceType.Weapon, IncreaseType.Add, criticalDamage));
-        if (lifeSteal > 0) containers.Add(new StatContainer(StatType.LifeSteal, SourceType.Weapon, IncreaseType.Add, lifeSteal));
-        if (reflectDamage > 0) containers.Add(new StatContainer(StatType.ReflectDamage, SourceType.Armor, IncreaseType.Add, reflectDamage));
-        if (dodgeChance > 0) containers.Add(new StatContainer(StatType.DodgeChance, SourceType.Accessory, IncreaseType.Add, dodgeChance));
-
-        return containers;
-    }
 }
 
 [Serializable]
@@ -239,7 +218,7 @@ public class ItemStatRange
     public float minValue;
     public float maxValue;
     public float weight = 1f;
-    public IncreaseType increaseType = IncreaseType.Add;
+    public IncreaseType increaseType = IncreaseType.Flat;
 }
 
 [Serializable]

@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-
 using System.Linq;
-
 using UnityEngine;
+using System;
 
 public class Inventory : MonoBehaviour, IInitializable
 {
@@ -10,13 +9,14 @@ public class Inventory : MonoBehaviour, IInitializable
     private Dictionary<EquipmentSlot, Item> equippedItems = new();
     private int gold;
     private InventoryData savedState;
-    private PlayerStat playerStat;
+    private PlayerStatSystem playerStat;
     public const int MAX_SLOTS = 20;
     public bool IsInitialized { get; private set; }
     public int MaxSlots => MAX_SLOTS;
+
     private void Awake()
     {
-        playerStat = GetComponent<PlayerStat>();
+        playerStat = GetComponent<PlayerStatSystem>();
     }
 
     public void Initialize()
@@ -175,14 +175,10 @@ public class Inventory : MonoBehaviour, IInitializable
 
         Debug.Log($"Attempting to equip {itemData.Name} to slot {slot}");
 
-        //   
-
         if (equippedItems.ContainsKey(slot))
         {
             UnequipFromSlot(slot);
         }
-
-        // �� ������ ���� �� ����
 
         Item newItem = CreateEquipmentItem(itemData);
 
@@ -191,8 +187,6 @@ public class Inventory : MonoBehaviour, IInitializable
             newItem.Initialize(itemData);
             equippedItems[slot] = newItem;
 
-            // �κ��丮 ���� ���� ������Ʈ
-
             var inventorySlot = slots.Find(s => s.itemId == itemData.ID);
 
             if (inventorySlot != null)
@@ -200,11 +194,12 @@ public class Inventory : MonoBehaviour, IInitializable
                 inventorySlot.isEquipped = true;
             }
 
-            // ���� ����
-
             if (playerStat != null)
             {
-                playerStat.EquipItem(itemData.Stats, slot);
+                foreach (var stat in itemData.Stats)
+                {
+                    playerStat.AddModifier(stat);
+                }
             }
 
             Debug.Log($"Successfully equipped {itemData.Name} to slot {slot}");
@@ -243,7 +238,7 @@ public class Inventory : MonoBehaviour, IInitializable
 
         }
 
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error creating equipment item: {e.Message}");
 
@@ -253,15 +248,12 @@ public class Inventory : MonoBehaviour, IInitializable
 
     public void SaveInventoryState()
     {
-        savedState = GetInventoryData();
+        PlayerDataManager.Instance.SaveInventoryData(GetInventoryData());
     }
 
     public void SaveEquippedItems()
     {
-        if (savedState == null)
-        {
-            savedState = new InventoryData();
-        }
+        PlayerDataManager.Instance.SaveInventoryData(GetInventoryData());
 
         savedState.equippedItems = equippedItems.ToDictionary(
             kvp => kvp.Key,
@@ -288,15 +280,6 @@ public class Inventory : MonoBehaviour, IInitializable
         }
     }
 
-    public void RestoreInventoryState()
-    {
-        if (savedState != null)
-        {
-            LoadInventoryData(savedState);
-            savedState = null;
-        }
-    }
-
     public void ClearInventory()
     {
         foreach (var slot in equippedItems.Keys.ToList())
@@ -311,40 +294,16 @@ public class Inventory : MonoBehaviour, IInitializable
         savedState = null;
     }
 
-    public void SwapItems(int fromSlot, int toSlot)
-    {
-        if (fromSlot < 0 || fromSlot >= slots.Count ||
-            toSlot < 0 || toSlot >= slots.Count) return;
-
-        var temp = slots[toSlot];
-        slots[toSlot] = slots[fromSlot];
-        slots[fromSlot] = temp;
-    }
-
-    public void UpdateStats()
-    {
-        if (playerStat == null) return;
-
-        foreach (EquipmentSlot slot in System.Enum.GetValues(typeof(EquipmentSlot)))
-        {
-            playerStat.UnequipItem(slot);
-        }
-
-        foreach (var kvp in equippedItems)
-        {
-            var itemData = kvp.Value.GetItemData();
-            if (itemData != null)
-            {
-                playerStat.EquipItem(itemData.Stats, kvp.Key);
-            }
-        }
-    }
-
     public void RemoveItem(string itemId)
     {
         var slot = slots.Find(s => s.itemId == itemId);
         if (slot != null)
         {
+            var itemData = ItemManager.Instance.GetItem(slot.itemId);
+            foreach (var stat in itemData.Stats)
+            {
+                playerStat.RemoveModifier(stat);
+            }
             slots.Remove(slot);
         }
     }

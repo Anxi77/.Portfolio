@@ -52,12 +52,8 @@ public class ItemGenerator : MonoBehaviour
             if (selectedStat != null)
             {
                 float value = GenerateStatValue(selectedStat, item.Rarity);
-                item.AddStat(new StatContainer
-                {
-                    statType = selectedStat.statType,
-                    amount = value,
-                    sourceType = (SourceType)Enum.Parse(typeof(SourceType), item.Type.ToString())
-                });
+                SourceType sourceType = (SourceType)Enum.Parse(typeof(SourceType), item.Type.ToString());
+                item.AddStat(new StatModifier(selectedStat.statType, sourceType, IncreaseType.Flat, value));
 
                 Debug.Log($"Added stat: {selectedStat.statType} = {value}");
                 availableStats.Remove(selectedStat);
@@ -155,10 +151,10 @@ public class ItemGenerator : MonoBehaviour
 
         switch (statRange.increaseType)
         {
-            case IncreaseType.Add:
+            case IncreaseType.Flat:
                 finalValue = Mathf.Round(finalValue);
                 break;
-            case IncreaseType.Mul:
+            case IncreaseType.Multiply:
                 finalValue = Mathf.Round(finalValue * 100) / 100;
                 break;
         }

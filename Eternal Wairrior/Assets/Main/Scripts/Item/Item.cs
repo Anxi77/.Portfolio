@@ -20,7 +20,7 @@ public abstract class Item
             return false;
 
         var inventory = player.GetComponent<Inventory>();
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
 
         if (inventory != null && playerStat != null)
         {
@@ -31,7 +31,10 @@ public abstract class Item
             }
 
             // 새 장비 장착
-            playerStat.EquipItem(itemData.Stats, slot);
+            foreach (var stat in itemData.Stats)
+            {
+                playerStat.AddModifier(stat);
+            }
             isEquipped = true;
             currentSlot = slot;
             inventory.EquipToSlot(this, slot);
@@ -47,12 +50,14 @@ public abstract class Item
             return;
 
         var inventory = player.GetComponent<Inventory>();
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
 
         if (inventory != null && playerStat != null)
         {
-            playerStat.UnequipItem(currentSlot);
-            inventory.UnequipFromSlot(currentSlot);
+            foreach (var stat in itemData.Stats)
+            {
+                playerStat.RemoveModifier(stat);
+            }
             isEquipped = false;
             currentSlot = EquipmentSlot.None;
         }

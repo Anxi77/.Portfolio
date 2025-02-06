@@ -4,35 +4,35 @@ public class SpeedUpgradeSkill : PermanentPassiveSkill
 {
     public override void ApplyEffectToPlayer(Player player)
     {
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return;
 
         if (_moveSpeedIncrease > 0)
         {
-            playerStat.AddStatModifier(StatType.MoveSpeed, SourceType.Passive, IncreaseType.Mul, _moveSpeedIncrease / 100f);
+            playerStat.AddModifier(new StatModifier(StatType.MoveSpeed, SourceType.Passive, IncreaseType.Multiply, _moveSpeedIncrease / 100f));
             Debug.Log($"Applied permanent move speed increase: {_moveSpeedIncrease}%");
         }
 
         if (_attackSpeedIncrease > 0)
         {
-            playerStat.AddStatModifier(StatType.AttackSpeed, SourceType.Passive, IncreaseType.Mul, _attackSpeedIncrease / 100f);
+            playerStat.AddModifier(new StatModifier(StatType.AttackSpeed, SourceType.Passive, IncreaseType.Multiply, _attackSpeedIncrease / 100f));
             Debug.Log($"Applied permanent attack speed increase: {_attackSpeedIncrease}%");
         }
     }
 
     public override void RemoveEffectFromPlayer(Player player)
     {
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return;
 
         if (_moveSpeedIncrease > 0)
         {
-            playerStat.RemoveStatModifier(StatType.MoveSpeed, SourceType.Passive);
+            playerStat.RemoveModifier(new StatModifier(StatType.MoveSpeed, SourceType.Passive, IncreaseType.Multiply, _moveSpeedIncrease / 100f));
         }
 
         if (_attackSpeedIncrease > 0)
         {
-            playerStat.RemoveStatModifier(StatType.AttackSpeed, SourceType.Passive);
+            playerStat.RemoveModifier(new StatModifier(StatType.AttackSpeed, SourceType.Passive, IncreaseType.Multiply, _attackSpeedIncrease / 100f));
         }
     }
 
@@ -66,7 +66,7 @@ public class SpeedUpgradeSkill : PermanentPassiveSkill
 
     public override string GetDetailedDescription()
     {
-        var playerStat = GameManager.Instance.player?.GetComponent<PlayerStat>();
+        var playerStat = GameManager.Instance.player?.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return "Permanently increases movement and attack speed";
 
         string baseDesc = "Permanently increases movement and attack speed";

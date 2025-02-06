@@ -54,9 +54,9 @@ public class ItemTooltip : MonoBehaviour
         {
             foreach (var stat in itemData.Stats)
             {
-                string valueStr = stat.amount >= 0 ? "+" + stat.amount : stat.amount.ToString();
-                statsBuilder.AppendLine($"{stat.statType}: {valueStr}");
-                Debug.Log($"Adding stat to tooltip: {stat.statType} = {valueStr}");
+                string valueStr = stat.Value >= 0 ? "+" + stat.Value : stat.Value.ToString();
+                statsBuilder.AppendLine($"{stat.Type}: {valueStr}");
+                Debug.Log($"Adding stat to tooltip: {stat.Type} = {valueStr}");
             }
         }
         else

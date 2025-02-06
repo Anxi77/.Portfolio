@@ -11,11 +11,11 @@ public class ExpParticle : MonoBehaviour, IContactable
     private Player player;
     private Vector2 velocity;
     private float spreadTime = 0f;
-    private PlayerStat playerStat;
+    private PlayerStatSystem playerStat;
     private void OnEnable()
     {
         player = GameManager.Instance?.player;
-        playerStat = GameManager.Instance?.player.GetComponent<PlayerStat>();
+        playerStat = GameManager.Instance?.player.GetComponent<PlayerStatSystem>();
     }
 
     private void Start()

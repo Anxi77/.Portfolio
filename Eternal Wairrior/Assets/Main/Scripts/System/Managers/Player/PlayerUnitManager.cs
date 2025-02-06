@@ -73,16 +73,9 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
             GameManager.Instance.player = player;
 
             // PlayerStat 초기화
-            PlayerStat playerStat = player.GetComponent<PlayerStat>();
+            PlayerStatSystem playerStat = player.GetComponent<PlayerStatSystem>();
             if (playerStat != null)
             {
-                // 기본 스탯 데이터 로드
-                var defaultStatData = Resources.Load<PlayerStatData>("DefaultPlayerStats");
-                if (defaultStatData != null)
-                {
-                    playerStat.LoadStats(Instantiate(defaultStatData));
-                }
-
                 // 체력을 최대치로 설정
                 float maxHp = playerStat.GetStat(StatType.MaxHp);
                 playerStat.SetCurrentHp(maxHp);
@@ -136,12 +129,11 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
         if (GameManager.Instance?.player == null) return;
 
         var player = GameManager.Instance.player;
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         var inventory = player.GetComponent<Inventory>();
 
         if (playerStat != null)
         {
-            PlayerDataManager.Instance.LoadPlayerStatData(playerStat.GetStatData());
             PlayerDataManager.Instance.SaveCurrentPlayerStatData();
         }
 
@@ -156,17 +148,11 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
         if (GameManager.Instance?.player == null) return;
 
         var player = GameManager.Instance.player;
-        var playerStat = player.GetComponent<PlayerStat>();
         var inventory = player.GetComponent<Inventory>();
 
         var savedData = PlayerDataManager.Instance.LoadPlayerData("CurrentSave");
         if (savedData != null)
         {
-            if (playerStat != null)
-            {
-                playerStat.LoadStats(savedData.stats);
-            }
-
             if (inventory != null)
             {
                 inventory.LoadInventoryData(savedData.inventory);

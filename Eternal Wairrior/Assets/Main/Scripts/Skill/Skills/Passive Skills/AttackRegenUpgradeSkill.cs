@@ -4,41 +4,41 @@ public class AttackRegenUpgradeSkill : PermanentPassiveSkill
 {
     public override void ApplyEffectToPlayer(Player player)
     {
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return;
 
         if (_damageIncrease > 0)
         {
-            playerStat.AddStatModifier(StatType.Damage, SourceType.Passive, IncreaseType.Mul, _damageIncrease / 100f);
+            playerStat.AddModifier(new StatModifier(StatType.Damage, SourceType.Passive, IncreaseType.Multiply, _damageIncrease / 100f));
             Debug.Log($"Applied permanent damage increase: {_damageIncrease}%");
         }
 
         if (_hpRegenIncrease > 0)
         {
-            playerStat.AddStatModifier(StatType.HpRegenRate, SourceType.Passive, IncreaseType.Mul, _hpRegenIncrease / 100f);
+            playerStat.AddModifier(new StatModifier(StatType.HpRegenRate, SourceType.Passive, IncreaseType.Multiply, _hpRegenIncrease / 100f));
             Debug.Log($"Applied permanent HP regen rate increase: {_hpRegenIncrease}%");
         }
     }
 
     public override void RemoveEffectFromPlayer(Player player)
     {
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return;
 
         if (_damageIncrease > 0)
         {
-            playerStat.RemoveStatModifier(StatType.Damage, SourceType.Passive);
+            playerStat.RemoveModifier(new StatModifier(StatType.Damage, SourceType.Passive, IncreaseType.Multiply, _damageIncrease / 100f));
         }
 
         if (_hpRegenIncrease > 0)
         {
-            playerStat.RemoveStatModifier(StatType.HpRegenRate, SourceType.Passive);
+            playerStat.RemoveModifier(new StatModifier(StatType.HpRegenRate, SourceType.Passive, IncreaseType.Multiply, _hpRegenIncrease / 100f));
         }
     }
 
     public override string GetDetailedDescription()
     {
-        var playerStat = GameManager.Instance.player?.GetComponent<PlayerStat>();
+        var playerStat = GameManager.Instance.player?.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return "Permanently increases attack damage and HP regeneration rate";
 
         string baseDesc = "Permanently increases attack damage and HP regeneration rate";

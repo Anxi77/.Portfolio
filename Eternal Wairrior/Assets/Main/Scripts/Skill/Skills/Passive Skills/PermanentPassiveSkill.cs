@@ -14,7 +14,7 @@ public abstract class PermanentPassiveSkill : PassiveSkills
 
     protected override void Start()
     {
-        // PassiveSkillsÀÇ Start¿¡¼­ ½ÃÀÛÇÏ´Â PassiveEffectCoroutineÀ» ½ÇÇàÇÏÁö ¾ÊÀ½
+        // PassiveSkillsï¿½ï¿½ Startï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ PassiveEffectCoroutineï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     }
 
     private void StartInitialization()
@@ -40,7 +40,7 @@ public abstract class PermanentPassiveSkill : PassiveSkills
 
         if (!effectApplied)
         {
-            var playerStat = GameManager.Instance.player.GetComponent<PlayerStat>();
+            var playerStat = GameManager.Instance.player.GetComponent<PlayerStatSystem>();
             if (playerStat != null)
             {
                 float currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
@@ -66,7 +66,7 @@ public abstract class PermanentPassiveSkill : PassiveSkills
             return;
         }
 
-        var playerStat = GameManager.Instance?.player?.GetComponent<PlayerStat>();
+        var playerStat = GameManager.Instance?.player?.GetComponent<PlayerStatSystem>();
         if (playerStat != null)
         {
             float currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
@@ -92,7 +92,7 @@ public abstract class PermanentPassiveSkill : PassiveSkills
     {
         if (effectApplied && GameManager.Instance?.player != null)
         {
-            var playerStat = GameManager.Instance.player.GetComponent<PlayerStat>();
+            var playerStat = GameManager.Instance.player.GetComponent<PlayerStatSystem>();
             if (playerStat != null)
             {
                 float currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
@@ -101,13 +101,13 @@ public abstract class PermanentPassiveSkill : PassiveSkills
 
                 Debug.Log($"Before destroy - HP: {currentHp}/{maxHp} ({currentHpRatio:F2})");
 
-                // È¿°ú Á¦°Å Àü¿¡ ÇöÀç HP ÀúÀå
+                // È¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ HP ï¿½ï¿½ï¿½ï¿½
                 RemoveEffectFromPlayer(GameManager.Instance.player);
                 effectApplied = false;
 
-                // »õ·Î¿î MaxHP¿¡ ¸ÂÃç HP Á¶Á¤
+                // ï¿½ï¿½ï¿½Î¿ï¿½ MaxHPï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ HP ï¿½ï¿½ï¿½ï¿½
                 float newMaxHp = playerStat.GetStat(StatType.MaxHp);
-                // ÇöÀç HP¿Í ºñÀ²·Î °è»êµÈ HP Áß ´õ Å« °ª »ç¿ë
+                // ï¿½ï¿½ï¿½ï¿½ HPï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ HP ï¿½ï¿½ ï¿½ï¿½ Å« ï¿½ï¿½ ï¿½ï¿½ï¿½
                 float newCurrentHp = Mathf.Max(currentHp, newMaxHp * currentHpRatio);
                 playerStat.SetCurrentHp(newCurrentHp);
 
@@ -115,7 +115,7 @@ public abstract class PermanentPassiveSkill : PassiveSkills
             }
         }
 
-        // base.OnDestroy´Â È£ÃâÇÏÁö ¾ÊÀ½ - PassiveSkillsÀÇ OnDestroy¿¡¼­ Ãß°¡ HP Á¶Á¤ÀÌ ÀÏ¾î³ª´Â °ÍÀ» ¹æÁö
+        // base.OnDestroyï¿½ï¿½ È£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ - PassiveSkillsï¿½ï¿½ OnDestroyï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ HP ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï¾î³ªï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         // base.OnDestroy();
     }
 

@@ -4,35 +4,35 @@ public class RangeUpgradeSkill : PermanentPassiveSkill
 {
     public override void ApplyEffectToPlayer(Player player)
     {
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return;
 
         if (_attackRangeIncrease > 0)
         {
-            playerStat.AddStatModifier(StatType.AttackRange, SourceType.Passive, IncreaseType.Mul, _attackRangeIncrease / 100f);
+            playerStat.AddModifier(new StatModifier(StatType.AttackRange, SourceType.Passive, IncreaseType.Multiply, _attackRangeIncrease / 100f));
             Debug.Log($"Applied permanent attack range increase: {_attackRangeIncrease}%");
         }
 
         if (_expAreaIncrease > 0)
         {
-            playerStat.AddStatModifier(StatType.ExpCollectionRadius, SourceType.Passive, IncreaseType.Mul, _expAreaIncrease / 100f);
+            playerStat.AddModifier(new StatModifier(StatType.ExpCollectionRadius, SourceType.Passive, IncreaseType.Multiply, _expAreaIncrease / 100f));
             Debug.Log($"Applied permanent exp collection radius increase: {_expAreaIncrease}%");
         }
     }
 
     public override void RemoveEffectFromPlayer(Player player)
     {
-        var playerStat = player.GetComponent<PlayerStat>();
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return;
 
         if (_attackRangeIncrease > 0)
         {
-            playerStat.RemoveStatModifier(StatType.AttackRange, SourceType.Passive);
+            playerStat.RemoveModifier(new StatModifier(StatType.AttackRange, SourceType.Passive, IncreaseType.Multiply, _attackRangeIncrease / 100f));
         }
 
         if (_expAreaIncrease > 0)
         {
-            playerStat.RemoveStatModifier(StatType.ExpCollectionRadius, SourceType.Passive);
+            playerStat.RemoveModifier(new StatModifier(StatType.ExpCollectionRadius, SourceType.Passive, IncreaseType.Multiply, _expAreaIncrease / 100f));
         }
     }
 
@@ -66,7 +66,7 @@ public class RangeUpgradeSkill : PermanentPassiveSkill
 
     public override string GetDetailedDescription()
     {
-        var playerStat = GameManager.Instance.player?.GetComponent<PlayerStat>();
+        var playerStat = GameManager.Instance.player?.GetComponent<PlayerStatSystem>();
         if (playerStat == null) return "Permanently increases attack range and experience collection radius";
 
         string baseDesc = "Permanently increases attack range and experience collection radius";
