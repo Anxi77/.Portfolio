@@ -1,0 +1,22 @@
+{
+  "dropTables": [
+    {
+      "enemyType": 1,
+      "dropEntries": [],
+      "guaranteedDropRate": 0.1,
+      "maxDrops": 2
+    },
+    {
+      "enemyType": 2,
+      "dropEntries": [],
+      "guaranteedDropRate": 0.3,
+      "maxDrops": 3
+    },
+    {
+      "enemyType": 3,
+      "dropEntries": [],
+      "guaranteedDropRate": 1.0,
+      "maxDrops": 5
+    }
+  ]
+}

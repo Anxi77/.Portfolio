@@ -47,10 +47,10 @@ public enum SourceType
     Level,      // 레벨 효과 
     Passive,    // 패시브 
     Active,     // 액티브 
-    Equipment_Weapon,    // 무기
-    Equipment_Armor,     // 방어구
-    Equipment_Accessory, // 장신구
-    Equipment_Special,   // 특수
+    Weapon,    // 무기
+    Armor,     // 방어구
+    Accessory, // 장신구
+    Special,   // 특수
     Consumable, // 소비
     Buff,       // 버프
     Debuff      // 디버프
@@ -276,10 +276,10 @@ public class PlayerStat : MonoBehaviour
 
     private bool IsPermanentSource(SourceType source)
     {
-        return source == SourceType.Equipment_Weapon ||
-               source == SourceType.Equipment_Armor ||
-               source == SourceType.Equipment_Accessory ||
-               source == SourceType.Equipment_Special;
+        return source == SourceType.Weapon ||
+               source == SourceType.Armor ||
+               source == SourceType.Accessory ||
+               source == SourceType.Special;
     }
 
     public float GetStat(StatType type)

@@ -6,18 +6,12 @@ using System.Linq;
 using System;
 using UnityEditor;
 
-public class CSVManager<T> : IDataManager<T> where T : class, new()
+public static class CSVIO<T> where T : class, new()
 {
-    private readonly string basePath;
-    private readonly Dictionary<string, T> cache;
+    private static readonly string basePath;
+    private static readonly Dictionary<string, T> cache;
 
-    public CSVManager(string basePath)
-    {
-        this.basePath = basePath;
-        this.cache = new Dictionary<string, T>();
-    }
-
-    public void SaveData(string key, T data)
+    public static void SaveData(string key, T data)
     {
         string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.csv");
         string directory = Path.GetDirectoryName(fullPath);
@@ -28,10 +22,10 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
         var csv = new StringBuilder();
         var properties = typeof(T).GetProperties();
 
-        // Çì´õ ÀÛ¼º
+        // ï¿½ï¿½ï¿½ ï¿½Û¼ï¿½
         csv.AppendLine(string.Join(",", properties.Select(p => p.Name)));
 
-        // µ¥ÀÌÅÍ ÀÛ¼º
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Û¼ï¿½
         var values = properties.Select(p => p.GetValue(data)?.ToString() ?? "");
         csv.AppendLine(string.Join(",", values));
 
@@ -39,7 +33,7 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
         cache[key] = data;
     }
 
-    public void SaveBulkData(string key, IEnumerable<T> dataList, bool overwrite = true)
+    public static void SaveBulkData(string key, IEnumerable<T> dataList, bool overwrite = true)
     {
         try
         {
@@ -59,11 +53,11 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
             var properties = typeof(T).GetProperties(System.Reflection.BindingFlags.Public |
                                                    System.Reflection.BindingFlags.Instance);
 
-            // Çì´õ ÀÛ¼º (ÇÑ ¹ø¸¸)
+            // ï¿½ï¿½ï¿½ ï¿½Û¼ï¿½ (ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
             var headerLine = string.Join(",", properties.Select(p => p.Name.ToLower()));
             csv.AppendLine(headerLine);
 
-            // µ¥ÀÌÅÍ ÀÛ¼º
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Û¼ï¿½
             int count = 0;
             foreach (var data in dataList)
             {
@@ -92,7 +86,7 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
                 count++;
             }
 
-            // ÆÄÀÏ ÀúÀå
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             File.WriteAllText(fullPath, csv.ToString());
             Debug.Log($"Successfully saved {count} entries to {fullPath}");
 #if UNITY_EDITOR
@@ -105,7 +99,7 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
         }
     }
 
-    public T LoadData(string key)
+    public static T LoadData(string key)
     {
         if (cache.TryGetValue(key, out T cachedData))
             return cachedData;
@@ -115,7 +109,7 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
             return null;
 
         var lines = File.ReadAllLines(fullPath);
-        if (lines.Length < 2) // Çì´õ + µ¥ÀÌÅÍ ÃÖ¼Ò 2ÁÙ
+        if (lines.Length < 2) // ï¿½ï¿½ï¿½ + ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½ 2ï¿½ï¿½
             return null;
 
         var headers = lines[0].Split(',');
@@ -137,7 +131,7 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
         return data;
     }
 
-    public IEnumerable<T> LoadBulkData(string key)
+    public static IEnumerable<T> LoadBulkData(string key)
     {
         string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.csv");
         if (!File.Exists(fullPath))
@@ -168,7 +162,7 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
         }
     }
 
-    public bool DeleteData(string key)
+    public static bool DeleteData(string key)
     {
         string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.csv");
         if (File.Exists(fullPath))
@@ -180,7 +174,7 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
         return false;
     }
 
-    public void ClearAll()
+    public static void ClearAll()
     {
         cache.Clear();
         string directory = Path.Combine(Application.dataPath, "Resources", basePath);
@@ -194,7 +188,7 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
         }
     }
 
-    public void CreateDefaultFile(string fileName, string headers)
+    public static void CreateDefaultFile(string fileName, string headers)
     {
         try
         {
@@ -206,10 +200,10 @@ public class CSVManager<T> : IDataManager<T> where T : class, new()
                 Directory.CreateDirectory(directory);
             }
 
-            // ÀÌ¹Ì ÆÄÀÏÀÌ Á¸ÀçÇÏ¸é µ¤¾î¾²Áö ¾ÊÀ½
+            // ï¿½Ì¹ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ï¿½î¾²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             if (!File.Exists(fullPath))
             {
-                File.WriteAllText(fullPath, headers + "\n");  // »õ ÁÙ ¹®ÀÚ Ãß°¡
+                File.WriteAllText(fullPath, headers + "\n");  // ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
                 Debug.Log($"Created new CSV file: {fullPath}");
 #if UNITY_EDITOR
                 AssetDatabase.Refresh();

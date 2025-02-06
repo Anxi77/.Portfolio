@@ -2,21 +2,19 @@
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using System;
-using EternalWarrior.Editor;
 
 public class ItemDataEditorWindow : EditorWindow
 {
     private enum EditorTab
     {
         Items,
-        DropTables,
-        Settings
+        DropTables
     }
 
     #region Fields
     private Dictionary<string, ItemData> itemDatabase = new();
+    private Dictionary<EnemyType, DropTableData> dropTables = new();
     private string searchText = "";
     private ItemType typeFilter = ItemType.None;
     private ItemRarity rarityFilter = ItemRarity.Common;
@@ -55,7 +53,26 @@ public class ItemDataEditorWindow : EditorWindow
 
     private void OnEnable()
     {
+        RefreshData();
+    }
+
+    private void RefreshData()
+    {
+        Debug.Log("RefreshData called");
         RefreshItemDatabase();
+        RefreshDropTables();
+    }
+
+    private void RefreshItemDatabase()
+    {
+        Debug.Log("RefreshItemDatabase called");
+        itemDatabase = ItemDataEditorUtility.GetItemDatabase();
+    }
+
+    private void RefreshDropTables()
+    {
+        Debug.Log("RefreshDropTables called");
+        dropTables = ItemDataEditorUtility.GetDropTables();
     }
 
     private void OnGUI()
@@ -67,24 +84,21 @@ public class ItemDataEditorWindow : EditorWindow
 
         EditorGUILayout.BeginVertical();
         {
-            DrawHeader();
             DrawTabs();
             EditorGUILayout.Space(10);
-            float contentHeight = position.height - 90f;
+
+            float footerHeight = 25f;
+            float contentHeight = position.height - footerHeight - 35f;
             EditorGUILayout.BeginVertical(GUILayout.Height(contentHeight));
             {
                 DrawMainContent();
             }
             EditorGUILayout.EndVertical();
+
+            GUILayout.FlexibleSpace();
             DrawFooter();
         }
         EditorGUILayout.EndVertical();
-    }
-
-    private void RefreshItemDatabase()
-    {
-        Debug.Log("RefreshItemDatabase called");
-        itemDatabase = ItemDataEditorUtility.GetItemDatabase();
     }
 
     private void InitializeStyles()
@@ -115,23 +129,9 @@ public class ItemDataEditorWindow : EditorWindow
                 case EditorTab.DropTables:
                     DrawDropTablesTab();
                     break;
-                case EditorTab.Settings:
-                    DrawSettingsTab();
-                    break;
             }
         }
         EditorGUILayout.EndScrollView();
-    }
-
-    private void DrawHeader()
-    {
-        EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
-        {
-            GUILayout.Label("Item Data Editor", headerStyle);
-            GUILayout.FlexibleSpace();
-            DrawSearchBar();
-        }
-        EditorGUILayout.EndHorizontal();
     }
 
     private void DrawTabs()
@@ -142,8 +142,6 @@ public class ItemDataEditorWindow : EditorWindow
                 currentTab = EditorTab.Items;
             if (GUILayout.Toggle(currentTab == EditorTab.DropTables, "Drop Tables", tabStyle))
                 currentTab = EditorTab.DropTables;
-            if (GUILayout.Toggle(currentTab == EditorTab.Settings, "Settings", tabStyle))
-                currentTab = EditorTab.Settings;
         }
         EditorGUILayout.EndHorizontal();
     }
@@ -166,26 +164,41 @@ public class ItemDataEditorWindow : EditorWindow
             {
                 ItemDataEditorUtility.SaveWithBackup();
             }
+            GUILayout.Space(10);
+            if (GUILayout.Button("Reset to Default", EditorStyles.toolbarButton, GUILayout.Width(100)))
+            {
+                if (EditorUtility.DisplayDialog("Reset to Default",
+                    "Are you sure you want to reset all data to default? This cannot be undone.",
+                    "Reset", "Cancel"))
+                {
+                    ItemDataEditorUtility.InitializeDefaultData();
+                    selectedItemId = null;
+
+                    EditorApplication.delayCall += () =>
+                    {
+                        RefreshData();
+                        Repaint();
+                    };
+
+                    EditorUtility.SetDirty(this);
+                }
+            }
         }
         EditorGUILayout.EndHorizontal();
     }
 
     private void DrawItemsTab()
     {
-        // 전체 영역을 좌우로 분할
         EditorGUILayout.BeginHorizontal();
         {
-            // 왼쪽 패널 - 아이템 리스트 (고정 너비)
             EditorGUILayout.BeginVertical(GUILayout.Width(250));
             {
                 DrawItemList();
             }
             EditorGUILayout.EndVertical();
-            // 구분선
             EditorGUILayout.Space(5);
             DrawVerticalLine(Color.gray);
             EditorGUILayout.Space(5);
-            // 오른쪽 패널 - 아이템 상세 정보 (나머지 영역 차지)
             EditorGUILayout.BeginVertical();
             {
                 DrawItemDetails();
@@ -197,7 +210,6 @@ public class ItemDataEditorWindow : EditorWindow
 
     private void DrawItemList()
     {
-        // 검색 및 필터 영역
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
             EditorGUILayout.LabelField("Search & Filter", EditorStyles.boldLabel);
@@ -208,7 +220,6 @@ public class ItemDataEditorWindow : EditorWindow
         }
         EditorGUILayout.EndVertical();
         EditorGUILayout.Space(5);
-        // 아이템 리스트 영역
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
             EditorGUILayout.LabelField("Items", EditorStyles.boldLabel);
@@ -235,7 +246,7 @@ public class ItemDataEditorWindow : EditorWindow
         }
         EditorGUILayout.EndVertical();
         EditorGUILayout.Space(5);
-        // 새 아이템 생성 버튼
+
         if (GUILayout.Button("Create New Item", GUILayout.Height(30)))
         {
             CreateNewItem();
@@ -311,7 +322,7 @@ public class ItemDataEditorWindow : EditorWindow
             }
             EditorGUILayout.EndVertical();
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error in DrawItemDetails: {e.Message}\n{e.StackTrace}");
             // GUI Layout 상태를 리셋
@@ -449,48 +460,20 @@ public class ItemDataEditorWindow : EditorWindow
             // 엔트리 목록
             for (int i = 0; i < dropTable.dropEntries.Count; i++)
             {
+                bool shouldRemove = false;
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 {
-                    var entry = dropTable.dropEntries[i];
-                    EditorGUILayout.BeginHorizontal();
-                    {
-                        EditorGUILayout.LabelField($"Entry {i + 1}", EditorStyles.boldLabel);
-                        GUILayout.FlexibleSpace();
-                        if (GUILayout.Button("Remove", GUILayout.Width(60)))
-                        {
-                            dropTable.dropEntries.RemoveAt(i);
-                            i--;
-                            GUI.changed = true;
-                            continue;
-                        }
-                    }
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.Space(2);
-                    // 아이템 선택
-                    var items = itemDatabase.Values.Select(item => item.Name).ToArray();
-                    int selectedIndex = Array.FindIndex(items, name =>
-                        itemDatabase.Values.FirstOrDefault(item => item.Name == name)?.ID == entry.itemId
-                    );
-                    EditorGUI.indentLevel++;
-                    int newIndex = EditorGUILayout.Popup("Item", selectedIndex, items);
-                    if (newIndex != selectedIndex && newIndex >= 0)
-                    {
-                        entry.itemId = itemDatabase.Values.ElementAt(newIndex).ID;
-                    }
-                    entry.dropRate = EditorGUILayout.Slider("Drop Rate", entry.dropRate, 0f, 1f);
-                    entry.rarity = (ItemRarity)EditorGUILayout.EnumPopup("Min Rarity", entry.rarity);
-                    EditorGUILayout.BeginHorizontal();
-                    {
-                        EditorGUILayout.LabelField("Amount Range", GUILayout.Width(100));
-                        entry.minAmount = EditorGUILayout.IntField(entry.minAmount, GUILayout.Width(50));
-                        EditorGUILayout.LabelField("to", GUILayout.Width(20));
-                        entry.maxAmount = EditorGUILayout.IntField(entry.maxAmount, GUILayout.Width(50));
-                    }
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUI.indentLevel--;
+                    ItemDataEditorUtility.DrawDropTableEntry(dropTable, i, out shouldRemove);
                 }
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space(5);
+
+                if (shouldRemove)
+                {
+                    dropTable.dropEntries.RemoveAt(i);
+                    i--;
+                    GUI.changed = true;
+                }
             }
         }
         EditorGUILayout.EndVertical();
@@ -523,6 +506,7 @@ public class ItemDataEditorWindow : EditorWindow
                     "Reset", "Cancel"))
                 {
                     ItemDataEditorUtility.InitializeDefaultData();
+                    RefreshItemDatabase();
                 }
             }
         }
@@ -531,39 +515,74 @@ public class ItemDataEditorWindow : EditorWindow
 
     private void DrawStatRanges()
     {
+        if (CurrentItem == null) return;
+
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         try
         {
+            bool changed = false;
             // 스탯 개수 범위 설정
             EditorGUILayout.BeginHorizontal();
             {
-                CurrentItem.StatRanges.minStatCount = EditorGUILayout.IntField("Stat Count", CurrentItem.StatRanges.minStatCount);
-                CurrentItem.StatRanges.maxStatCount = EditorGUILayout.IntField("to", CurrentItem.StatRanges.maxStatCount);
+                int newMinCount = EditorGUILayout.IntField("Stat Count", CurrentItem.StatRanges.minStatCount);
+                int newMaxCount = EditorGUILayout.IntField("to", CurrentItem.StatRanges.maxStatCount);
+
+                if (newMinCount != CurrentItem.StatRanges.minStatCount || newMaxCount != CurrentItem.StatRanges.maxStatCount)
+                {
+                    CurrentItem.StatRanges.minStatCount = newMinCount;
+                    CurrentItem.StatRanges.maxStatCount = newMaxCount;
+                    changed = true;
+                }
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space(5);
+
             // 가능한 스탯 목록
             for (int i = 0; i < CurrentItem.StatRanges.possibleStats.Count; i++)
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 {
                     var statRange = CurrentItem.StatRanges.possibleStats[i];
-                    statRange.statType = (StatType)EditorGUILayout.EnumPopup("Stat Type", statRange.statType);
+
+                    StatType newStatType = (StatType)EditorGUILayout.EnumPopup("Stat Type", statRange.statType);
+                    if (newStatType != statRange.statType)
+                    {
+                        statRange.statType = newStatType;
+                        changed = true;
+                    }
+
                     EditorGUILayout.BeginHorizontal();
                     {
-                        statRange.minValue = EditorGUILayout.FloatField("Value Range", statRange.minValue);
-                        statRange.maxValue = EditorGUILayout.FloatField("to", statRange.maxValue);
+                        float newMinValue = EditorGUILayout.FloatField("Value Range", statRange.minValue);
+                        float newMaxValue = EditorGUILayout.FloatField("to", statRange.maxValue);
+                        if (newMinValue != statRange.minValue || newMaxValue != statRange.maxValue)
+                        {
+                            statRange.minValue = newMinValue;
+                            statRange.maxValue = newMaxValue;
+                            changed = true;
+                        }
                     }
                     EditorGUILayout.EndHorizontal();
-                    statRange.weight = EditorGUILayout.Slider("Weight", statRange.weight, 0f, 1f);
-                    statRange.minRarity = (ItemRarity)EditorGUILayout.EnumPopup("Min Rarity", statRange.minRarity);
-                    statRange.increaseType = (IncreaseType)EditorGUILayout.EnumPopup("Increase Type", statRange.increaseType);
-                    statRange.sourceType = (SourceType)EditorGUILayout.EnumPopup("Source Type", statRange.sourceType);
+
+                    float newWeight = EditorGUILayout.Slider("Weight", statRange.weight, 0f, 1f);
+                    if (newWeight != statRange.weight)
+                    {
+                        statRange.weight = newWeight;
+                        changed = true;
+                    }
+
+                    IncreaseType newIncreaseType = (IncreaseType)EditorGUILayout.EnumPopup("Increase Type", statRange.increaseType);
+                    if (newIncreaseType != statRange.increaseType)
+                    {
+                        statRange.increaseType = newIncreaseType;
+                        changed = true;
+                    }
 
                     if (GUILayout.Button("Remove Stat Range"))
                     {
-                        CurrentItem.StatRanges.possibleStats.RemoveAt(i);
+                        ItemDataEditorUtility.RemoveStatRange(CurrentItem, i);
                         i--;
+                        changed = true;
                     }
                 }
                 EditorGUILayout.EndVertical();
@@ -571,7 +590,13 @@ public class ItemDataEditorWindow : EditorWindow
 
             if (GUILayout.Button("Add Stat Range"))
             {
-                CurrentItem.StatRanges.possibleStats.Add(new ItemStatRange());
+                ItemDataEditorUtility.AddStatRange(CurrentItem);
+                changed = true;
+            }
+
+            if (changed)
+            {
+                ItemDataEditorUtility.SaveStatRanges(CurrentItem);
             }
         }
         finally
@@ -619,28 +644,21 @@ public class ItemDataEditorWindow : EditorWindow
 
                     // 데이터베이스 새로고침 및 UI 갱신
                     string currentId = CurrentItem.ID;
-                    RefreshItemDatabase();
-                    selectedItemId = currentId;  // 선택된 아이템 유지
+
+                    // 리소스 캐시 클리어 및 리로드
+                    Resources.UnloadUnusedAssets();
+                    EditorApplication.delayCall += () =>
+                    {
+                        RefreshItemDatabase();
+                        selectedItemId = currentId;  // 선택된 아이템 유지
+                        Repaint();  // 윈도우 강제 갱신
+                    };
 
                     // UI 갱신
                     EditorUtility.SetDirty(this);
                     GUI.changed = true;
-                    Repaint();  // 윈도우 강제 갱신
                 }
             }
-        }
-        EditorGUILayout.EndVertical();
-    }
-
-    private void DrawSearchAndFilter()
-    {
-        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-        {
-            searchText = EditorGUILayout.TextField("Search", searchText);
-
-            typeFilter = (ItemType)EditorGUILayout.EnumPopup("Type Filter", typeFilter);
-
-            rarityFilter = (ItemRarity)EditorGUILayout.EnumPopup("Rarity Filter", rarityFilter);
         }
         EditorGUILayout.EndVertical();
     }
@@ -688,16 +706,20 @@ public class ItemDataEditorWindow : EditorWindow
                 $"Are you sure you want to delete '{CurrentItem.Name}'?",
                 "Delete", "Cancel"))
             {
-                itemDatabase.Remove(CurrentItem.ID);
+                string itemId = CurrentItem.ID;
+                ItemDataEditorUtility.DeleteItemData(itemId);
                 selectedItemId = null;
+
+                // 에디터 데이터 새로고침
+                EditorApplication.delayCall += () =>
+                {
+                    RefreshData();
+                    Repaint();
+                };
+
                 EditorUtility.SetDirty(this);
             }
         }
-    }
-
-    private void DrawSearchBar()
-    {
-        searchText = GUILayout.TextField(searchText ?? "", EditorStyles.toolbarSearchField);
     }
 
     private void DrawVerticalLine(Color color)
@@ -716,8 +738,8 @@ public class ItemDataEditorWindow : EditorWindow
             // 데이터베이스 새로고침 전에 현재 선택된 아이템 ID 저장
             string previousSelectedId = selectedItemId;
 
-            // 데이터베이스 새로고침
-            RefreshItemDatabase();
+            // 모든 데이터 새로고침
+            RefreshData();
 
             // 이전에 선택된 아이템이 여전히 존재하는지 확인
             if (!string.IsNullOrEmpty(previousSelectedId) && !itemDatabase.ContainsKey(previousSelectedId))
@@ -775,55 +797,92 @@ public class ItemDataEditorWindow : EditorWindow
 
     private void DrawEffects()
     {
+        if (CurrentItem == null) return;
+
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         try
         {
+            bool changed = false;
             // 효과 개수 범위 설정
             EditorGUILayout.BeginHorizontal();
             {
-                CurrentItem.EffectRanges.minEffectCount = EditorGUILayout.IntField("Effect Count", CurrentItem.EffectRanges.minEffectCount);
-                CurrentItem.EffectRanges.maxEffectCount = EditorGUILayout.IntField("to", CurrentItem.EffectRanges.maxEffectCount);
+                int newMinCount = EditorGUILayout.IntField("Effect Count", CurrentItem.EffectRanges.minEffectCount);
+                int newMaxCount = EditorGUILayout.IntField("to", CurrentItem.EffectRanges.maxEffectCount);
+
+                if (newMinCount != CurrentItem.EffectRanges.minEffectCount || newMaxCount != CurrentItem.EffectRanges.maxEffectCount)
+                {
+                    CurrentItem.EffectRanges.minEffectCount = newMinCount;
+                    CurrentItem.EffectRanges.maxEffectCount = newMaxCount;
+                    changed = true;
+                }
             }
             EditorGUILayout.EndHorizontal();
-
             EditorGUILayout.Space(5);
 
             // 가능한 효과 목록
             EditorGUILayout.LabelField("Possible Effects", EditorStyles.boldLabel);
-
             for (int i = 0; i < CurrentItem.EffectRanges.possibleEffects.Count; i++)
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 {
                     var effectRange = CurrentItem.EffectRanges.possibleEffects[i];
-                    effectRange.effectId = EditorGUILayout.TextField("Effect ID", effectRange.effectId);
-                    effectRange.effectName = EditorGUILayout.TextField("Name", effectRange.effectName);
-                    effectRange.description = EditorGUILayout.TextField("Description", effectRange.description);
-                    effectRange.effectType = (EffectType)EditorGUILayout.EnumPopup("Type", effectRange.effectType);
+
+                    string newEffectId = EditorGUILayout.TextField("Effect ID", effectRange.effectId);
+                    if (newEffectId != effectRange.effectId)
+                    {
+                        effectRange.effectId = newEffectId;
+                        changed = true;
+                    }
+
+                    string newEffectName = EditorGUILayout.TextField("Name", effectRange.effectName);
+                    if (newEffectName != effectRange.effectName)
+                    {
+                        effectRange.effectName = newEffectName;
+                        changed = true;
+                    }
+
+                    string newDescription = EditorGUILayout.TextField("Description", effectRange.description);
+                    if (newDescription != effectRange.description)
+                    {
+                        effectRange.description = newDescription;
+                        changed = true;
+                    }
+
+                    EffectType newEffectType = (EffectType)EditorGUILayout.EnumPopup("Type", effectRange.effectType);
+                    if (newEffectType != effectRange.effectType)
+                    {
+                        effectRange.effectType = newEffectType;
+                        changed = true;
+                    }
 
                     EditorGUILayout.BeginHorizontal();
                     {
-                        effectRange.minValue = EditorGUILayout.FloatField("Value Range", effectRange.minValue);
-                        effectRange.maxValue = EditorGUILayout.FloatField("to", effectRange.maxValue);
+                        float newMinValue = EditorGUILayout.FloatField("Value Range", effectRange.minValue);
+                        float newMaxValue = EditorGUILayout.FloatField("to", effectRange.maxValue);
+                        if (newMinValue != effectRange.minValue || newMaxValue != effectRange.maxValue)
+                        {
+                            effectRange.minValue = newMinValue;
+                            effectRange.maxValue = newMaxValue;
+                            changed = true;
+                        }
                     }
                     EditorGUILayout.EndHorizontal();
 
-                    effectRange.weight = EditorGUILayout.Slider("Weight", effectRange.weight, 0f, 1f);
-                    effectRange.minRarity = (ItemRarity)EditorGUILayout.EnumPopup("Min Rarity", effectRange.minRarity);
+                    float newWeight = EditorGUILayout.Slider("Weight", effectRange.weight, 0f, 1f);
+                    if (newWeight != effectRange.weight)
+                    {
+                        effectRange.weight = newWeight;
+                        changed = true;
+                    }
 
-                    // 적용 가능한 아이템 타입
-                    DrawApplicableItemTypes(effectRange);
-
-                    // 적용 가능한 스킬 타입
-                    DrawApplicableSkillTypes(effectRange);
-
-                    // 적용 가능한 속성
-                    DrawApplicableElementTypes(effectRange);
+                    DrawApplicableSkillTypes(effectRange, ref changed);
+                    DrawApplicableElementTypes(effectRange, ref changed);
 
                     if (GUILayout.Button("Remove Effect Range"))
                     {
-                        CurrentItem.EffectRanges.possibleEffects.RemoveAt(i);
+                        ItemDataEditorUtility.RemoveEffectRange(CurrentItem, i);
                         i--;
+                        changed = true;
                     }
                 }
                 EditorGUILayout.EndVertical();
@@ -831,7 +890,13 @@ public class ItemDataEditorWindow : EditorWindow
 
             if (GUILayout.Button("Add Effect Range"))
             {
-                CurrentItem.EffectRanges.possibleEffects.Add(new ItemEffectRange());
+                ItemDataEditorUtility.AddEffectRange(CurrentItem);
+                changed = true;
+            }
+
+            if (changed)
+            {
+                ItemDataEditorUtility.SaveEffects(CurrentItem);
             }
         }
         finally
@@ -840,75 +905,32 @@ public class ItemDataEditorWindow : EditorWindow
         }
     }
 
-    private void DrawApplicableItemTypes(ItemEffectRange effectRange)
+    private void DrawApplicableSkillTypes(ItemEffectRange effectRange, ref bool changed)
     {
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
-            EditorGUILayout.LabelField("Applicable Item Types", EditorStyles.boldLabel);
-
-            if (effectRange.applicableTypes == null)
-                effectRange.applicableTypes = new ItemType[0];
-
-            var itemTypes = System.Enum.GetValues(typeof(ItemType));
-
-            foreach (ItemType itemType in itemTypes)
-            {
-                bool isSelected = System.Array.IndexOf(effectRange.applicableTypes, itemType) != -1;
-
-                bool newValue = EditorGUILayout.Toggle(itemType.ToString(), isSelected);
-
-                if (newValue != isSelected)
-                {
-                    var list = new List<ItemType>(effectRange.applicableTypes);
-
-                    if (newValue)
-                        list.Add(itemType);
-                    else
-                        list.Remove(itemType);
-
-                    effectRange.applicableTypes = list.ToArray();
-                }
-            }
-        }
-        EditorGUILayout.EndVertical();
-    }
-
-    private void DrawApplicableSkillTypes(ItemEffectRange effectRange)
-    {
-        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-        {
-
             EditorGUILayout.LabelField("Applicable Skill Types", EditorStyles.boldLabel);
 
             if (effectRange.applicableSkills == null)
                 effectRange.applicableSkills = new SkillType[0];
 
             var skillTypes = System.Enum.GetValues(typeof(SkillType));
-
             foreach (SkillType skillType in skillTypes)
             {
-
                 bool isSelected = System.Array.IndexOf(effectRange.applicableSkills, skillType) != -1;
-
                 bool newValue = EditorGUILayout.Toggle(skillType.ToString(), isSelected);
 
                 if (newValue != isSelected)
                 {
-                    var list = new List<SkillType>(effectRange.applicableSkills);
-
-                    if (newValue)
-                        list.Add(skillType);
-                    else
-                        list.Remove(skillType);
-
-                    effectRange.applicableSkills = list.ToArray();
+                    ItemDataEditorUtility.UpdateSkillTypes(effectRange, skillType, newValue);
+                    changed = true;
                 }
             }
         }
         EditorGUILayout.EndVertical();
     }
 
-    private void DrawApplicableElementTypes(ItemEffectRange effectRange)
+    private void DrawApplicableElementTypes(ItemEffectRange effectRange, ref bool changed)
     {
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
@@ -918,22 +940,15 @@ public class ItemDataEditorWindow : EditorWindow
                 effectRange.applicableElements = new ElementType[0];
 
             var elementTypes = System.Enum.GetValues(typeof(ElementType));
-
             foreach (ElementType elementType in elementTypes)
             {
                 bool isSelected = System.Array.IndexOf(effectRange.applicableElements, elementType) != -1;
-
                 bool newValue = EditorGUILayout.Toggle(elementType.ToString(), isSelected);
 
                 if (newValue != isSelected)
                 {
-                    var list = new List<ElementType>(effectRange.applicableElements);
-
-                    if (newValue)
-                        list.Add(elementType);
-                    else
-                        list.Remove(elementType);
-                    effectRange.applicableElements = list.ToArray();
+                    ItemDataEditorUtility.UpdateElementTypes(effectRange, elementType, newValue);
+                    changed = true;
                 }
             }
         }

@@ -12,7 +12,6 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
     private PlayerStatData currentPlayerStatData;
     private InventoryData currentInventoryData;
     private LevelData currentLevelData = new LevelData { level = 1, exp = 0f };
-    private BackupManager backupManager;
 
     public new bool IsInitialized { get; private set; }
     public PlayerStatData CurrentPlayerStatData => currentPlayerStatData;
@@ -49,7 +48,6 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
 
     protected override void InitializeManagers()
     {
-        backupManager = new BackupManager();
     }
 
     protected override void CreateResourceFolders()
@@ -87,23 +85,14 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
         currentInventoryData = new InventoryData();
     }
 
-    protected override BackupManager GetBackupManager()
-    {
-        return backupManager;
-    }
-
     public override void SaveWithBackup()
     {
-        if (backupManager != null)
         {
             try
             {
                 if (!Directory.Exists(SAVE_PATH))
-                {
-                    CreateResourceFolders();
-                }
-                backupManager.CreateBackup(SAVE_PATH);
-                Debug.Log($"Backup created at: {SAVE_PATH}");
+                    Directory.CreateDirectory(SAVE_PATH);
+                BackupIO.CreateBackup(SAVE_PATH);
             }
             catch (System.Exception e)
             {
@@ -112,7 +101,7 @@ public class PlayerDataManager : DataManager<PlayerDataManager>, IInitializable
         }
     }
 
-    public override void ClearAllData()
+    public override void ClearAllRuntimeData()
     {
         currentPlayerStatData = null;
         currentPlayerStatData = ScriptableObject.CreateInstance<PlayerStatData>();

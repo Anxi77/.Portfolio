@@ -9,11 +9,8 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 {
     public new bool IsInitialized { get; private set; }
 
-    private CSVManager<SkillStatData> statManager;
-    private BackupManager backupManager;
     private DataValidator dataValidator;
 
-    // 스킬 시스템 전용 경로 상수
     private const string RESOURCE_PATH = "SkillData";
     private const string PREFAB_PATH = "SkillData/Prefabs";
     private const string ICON_PATH = "SkillData/Icons";
@@ -31,7 +28,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
         base.Awake();
     }
 
-    public void Initialize()
+    public override void Initialize()
     {
         if (Application.isEditor && !Application.isPlaying)
         {
@@ -322,7 +319,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
         }
     }
 
-    protected override void InitializeManagers()
+    protected void InitializeManagers()
     {
         try
         {
@@ -331,8 +328,6 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
             // 각 매니저 초기화 전에 폴더 생성 확인
             CreateResourceFolders();
 
-            statManager = new CSVManager<SkillStatData>(STAT_PATH);
-            backupManager = new BackupManager();
             dataValidator = new DataValidator();
 
             // 데이터베이스 초기화
@@ -351,7 +346,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
         }
     }
 
-    protected override void CreateResourceFolders()
+    protected void CreateResourceFolders()
     {
         string resourcesPath = Path.Combine(Application.dataPath, "Resources");
         string[] paths = new string[]
@@ -377,7 +372,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 #endif
     }
 
-    protected override void CreateDefaultFiles()
+    protected void CreateDefaultFiles()
     {
         CreateDefaultCSVFiles();
     }
@@ -387,12 +382,6 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
         try
         {
             Debug.Log("Creating default CSV files...");
-
-            if (statManager == null)
-            {
-                Debug.LogWarning("StatManager was null, initializing...");
-                statManager = new CSVManager<SkillStatData>(STAT_PATH);
-            }
 
             // 각 스킬 타입별 고유한 헤더 정의
             var baseHeaders = new string[] {
@@ -442,13 +431,13 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 
             // 헤더를 직접 문자열로 전달
             Debug.Log("Creating ProjectileSkillStats file...");
-            statManager.CreateDefaultFile("ProjectileSkillStats", string.Join(",", projectileHeaders));
+            CSVIO<SkillStatData>.CreateDefaultFile("ProjectileSkillStats", string.Join(",", projectileHeaders));
 
             Debug.Log("Creating AreaSkillStats file...");
-            statManager.CreateDefaultFile("AreaSkillStats", string.Join(",", areaHeaders));
+            CSVIO<SkillStatData>.CreateDefaultFile("AreaSkillStats", string.Join(",", areaHeaders));
 
             Debug.Log("Creating PassiveSkillStats file...");
-            statManager.CreateDefaultFile("PassiveSkillStats", string.Join(",", passiveHeaders));
+            CSVIO<SkillStatData>.CreateDefaultFile("PassiveSkillStats", string.Join(",", passiveHeaders));
 
             Debug.Log("Successfully created all default CSV files");
         }
@@ -459,12 +448,8 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
         }
     }
 
-    protected override BackupManager GetBackupManager()
-    {
-        return backupManager;
-    }
 #if UNITY_EDITOR
-    public override void ClearAllData()
+    public void ClearAllRuntimeData()
     {
         // 에디터 모드이면서 플레이 모드 아닐  데이터 제 용
         if (Application.isEditor && !Application.isPlaying)
@@ -473,9 +458,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
             if (EditorWindow.focusedWindow != null &&
                 EditorWindow.focusedWindow.GetType().Name == "SkillDataEditorWindow")
             {
-                base.ClearAllData();
-
-                statManager?.ClearAll();
+                CSVIO<SkillStatData>.ClearAll();
                 JSONIO<SkillData>.ClearAll();
 
                 skillDatabase?.Clear();
@@ -838,7 +821,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
             if (EditorWindow.focusedWindow != null &&
                 EditorWindow.focusedWindow.GetType().Name == "SkillDataEditorWindow")
             {
-                ClearAllData();
+                ClearAllRuntimeData();
                 Debug.Log("Cleaned up skill data from editor window close");
             }
         }

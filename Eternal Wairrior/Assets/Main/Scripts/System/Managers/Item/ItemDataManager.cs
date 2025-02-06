@@ -1,101 +1,23 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System;
 using Newtonsoft.Json;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
-public class ItemDataManager : MonoBehaviour, IInitializable
+public class ItemDataManager : DataManager<ItemDataManager>
 {
-    #region Singleton
-    private static ItemDataManager instance;
-    public static ItemDataManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                instance = FindObjectOfType<ItemDataManager>();
-                if (instance == null)
-                {
-                    var go = new GameObject("ItemDataManager");
-                    instance = go.AddComponent<ItemDataManager>();
-                }
-            }
-            return instance;
-        }
-    }
-
-    private void Awake()
-    {
-        if (instance != null && instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
-    #endregion
-
     #region Constants
     private const string ITEM_DB_PATH = "Items/Database";
     private const string DROP_TABLES_PATH = "Items/DropTables";
     #endregion
 
     #region Fields
-    private Dictionary<string, ItemData> itemDatabase = new();
-    private Dictionary<EnemyType, DropTableData> dropTables = new();
-    private bool isInitialized;
+    public Dictionary<string, ItemData> itemDatabase = new();
+    public Dictionary<EnemyType, DropTableData> dropTables = new();
     #endregion
 
-    #region Properties
-    public bool IsInitialized => isInitialized;
-    #endregion
-
-    #region Serialization Classes
-
-    [Serializable]
-    public class SerializableItemList
-    {
-        public List<ItemData> items = new();
-    }
-
-    [Serializable]
-    public class SerializableDropTableEntry
-    {
-        public EnemyType enemyType;
-        public float guaranteedDropRate;
-        public int maxDrops;
-        public List<DropTableEntry> dropEntries = new();
-    }
-    #endregion
-
-    #region Initialization
-    public void Initialize()
-    {
-        if (!isInitialized)
-        {
-            try
-            {
-                Debug.Log("Initializing ItemDataManager...");
-                LoadAllData();
-                isInitialized = true;
-                Debug.Log("ItemDataManager initialized successfully");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Error initializing ItemDataManager: {e.Message}");
-                isInitialized = false;
-            }
-        }
-    }
-
-    private void LoadAllData()
+    #region Data Loading
+    protected override void LoadRuntimeData()
     {
         try
         {
@@ -107,9 +29,7 @@ public class ItemDataManager : MonoBehaviour, IInitializable
             Debug.LogError($"Error loading data: {e.Message}");
         }
     }
-    #endregion
 
-    #region Data Loading
     private void LoadItemDatabase()
     {
         try
@@ -117,7 +37,7 @@ public class ItemDataManager : MonoBehaviour, IInitializable
             var jsonAsset = Resources.Load<TextAsset>($"{ITEM_DB_PATH}/ItemDatabase");
             if (jsonAsset != null)
             {
-                var serializableData = JsonUtility.FromJson<SerializableItemList>(jsonAsset.text);
+                var serializableData = JsonConvert.DeserializeObject<SerializableItemList>(jsonAsset.text);
                 if (serializableData?.items != null)
                 {
                     itemDatabase = serializableData.items.ToDictionary(item => item.ID);
@@ -132,7 +52,7 @@ public class ItemDataManager : MonoBehaviour, IInitializable
                 Debug.LogError($"ItemDatabase.json not found at path: Resources/{ITEM_DB_PATH}/ItemDatabase");
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error loading item database: {e.Message}\n{e.StackTrace}");
         }
@@ -145,7 +65,7 @@ public class ItemDataManager : MonoBehaviour, IInitializable
             var jsonAsset = Resources.Load<TextAsset>($"{DROP_TABLES_PATH}/DropTables");
             if (jsonAsset != null)
             {
-                var wrapper = JsonUtility.FromJson<DropTablesWrapper>(jsonAsset.text);
+                var wrapper = JsonConvert.DeserializeObject<DropTablesWrapper>(jsonAsset.text);
                 dropTables = wrapper.dropTables.ToDictionary(dt => dt.enemyType);
             }
             else
@@ -191,10 +111,4 @@ public class ItemDataManager : MonoBehaviour, IInitializable
         return new Dictionary<EnemyType, DropTableData>(dropTables);
     }
     #endregion
-}
-
-[System.Serializable]
-public class DropTablesWrapper
-{
-    public List<DropTableData> dropTables = new();
 }

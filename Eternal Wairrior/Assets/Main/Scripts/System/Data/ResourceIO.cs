@@ -115,84 +115,47 @@ public static class ResourceIO<T> where T : UnityEngine.Object
         {
             Debug.Log($"SaveSprite called with path: {path}");
 
-            string directory = Path.GetDirectoryName(path);
+            string sourcePath = AssetDatabase.GetAssetPath(sprite);
+            if (string.IsNullOrEmpty(sourcePath))
+            {
+                Debug.LogError("Source sprite path is null or empty");
+                return;
+            }
+
+            // Resources 폴더 내 경로 구성
+            string targetPath = $"Assets/Resources/{path}.png";
+            string directory = Path.GetDirectoryName(targetPath);
+
+            // 디렉토리 생성
             if (!Directory.Exists(directory))
             {
-                Debug.Log($"Creating directory: {directory}");
                 Directory.CreateDirectory(directory);
             }
 
-            // 텍스처 파일 경로 가져오기
-            string texturePath = AssetDatabase.GetAssetPath(sprite.texture);
-            Debug.Log($"Texture path: {texturePath}");
-
-            // 파일이 존재하면 복사
-            if (File.Exists(texturePath))
+            // 기존 파일이 있다면 삭제
+            if (File.Exists(targetPath))
             {
-                Debug.Log($"Copying sprite from {texturePath} to {path}");
-                File.Copy(texturePath, path, true);
-                Debug.Log($"Copied sprite from {texturePath} to {path}");
+                AssetDatabase.DeleteAsset(targetPath);
+            }
+
+            // 파일 복사
+            bool success = AssetDatabase.CopyAsset(sourcePath, targetPath);
+            if (success)
+            {
+                // 스프라이트 설정 적용
+                TextureImporter importer = AssetImporter.GetAtPath(targetPath) as TextureImporter;
+                if (importer != null)
+                {
+                    importer.textureType = TextureImporterType.Sprite;
+                    importer.spriteImportMode = SpriteImportMode.Single;
+                    importer.SaveAndReimport();
+                }
+
+                Debug.Log($"Successfully saved sprite to: {targetPath}");
             }
             else
             {
-                Debug.Log($"Creating new texture from sprite");
-                // 텍스처 임포터 설정 변경
-                TextureImporter importer = AssetImporter.GetAtPath(texturePath) as TextureImporter;
-                if (importer != null)
-                {
-                    bool originalReadable = importer.isReadable;
-                    TextureImporterCompression originalCompression = importer.textureCompression;
-
-                    try
-                    {
-                        importer.isReadable = true;
-                        importer.textureCompression = TextureImporterCompression.Uncompressed;
-                        importer.SaveAndReimport();
-                        Debug.Log("Texture importer settings updated");
-
-                        // 스프라이트의 실제 크기로 새 텍스처 생성
-                        Rect spriteRect = sprite.rect;
-                        Texture2D tempTexture = new Texture2D(
-                            (int)spriteRect.width,
-                            (int)spriteRect.height,
-                            TextureFormat.RGBA32,
-                            false);
-
-                        // 스프라이트의 픽셀 데이터를 새로 복사
-                        var pixels = sprite.texture.GetPixels(
-                            (int)spriteRect.x,
-                            (int)spriteRect.y,
-                            (int)spriteRect.width,
-                            (int)spriteRect.height);
-                        tempTexture.SetPixels(pixels);
-                        tempTexture.Apply();
-
-                        byte[] bytes = tempTexture.EncodeToPNG();
-                        if (bytes != null && bytes.Length > 0)
-                        {
-                            File.WriteAllBytes(path, bytes);
-                            Debug.Log($"Saved sprite to: {path}");
-                        }
-                        else
-                        {
-                            Debug.LogError("Failed to encode texture to PNG");
-                        }
-
-                        Object.DestroyImmediate(tempTexture);
-                    }
-                    finally
-                    {
-                        // 원래 설정 복구
-                        importer.isReadable = originalReadable;
-                        importer.textureCompression = originalCompression;
-                        importer.SaveAndReimport();
-                        Debug.Log("Texture importer settings restored");
-                    }
-                }
-                else
-                {
-                    Debug.LogError($"Could not get TextureImporter for sprite: {texturePath}");
-                }
+                Debug.LogError($"Failed to copy sprite from {sourcePath} to {targetPath}");
             }
 
             AssetDatabase.Refresh();

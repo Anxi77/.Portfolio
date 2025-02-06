@@ -1,28 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System;
+using Random = UnityEngine.Random;
 
 public class ItemGenerator : MonoBehaviour
 {
-    private Dictionary<string, ItemData> itemDatabase;
-    private System.Random random = new System.Random();
-
-    public ItemGenerator(Dictionary<string, ItemData> database)
-    {
-        itemDatabase = database;
-    }
-
     public ItemData GenerateItem(string itemId, ItemRarity? targetRarity = null)
     {
-        if (!itemDatabase.TryGetValue(itemId, out var baseItem))
-        {
-            Debug.LogError($"Item not found in database: {itemId}");
-            return null;
-        }
+        var newItem = ItemDataManager.Instance.itemDatabase[itemId].Clone();
 
-        var newItem = baseItem.Clone();
-
-        // ���Ƽ ����
         if (targetRarity.HasValue)
         {
             newItem.Rarity = targetRarity.Value;
@@ -30,10 +17,8 @@ public class ItemGenerator : MonoBehaviour
 
         Debug.Log($"Generating item: {newItem.Name} with rarity: {newItem.Rarity}");
 
-        // ���� ����
         GenerateStats(newItem);
 
-        // ����Ʈ ����
         GenerateEffects(newItem);
 
         return newItem;
@@ -49,9 +34,8 @@ public class ItemGenerator : MonoBehaviour
 
         item.Stats.Clear();
 
-        // Ƽ  ߰   
         int additionalStats = item.StatRanges.additionalStatsByRarity.GetValueOrDefault(item.Rarity, 0);
-        int statCount = random.Next(
+        int statCount = Random.Range(
             item.StatRanges.minStatCount,
             Mathf.Min(item.StatRanges.maxStatCount + additionalStats + 1,
                      item.StatRanges.possibleStats.Count)
@@ -59,9 +43,7 @@ public class ItemGenerator : MonoBehaviour
 
         Debug.Log($"Generating {statCount} stats for item {item.ID}");
 
-        // ����ġ ��� ���� ����
         var availableStats = item.StatRanges.possibleStats
-            .Where(stat => stat.minRarity <= item.Rarity)
             .ToList();
 
         for (int i = 0; i < statCount && availableStats.Any(); i++)
@@ -74,7 +56,7 @@ public class ItemGenerator : MonoBehaviour
                 {
                     statType = selectedStat.statType,
                     amount = value,
-                    sourceType = selectedStat.sourceType
+                    sourceType = (SourceType)Enum.Parse(typeof(SourceType), item.Type.ToString())
                 });
 
                 Debug.Log($"Added stat: {selectedStat.statType} = {value}");
@@ -93,9 +75,8 @@ public class ItemGenerator : MonoBehaviour
 
         item.Effects.Clear();
 
-        // Ƽ  ߰ Ʈ  
         int additionalEffects = item.EffectRanges.additionalEffectsByRarity.GetValueOrDefault(item.Rarity, 0);
-        int effectCount = random.Next(
+        int effectCount = Random.Range(
             item.EffectRanges.minEffectCount,
             Mathf.Min(item.EffectRanges.maxEffectCount + additionalEffects + 1,
                      item.EffectRanges.possibleEffects.Count)
@@ -103,9 +84,7 @@ public class ItemGenerator : MonoBehaviour
 
         Debug.Log($"Generating {effectCount} effects for item {item.ID}");
 
-        // ����ġ ��� ����Ʈ ����
         var availableEffects = item.EffectRanges.possibleEffects
-            .Where(effect => effect.minRarity <= item.Rarity)
             .ToList();
 
         for (int i = 0; i < effectCount && availableEffects.Any(); i++)
@@ -120,7 +99,6 @@ public class ItemGenerator : MonoBehaviour
                     effectName = selectedEffect.effectName,
                     effectType = selectedEffect.effectType,
                     value = value,
-                    applicableTypes = selectedEffect.applicableTypes,
                     applicableSkills = selectedEffect.applicableSkills,
                     applicableElements = selectedEffect.applicableElements
                 };
@@ -135,7 +113,7 @@ public class ItemGenerator : MonoBehaviour
     private ItemStatRange SelectStatByWeight(List<ItemStatRange> stats)
     {
         float totalWeight = stats.Sum(s => s.weight);
-        float randomValue = (float)(random.NextDouble() * totalWeight);
+        float randomValue = (float)(Random.value * totalWeight);
 
         float currentWeight = 0;
         foreach (var stat in stats)
@@ -153,7 +131,7 @@ public class ItemGenerator : MonoBehaviour
     private ItemEffectRange SelectEffectByWeight(List<ItemEffectRange> effects)
     {
         float totalWeight = effects.Sum(e => e.weight);
-        float randomValue = (float)(random.NextDouble() * totalWeight);
+        float randomValue = (float)(Random.value * totalWeight);
 
         float currentWeight = 0;
         foreach (var effect in effects)
@@ -170,13 +148,11 @@ public class ItemGenerator : MonoBehaviour
 
     private float GenerateStatValue(ItemStatRange statRange, ItemRarity rarity)
     {
-        float baseValue = (float)(random.NextDouble() * (statRange.maxValue - statRange.minValue) + statRange.minValue);
+        float baseValue = (float)(Random.value * (statRange.maxValue - statRange.minValue) + statRange.minValue);
 
-        // ���Ƽ�� ���� �� ����
         float rarityMultiplier = 1 + ((int)rarity * 0.2f);
         float finalValue = baseValue * rarityMultiplier;
 
-        // ���� Ÿ�Կ� ���� ó��
         switch (statRange.increaseType)
         {
             case IncreaseType.Add:
@@ -192,7 +168,7 @@ public class ItemGenerator : MonoBehaviour
 
     private float GenerateEffectValue(ItemEffectRange effectRange, ItemRarity rarity)
     {
-        float baseValue = (float)(random.NextDouble() * (effectRange.maxValue - effectRange.minValue) + effectRange.minValue);
+        float baseValue = (float)(Random.value * (effectRange.maxValue - effectRange.minValue) + effectRange.minValue);
         float rarityMultiplier = 1 + ((int)rarity * 0.2f);
         return baseValue * rarityMultiplier;
     }
@@ -208,8 +184,7 @@ public class ItemGenerator : MonoBehaviour
         var drops = new List<ItemData>();
         int dropCount = 0;
 
-        // ����� ��� üũ
-        if (random.NextDouble() < dropTable.guaranteedDropRate)
+        if (Random.value < dropTable.guaranteedDropRate)
         {
             var guaranteedDrop = GenerateGuaranteedDrop(dropTable);
             if (guaranteedDrop != null)
@@ -219,19 +194,17 @@ public class ItemGenerator : MonoBehaviour
             }
         }
 
-        // �Ϲ� ��� ����
         foreach (var entry in dropTable.dropEntries)
         {
             if (dropCount >= dropTable.maxDrops) break;
 
             float adjustedDropRate = entry.dropRate * luckMultiplier;
-            if (random.NextDouble() < adjustedDropRate)
+            if (Random.value < adjustedDropRate)
             {
                 var item = GenerateItem(entry.itemId, entry.rarity);
                 if (item != null)
                 {
-                    // ������ ���� ����
-                    item.amount = random.Next(entry.minAmount, entry.maxAmount + 1);
+                    item.amount = Random.Range(entry.minAmount, entry.maxAmount + 1);
                     drops.Add(item);
                     dropCount++;
                     Debug.Log($"Generated drop: {item.Name} x{item.amount}");
@@ -244,11 +217,9 @@ public class ItemGenerator : MonoBehaviour
 
     private ItemData GenerateGuaranteedDrop(DropTableData dropTable)
     {
-        // ����ġ �հ� ���
         float totalWeight = dropTable.dropEntries.Sum(entry => entry.dropRate);
-        float randomValue = (float)(random.NextDouble() * totalWeight);
+        float randomValue = Random.value * totalWeight;
 
-        // ����ġ ��� ������ ����
         float currentWeight = 0;
         foreach (var entry in dropTable.dropEntries)
         {
@@ -258,7 +229,7 @@ public class ItemGenerator : MonoBehaviour
                 var item = GenerateItem(entry.itemId, entry.rarity);
                 if (item != null)
                 {
-                    item.amount = random.Next(entry.minAmount, entry.maxAmount + 1);
+                    item.amount = Random.Range(entry.minAmount, entry.maxAmount + 1);
                     Debug.Log($"Generated guaranteed drop: {item.Name} x{item.amount}");
                     return item;
                 }

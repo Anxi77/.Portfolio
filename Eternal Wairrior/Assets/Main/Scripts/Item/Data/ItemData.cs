@@ -7,6 +7,35 @@ using System;
 using Newtonsoft.Json;
 
 [Serializable]
+public enum ItemType
+{
+    None,
+    Weapon,
+    Armor,
+    Accessory,
+    Consumable,
+    Material
+}
+
+[Serializable]
+public enum AccessoryType
+{
+    None,
+    Necklace,
+    Ring
+}
+
+[Serializable]
+public enum ItemRarity
+{
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary,
+}
+
+[Serializable]
 public class ItemData
 {
     // 기본 아이템 데이터
@@ -20,7 +49,6 @@ public class ItemData
     [JsonProperty] public float DropRate { get; set; }
     [JsonProperty] public int MinAmount { get; set; } = 1;
     [JsonProperty] public int MaxAmount { get; set; } = 1;
-    [JsonProperty] public List<StatType> BaseStatTypes { get; set; } = new();
     [JsonProperty] public string IconPath { get; set; }
     [JsonProperty] public ItemStatRangeData StatRanges { get; set; } = new();
     [JsonProperty] public List<StatContainer> Stats { get; set; } = new();
@@ -89,3 +117,179 @@ public class ItemData
     }
     #endregion
 }
+
+[Serializable]
+public class ItemEffectData
+{
+    public string effectId;
+    public string effectName;
+    public EffectType effectType;
+    public float value;
+    public ItemRarity minRarity;
+    public ItemType[] applicableTypes;
+    public SkillType[] applicableSkills;
+    public ElementType[] applicableElements;
+
+    public bool CanApplyTo(ItemData item, SkillType skillType = SkillType.None, ElementType element = ElementType.None)
+    {
+        if (item.Rarity < minRarity) return false;
+        if (applicableTypes != null && !applicableTypes.Contains(item.Type)) return false;
+        if (skillType != SkillType.None && applicableSkills != null && !applicableSkills.Contains(skillType)) return false;
+        if (element != ElementType.None && applicableElements != null && !applicableElements.Contains(element)) return false;
+        return true;
+    }
+}
+
+[Serializable]
+public enum EffectType
+{
+    None,
+    DamageBonus,
+    CooldownReduction,
+    ProjectileSpeed,
+    ProjectileRange,
+    HomingEffect,
+    AreaRadius,
+    AreaDuration,
+    ElementalPower
+}
+
+[Serializable]
+public class SerializableItemList
+{
+    public List<ItemData> items = new();
+}
+
+[Serializable]
+public class ItemEffectRange
+{
+    public string effectId;
+    public string effectName;
+    public string description;
+    public EffectType effectType;
+    public float minValue;
+    public float maxValue;
+    public float weight = 1f;
+    public SkillType[] applicableSkills;
+    public ElementType[] applicableElements;
+}
+
+[Serializable]
+public class ItemEffectRangeData
+{
+    public string itemId;
+    public ItemType itemType;
+    public List<ItemEffectRange> possibleEffects = new List<ItemEffectRange>();
+    public int minEffectCount = 1;
+    public int maxEffectCount = 3;
+
+    public Dictionary<ItemRarity, int> additionalEffectsByRarity = new Dictionary<ItemRarity, int>
+    {
+        { ItemRarity.Common, 0 },
+        { ItemRarity.Uncommon, 1 },
+        { ItemRarity.Rare, 2 },
+        { ItemRarity.Epic, 3 },
+        { ItemRarity.Legendary, 4 }
+    };
+}
+
+[Serializable]
+public class ItemStatData
+{
+    public float damage;
+    public float defense;
+    public float hp;
+    public float moveSpeed;
+    public float attackSpeed;
+    public float attackRange;
+    public float hpRegen;
+
+    public float criticalChance;
+    public float criticalDamage;
+    public float lifeSteal;
+    public float reflectDamage;
+    public float dodgeChance;
+
+    public List<StatContainer> ConvertToStatContainers()
+    {
+        var containers = new List<StatContainer>();
+
+        if (damage > 0) containers.Add(new StatContainer(StatType.Damage, SourceType.Weapon, IncreaseType.Add, damage));
+        if (defense > 0) containers.Add(new StatContainer(StatType.Defense, SourceType.Armor, IncreaseType.Add, defense));
+        if (hp > 0) containers.Add(new StatContainer(StatType.MaxHp, SourceType.Armor, IncreaseType.Add, hp));
+        if (moveSpeed > 0) containers.Add(new StatContainer(StatType.MoveSpeed, SourceType.Accessory, IncreaseType.Mul, moveSpeed));
+        if (attackSpeed > 0) containers.Add(new StatContainer(StatType.AttackSpeed, SourceType.Weapon, IncreaseType.Mul, attackSpeed));
+        if (attackRange > 0) containers.Add(new StatContainer(StatType.AttackRange, SourceType.Weapon, IncreaseType.Mul, attackRange));
+        if (hpRegen > 0) containers.Add(new StatContainer(StatType.HpRegenRate, SourceType.Accessory, IncreaseType.Add, hpRegen));
+
+        if (criticalChance > 0) containers.Add(new StatContainer(StatType.CriticalChance, SourceType.Weapon, IncreaseType.Add, criticalChance));
+        if (criticalDamage > 0) containers.Add(new StatContainer(StatType.CriticalDamage, SourceType.Weapon, IncreaseType.Add, criticalDamage));
+        if (lifeSteal > 0) containers.Add(new StatContainer(StatType.LifeSteal, SourceType.Weapon, IncreaseType.Add, lifeSteal));
+        if (reflectDamage > 0) containers.Add(new StatContainer(StatType.ReflectDamage, SourceType.Armor, IncreaseType.Add, reflectDamage));
+        if (dodgeChance > 0) containers.Add(new StatContainer(StatType.DodgeChance, SourceType.Accessory, IncreaseType.Add, dodgeChance));
+
+        return containers;
+    }
+}
+
+[Serializable]
+public class ItemStatRange
+{
+    public StatType statType;
+    public float minValue;
+    public float maxValue;
+    public float weight = 1f;
+    public IncreaseType increaseType = IncreaseType.Add;
+}
+
+[Serializable]
+public class ItemStatRangeData
+{
+    public List<ItemStatRange> possibleStats = new();
+    public int minStatCount = 1;
+    public int maxStatCount = 4;
+
+    public Dictionary<ItemRarity, int> additionalStatsByRarity = new()
+    {
+        { ItemRarity.Common, 0 },
+        { ItemRarity.Uncommon, 1 },
+        { ItemRarity.Rare, 2 },
+        { ItemRarity.Epic, 3 },
+        { ItemRarity.Legendary, 4 }
+    };
+}
+
+[Serializable]
+public class DropTableData
+{
+    [SerializeField]
+    public EnemyType enemyType;
+    [SerializeField]
+    public List<DropTableEntry> dropEntries = new();
+    [SerializeField]
+    public float guaranteedDropRate = 0.1f;
+    [SerializeField]
+    public int maxDrops = 3;
+}
+
+[Serializable]
+public class DropTableEntry
+{
+    [SerializeField]
+    public string itemId;
+    [SerializeField]
+    public float dropRate;
+    [SerializeField]
+    public ItemRarity rarity;
+    [SerializeField]
+    public int minAmount = 1;
+    [SerializeField]
+    public int maxAmount = 1;
+}
+
+[Serializable]
+public class DropTablesWrapper
+{
+    public List<DropTableData> dropTables = new();
+}
+

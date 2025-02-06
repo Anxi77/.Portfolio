@@ -1,3 +1,6 @@
+using System;
+
+[Serializable]
 public enum ElementType
 {
     None = 0,
@@ -7,13 +10,15 @@ public enum ElementType
     Earth    // Can stun targets
 }
 
+[Serializable]
 public enum EquipmentSlot
 {
     None,
     Weapon,
     Armor,
-    Necklace,   // ¸ñ°ÉÀÌ ½½·Ô
-    Ring1,      // ¹ÝÁö ½½·Ô 1
-    Ring2,      // ¹ÝÁö ½½·Ô 2
+    Necklace,
+    Ring1,
+    Ring2,
     Special
 }
+

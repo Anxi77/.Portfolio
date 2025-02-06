@@ -4,33 +4,28 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-public class BackupManager
+public static class BackupIO
 {
     private const string BACKUP_PATH = "Backups";
     private const int MAX_BACKUPS = 5;
 
-    // ¹é¾÷ÀÌ ÇÊ¿äÇÑ ÆÄÀÏ È®ÀåÀÚ ÁöÁ¤
-    private readonly string[] BACKUP_EXTENSIONS = new string[]
+    private static readonly string[] BACKUP_EXTENSIONS = new string[]
     {
-        ".json",    // °ÔÀÓ ¼¼ÀÌºê µ¥ÀÌÅÍ
-        ".csv",     // »ç¿ëÀÚ Á¤ÀÇ µ¥ÀÌÅÍ
-        // ÇÊ¿äÇÑ ´Ù¸¥ È®ÀåÀÚ Ãß°¡
+        ".json",
+        ".csv",
     };
 
-    public void CreateBackup(string sourcePath)
+    public static void CreateBackup(string sourcePath)
     {
         try
         {
             string timestamp = System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
             string backupPath = Path.Combine(Application.dataPath, BACKUP_PATH, timestamp);
 
-            // ¹é¾÷ µð·ºÅä¸® »ý¼º
             Directory.CreateDirectory(backupPath);
 
-            // ¸ðµç µ¥ÀÌÅÍ ÆÄÀÏ º¹»ç
             CopyDirectory(sourcePath, backupPath);
 
-            // ¿À·¡µÈ ¹é¾÷ Á¤¸®
             CleanupOldBackups();
 
             Debug.Log($"Backup created successfully: {backupPath}");
@@ -41,7 +36,7 @@ public class BackupManager
         }
     }
 
-    private void CopyDirectory(string source, string target)
+    private static void CopyDirectory(string source, string target)
     {
         foreach (string dirPath in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
         {
@@ -50,13 +45,11 @@ public class BackupManager
 
         foreach (string filePath in Directory.GetFiles(source, "*.*", SearchOption.AllDirectories))
         {
-            // ÁöÁ¤µÈ È®ÀåÀÚÀÇ ÆÄÀÏ¸¸ ¹é¾÷
             if (BACKUP_EXTENSIONS.Any(ext => filePath.EndsWith(ext, System.StringComparison.OrdinalIgnoreCase)))
             {
                 string newPath = filePath.Replace(source, target);
                 File.Copy(filePath, newPath, true);
 
-                // meta ÆÄÀÏµµ ÇÔ²² º¹»ç
                 string metaPath = filePath + ".meta";
                 if (File.Exists(metaPath))
                 {
@@ -68,7 +61,7 @@ public class BackupManager
         }
     }
 
-    private void UpdateMetaFileGuid(string metaFilePath)
+    private static void UpdateMetaFileGuid(string metaFilePath)
     {
         try
         {
@@ -82,15 +75,14 @@ public class BackupManager
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"¸ÞÅ¸ ÆÄÀÏ GUID ¾÷µ¥ÀÌÆ® ½ÇÆÐ: {metaFilePath}, ¿À·ù: {e.Message}");
+            Debug.LogWarning($"ï¿½ï¿½Å¸ ï¿½ï¿½ï¿½ï¿½ GUID ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½: {metaFilePath}, ï¿½ï¿½ï¿½ï¿½: {e.Message}");
         }
     }
 
-    private void CleanupOldBackups()
+    private static void CleanupOldBackups()
     {
         string backupRoot = Path.Combine(Application.dataPath, BACKUP_PATH);
 
-        // ¹é¾÷ µð·ºÅä¸®µéÀ» ³¯Â¥¼øÀ¸·Î Á¤·ÄÇÏ°í MAX_BACKUPS ÀÌÈÄÀÇ °ÍµéÀ» °¡Á®¿É´Ï´Ù
         var backups = Directory.GetDirectories(backupRoot)
             .OrderByDescending(d => d)
             .Skip(MAX_BACKUPS);
@@ -99,10 +91,8 @@ public class BackupManager
         {
             try
             {
-                // µð·ºÅä¸®¿Í ±× ¾ÈÀÇ ¸ðµç ÆÄÀÏ(.meta Æ÷ÇÔ) »èÁ¦
                 Directory.Delete(oldBackup, true);
 
-                // .meta ÆÄÀÏÀÌ ÀÖ´Ù¸é »èÁ¦
                 string metaFilePath = oldBackup + ".meta";
                 if (File.Exists(metaFilePath))
                 {
@@ -111,16 +101,15 @@ public class BackupManager
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"¹é¾÷ Á¤¸® Áß ¿À·ù ¹ß»ý: {oldBackup}, ¿À·ù: {e.Message}");
+                Debug.LogError($"ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½: {oldBackup}, ï¿½ï¿½ï¿½ï¿½: {e.Message}");
             }
         }
 #if UNITY_EDITOR
-        // º¯°æ»çÇ×À» Unity¿¡ ¹Ý¿µ
         AssetDatabase.Refresh();
 #endif
     }
 
-    public bool RestoreFromBackup(string backupTimestamp)
+    public static bool RestoreFromBackup(string backupTimestamp)
     {
         try
         {
@@ -133,10 +122,8 @@ public class BackupManager
                 return false;
             }
 
-            // ÇöÀç µ¥ÀÌÅÍ ¹é¾÷
             CreateBackup(resourcePath);
 
-            // ¹é¾÷¿¡¼­ º¹¿ø
             CopyDirectory(backupPath, resourcePath);
 #if UNITY_EDITOR
             AssetDatabase.Refresh();

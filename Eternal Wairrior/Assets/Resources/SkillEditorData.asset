@@ -71,7 +71,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - level_prefab_0
       - level_prefab_1
@@ -79,8 +78,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: 9e771bb2207c7ae40b316f9dd66e6a7f
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Necro/256/Necro_256_6.png
       - guid: b27865ffd0914544f933e40984b74479
         path: Assets/Main/Prefabs/Skills/Dark/AbyssalExpansion.prefab
       - guid: b27865ffd0914544f933e40984b74479
@@ -151,7 +148,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - projectile
       - level_prefab_0
@@ -160,8 +156,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: 58064d0a1762df149bb52462a20772a9
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Necro/256/Necro_256_21.png
       - guid: bc5599e09c86aae43bbd79fc51a473d7
         path: Assets/Main/Prefabs/Skills/Dark/EventHorizon.prefab
       - guid: 046f24ff77ef1f847b80e6bb334e9cd9
@@ -234,7 +228,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - level_prefab_0
       - level_prefab_1
@@ -242,8 +235,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: 475be4f561405574387b976eb90cae1e
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Necro/256/Necro_256_65.png
       - guid: d11ac4e9ec5d9df44b32bc61f56908dd
         path: Assets/Main/Prefabs/Skills/Dark/Shadow Waltz.prefab
       - guid: d11ac4e9ec5d9df44b32bc61f56908dd
@@ -314,7 +305,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - projectile
       - level_prefab_0
@@ -323,8 +313,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: 15743b33bbbbe6c41968fa68771873ba
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Earth/256/Earth_256_11.png
       - guid: d6f4cd9ede19fb14e923ad14ac13607b
         path: Assets/Main/Prefabs/Skills/Earth/EarthRift.prefab
       - guid: 54c61bb0999022b49bcaa64c82212734
@@ -397,7 +385,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - level_prefab_0
       - level_prefab_1
@@ -405,8 +392,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: 9724f2d9adefc8b4c862d724f75f5ce7
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Earth/256/Earth_256_14.png
       - guid: 360a07736bd00c44299bc226ab80cbb4
         path: Assets/Main/Prefabs/Skills/Earth/Vine.prefab
       - guid: 360a07736bd00c44299bc226ab80cbb4
@@ -477,7 +462,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - level_prefab_0
       - level_prefab_1
@@ -485,8 +469,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: 905d972096adf3a4caf053d3d03cfc84
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Earth/256/Earth_256_58.png
       - guid: 459ed8ca70a65a140b56224682178fb9
         path: Assets/Main/Prefabs/Skills/Earth/GaiasGrace.prefab
       - guid: 459ed8ca70a65a140b56224682178fb9
@@ -557,7 +539,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - projectile
       - level_prefab_0
@@ -566,8 +547,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: 6c8a5faf00dff864391fec31163619fe
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Fire/256/Fire_256_38.png
       - guid: d9384d0f4a5036047a1c26bf6ccf1126
         path: Assets/Main/Prefabs/Skills/Fire/Flame.prefab
       - guid: 65a818cb6a19bf845b11fb41490d2938
@@ -640,7 +619,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - level_prefab_0
       - level_prefab_1
@@ -648,8 +626,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: 80c2e9cb740539a4f870ea221529bca4
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Fire/256/Fire_256_42.png
       - guid: f92876a8ead425b4699176938e40e790
         path: Assets/Main/Prefabs/Skills/Fire/FireRing.prefab
       - guid: f92876a8ead425b4699176938e40e790
@@ -720,7 +696,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - level_prefab_0
       - level_prefab_1
@@ -728,8 +703,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: d7c267748f2bff84c90506c5b8e4b4cd
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Fire/256/Fire_256_7.png
       - guid: 65d7446ee33b00749be7a1a7d79ae427
         path: Assets/Main/Prefabs/Skills/Fire/ThermalElevation.prefab
       - guid: 65d7446ee33b00749be7a1a7d79ae427
@@ -800,7 +773,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - projectile
       - level_prefab_0
@@ -809,8 +781,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: cb4362f098fd70140ac0407f1bf49304
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Frost/256/Frost_256_10.png
       - guid: aa216f1c2845f2944a6932adf6a497a4
         path: Assets/Main/Prefabs/Skills/Water/FrostHunt.prefab
       - guid: 40817c4eba2031347b629e33e0edfc72
@@ -883,7 +853,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - level_prefab_0
       - level_prefab_1
@@ -891,8 +860,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: 9e9342b3e851aa540922465d404d4457
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Frost/256/Frost_256_55.png
       - guid: 17bafc3e9b644a9428345b47cdc04d27
         path: Assets/Main/Prefabs/Skills/Water/FrostTide.prefab
       - guid: 17bafc3e9b644a9428345b47cdc04d27
@@ -963,7 +930,6 @@ MonoBehaviour:
       hpRegenIncrease: 0
     resourceReferences:
       keys:
-      - icon
       - prefab
       - level_prefab_0
       - level_prefab_1
@@ -971,8 +937,6 @@ MonoBehaviour:
       - level_prefab_3
       - level_prefab_4
       values:
-      - guid: 2f5a3b883321a4543a7d740b52373ce8
-        path: Assets/External/Fantasy Icons + UI/Sprites/Icons/Frost/256/Frost_256_97.png
       - guid: 72bd3d9f9944c3c4c923bfe7ec962e77
         path: Assets/Main/Prefabs/Skills/Water/TidalEssence.prefab
       - guid: 72bd3d9f9944c3c4c923bfe7ec962e77
@@ -1032,7 +996,7 @@ MonoBehaviour:
     levelStats: []
   - skillID: 100006
     levelStats: []
-  lastSelectedSkillID: 100009
+  lastSelectedSkillID: 100002
   scrollPosition: {x: 0, y: 0}
   showBaseStats: 1
   showLevelStats: 1

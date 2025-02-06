@@ -10,13 +10,19 @@ using UnityEditor;
 
 public static class JSONIO<T> where T : class
 {
-    private static readonly string basePath;
+    private static readonly string defaultPath;
+    private static string customPath;
     private static readonly Dictionary<string, T> cache;
 
     static JSONIO()
     {
-        basePath = typeof(T).Name;
+        defaultPath = typeof(T).Name;
         cache = new Dictionary<string, T>();
+    }
+
+    public static void SetCustomPath(string path)
+    {
+        customPath = path;
     }
 
     public static void SaveData(string key, T data)
@@ -29,7 +35,8 @@ public static class JSONIO<T> where T : class
                 return;
             }
 
-            string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.json");
+            string savePath = customPath ?? defaultPath;
+            string fullPath = Path.Combine(Application.dataPath, "Resources", savePath, $"{key}.json");
             string directory = Path.GetDirectoryName(fullPath);
 
             if (!Directory.Exists(directory))
@@ -57,7 +64,8 @@ public static class JSONIO<T> where T : class
 
         try
         {
-            string resourcePath = Path.Combine(basePath, key);
+            string savePath = customPath ?? defaultPath;
+            string resourcePath = Path.Combine(savePath, key);
             TextAsset jsonAsset = Resources.Load<TextAsset>(resourcePath);
 
             if (jsonAsset != null)
@@ -79,7 +87,7 @@ public static class JSONIO<T> where T : class
     {
         try
         {
-            string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.json");
+            string fullPath = Path.Combine(Application.dataPath, "Resources", defaultPath, $"{key}.json");
             if (File.Exists(fullPath))
             {
                 File.Delete(fullPath);
@@ -101,7 +109,7 @@ public static class JSONIO<T> where T : class
     {
         try
         {
-            string directory = Path.Combine(Application.dataPath, "Resources", basePath);
+            string directory = Path.Combine(Application.dataPath, "Resources", defaultPath);
             if (Directory.Exists(directory))
             {
                 var files = Directory.GetFiles(directory, "*.json");
@@ -128,7 +136,7 @@ public static class JSONIO<T> where T : class
         {
             var wrapper = new ListWrapper<T> { Items = dataList.ToList() };
             string jsonData = JsonConvert.SerializeObject(wrapper);
-            string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.json");
+            string fullPath = Path.Combine(Application.dataPath, "Resources", defaultPath, $"{key}.json");
             File.WriteAllText(fullPath, jsonData);
             AssetDatabase.Refresh();
         }

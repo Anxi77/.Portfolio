@@ -36,10 +36,10 @@ public class ItemEffectApplier
     {
         return slot switch
         {
-            EquipmentSlot.Weapon => SourceType.Equipment_Weapon,
-            EquipmentSlot.Armor => SourceType.Equipment_Armor,
-            EquipmentSlot.Ring2 or EquipmentSlot.Ring1 or EquipmentSlot.Necklace => SourceType.Equipment_Accessory,
-            EquipmentSlot.Special => SourceType.Equipment_Special,
+            EquipmentSlot.Weapon => SourceType.Weapon,
+            EquipmentSlot.Armor => SourceType.Armor,
+            EquipmentSlot.Ring2 or EquipmentSlot.Ring1 or EquipmentSlot.Necklace => SourceType.Accessory,
+            EquipmentSlot.Special => SourceType.Special,
             _ => SourceType.Consumable
         };
     }

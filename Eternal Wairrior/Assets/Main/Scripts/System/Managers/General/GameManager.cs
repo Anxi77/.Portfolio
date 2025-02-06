@@ -172,7 +172,7 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
 
     public void ClearGameData()
     {
-        PlayerDataManager.Instance.ClearAllData();
+        PlayerDataManager.Instance.ClearAllRuntimeData();
         lastSavedScene = "TownScene";
         lastSavedPosition = Vector3.zero;
     }

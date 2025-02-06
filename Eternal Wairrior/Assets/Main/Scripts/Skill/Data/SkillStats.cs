@@ -1,4 +1,5 @@
 using Unity.VisualScripting;
+using System;
 
 public interface ISkillStat
 {
@@ -6,7 +7,7 @@ public interface ISkillStat
     SkillType skillType { get; }
 }
 
-[System.Serializable]
+[Serializable]
 public class BaseSkillStat
 {
     public float damage;
@@ -36,7 +37,7 @@ public class BaseSkillStat
     }
 }
 
-[System.Serializable]
+[Serializable]
 public class ProjectileSkillStat : ISkillStat
 {
     public BaseSkillStat baseStat { get; set; }
@@ -71,7 +72,7 @@ public class ProjectileSkillStat : ISkillStat
     }
 }
 
-[System.Serializable]
+[Serializable]
 public class AreaSkillStat : ISkillStat
 {
     public BaseSkillStat baseStat { get; set; }
@@ -96,7 +97,7 @@ public class AreaSkillStat : ISkillStat
     }
 }
 
-[System.Serializable]
+[Serializable]
 public class PassiveSkillStat : ISkillStat
 {
     public BaseSkillStat baseStat { get; set; }
