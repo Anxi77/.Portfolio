@@ -5,10 +5,8 @@ on:
     branches:
       - "**" # 모든 브랜치에서 동작
     paths-ignore: # 불필요한 파일 변경 시 스킵
-      - "**.md"
       - ".gitignore"
       - "LICENSE"
-      - ".github/**"
 
 permissions:
   issues: write # 이슈 생성 권한 추가
