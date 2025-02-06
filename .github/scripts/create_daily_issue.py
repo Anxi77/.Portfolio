@@ -87,22 +87,20 @@ def parse_existing_issue(body):
         'todos': []
     }
     
-    # Split content by sections
-    sections = body.split('---')
-    
-    # Parse branch sections
-    branch_section = sections[0] if sections else ''
-    branch_blocks = re.finditer(r'<details>\s*<summary>✨\s*(\w+)</summary>(.*?)</details>', 
-                              branch_section, re.DOTALL)
+    # 브랜치 섹션 파싱
+    branch_pattern = r'<details>\s*<summary><h3 style="display: inline;">✨\s*(\w+)</h3></summary>(.*?)</details>'
+    branch_blocks = re.finditer(branch_pattern, body, re.DOTALL)
     
     for block in branch_blocks:
         branch_name = block.group(1)
-        branch_content = block.group(2)
-        result['branches'][branch_name] = branch_content.strip()
+        branch_content = block.group(2).strip()
+        result['branches'][branch_name] = branch_content
     
-    # Parse todos
-    if len(sections) > 1:
-        todo_section = sections[1]
+    # Todo 섹션 파싱
+    todo_pattern = r'## 📝 Todo\s*\n\n(.*?)(?=\n\n|$)'
+    todo_match = re.search(todo_pattern, body, re.DOTALL)
+    if todo_match:
+        todo_section = todo_match.group(1)
         todo_matches = re.finditer(r'- \[([ x])\] (.*?)(?:\n|$)', todo_section, re.MULTILINE)
         result['todos'] = [(match.group(1) != ' ', match.group(2)) for match in todo_matches]
     
