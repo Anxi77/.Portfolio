@@ -1,0 +1,43 @@
+name: Create Issue from Commit Message
+
+on:
+  push:
+    branches:
+      - "**" # 모든 브랜치에서 동작
+    paths-ignore: # 불필요한 파일 변경 시 스킵
+      - ".gitignore"
+      - "LICENSE"
+
+permissions:
+  issues: write # 이슈 생성 권한 추가
+  contents: read # 저장소 내용 읽기 권한
+
+env:
+  TIMEZONE: "Asia/Seoul" # 타임존 설정
+  ISSUE_PREFIX: "📅" # 이슈 제목 접두사
+  ISSUE_LABEL: "daily-log" # 기본 라벨
+  EXCLUDED_COMMITS: "^(chore|docs|style):" # 제외할 커밋 타입
+
+jobs:
+  create-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r .github/scripts/requirements.txt
+
+      - name: Create or Update Daily Issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python .github/scripts/create_daily_issue.py

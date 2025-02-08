@@ -6,7 +6,7 @@ public class BindEffect : MonoBehaviour, IPoolable
 
     private void Awake()
     {
-        // ¸ğµç ÆÄÆ¼Å¬ ½Ã½ºÅÛÀ» ÇÑ ¹ø¿¡ °¡Á®¿È (ÀÚ½Å°ú ÀÚ½ÄµéÀÇ ÆÄÆ¼Å¬ ½Ã½ºÅÛ)
+        // ëª¨ë“  íŒŒí‹°í´ ì‹œìŠ¤í…œì„ í•œ ë²ˆì— ê°€ì ¸ì˜´ (ìì‹ ê³¼ ìì‹ë“¤ì˜ íŒŒí‹°í´ ì‹œìŠ¤í…œ)
         particleSystems = GetComponentsInChildren<ParticleSystem>(true);
     }
 
@@ -14,17 +14,17 @@ public class BindEffect : MonoBehaviour, IPoolable
     {
         Debug.Log($"BindEffect spawned: {gameObject.name}, Particle count: {particleSystems.Length}");
 
-        // ¸ğµç ÆÄÆ¼Å¬ ½Ã½ºÅÛ Àç»ı
+        // ëª¨ë“  íŒŒí‹°í´ ì‹œìŠ¤í…œ ì¬ìƒ
         foreach (var ps in particleSystems)
         {
             if (ps != null)
             {
                 ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                ps.Play(true);  // withChildren = true·Î ¼³Á¤
+                ps.Play(true);  // withChildren = trueë¡œ ì„¤ì •
             }
         }
 
-        // Transform ÃÊ±âÈ­
+        // Transform ì´ˆê¸°í™”
         transform.localPosition = Vector3.zero;
         transform.localRotation = Quaternion.identity;
         transform.localScale = Vector3.one;
@@ -32,7 +32,7 @@ public class BindEffect : MonoBehaviour, IPoolable
 
     public void OnReturnToPool()
     {
-        // ¸ğµç ÆÄÆ¼Å¬ ½Ã½ºÅÛ Á¤Áö
+        // ëª¨ë“  íŒŒí‹°í´ ì‹œìŠ¤í…œ ì •ì§€
         foreach (var ps in particleSystems)
         {
             if (ps != null)
@@ -44,7 +44,7 @@ public class BindEffect : MonoBehaviour, IPoolable
         transform.SetParent(null);
     }
 
-    // µğ¹ö±×¿ë ¸Ş¼­µå
+    // ë””ë²„ê·¸ìš© ë©”ì„œë“œ
     private void OnEnable()
     {
         Debug.Log($"BindEffect enabled: {gameObject.name}");
