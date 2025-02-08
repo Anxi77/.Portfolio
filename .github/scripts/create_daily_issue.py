@@ -17,8 +17,8 @@ COMMIT_TYPES = {
 
 def parse_commit_message(message):
     """Parse commit message"""
-    pattern = r'\[(.*?)\]\s*(.*?)\n\n\[body\](.*?)(?:\n\n\[todo\](.*?))?(?:\n\n\[footer\](.*?))?$'
-    match = re.search(pattern, message, re.DOTALL)
+    pattern = r'(?i)\[(.*?)\] (.*?)\n\n\[body\](.*?)(?:\n\n\[todo\](.*?))?(?:\n\n\[footer\](.*?))?$'
+    match = re.search(pattern, message, re.DOTALL | re.IGNORECASE)
     if not match:
         return None
     
@@ -50,11 +50,11 @@ def convert_to_checkbox_list(text):
 
 def create_commit_section(commit_data, branch, commit_sha, author, time_string):
     """Create commit section with details tag"""
-    # 본문의 각 줄에 blockquote 적용
+    # Apply blockquote to each line of the body
     body_lines = [f"> {line}" for line in commit_data['body'].strip().split('\n')]
     quoted_body = '\n'.join(body_lines)
     
-    # 관련 이슈가 있는 경우 blockquote 적용
+    # Apply blockquote to related issues if they exist
     related_issues = f"\n> **Related Issues:**\n> {commit_data['footer'].strip()}" if commit_data['footer'] else ''
     
     section = f'''> <details>
@@ -87,7 +87,7 @@ def parse_existing_issue(body):
         'todos': []
     }
     
-    # 브랜치 섹션 파싱
+    # Parse branch section
     branch_pattern = r'<details>\s*<summary><h3 style="display: inline;">✨\s*(\w+)</h3></summary>(.*?)</details>'
     branch_blocks = re.finditer(branch_pattern, body, re.DOTALL)
     
@@ -96,33 +96,48 @@ def parse_existing_issue(body):
         branch_content = block.group(2).strip()
         result['branches'][branch_name] = branch_content
     
-    # Todo 섹션 파싱
-    todo_pattern = r'## 📝 Todo\s*\n\n(.*?)(?=\n\n|$)'
+    # Parse Todo section
+    todo_pattern = r'## 📝 Todo\s*\n\n(.*?)(?=\n\n<div align="center">|$)'
     todo_match = re.search(todo_pattern, body, re.DOTALL)
     if todo_match:
-        todo_section = todo_match.group(1)
-        todo_matches = re.finditer(r'- \[([ x])\] (.*?)(?:\n|$)', todo_section, re.MULTILINE)
-        result['todos'] = [(match.group(1) != ' ', match.group(2)) for match in todo_matches]
+        todo_section = todo_match.group(1).strip()
+        print(f"\n=== Current Issue's TODO List ===")
+        if todo_section:
+            todo_lines = [line.strip() for line in todo_section.split('\n') if line.strip()]
+            for line in todo_lines:
+                checkbox_match = re.match(r'- \[([ x])\] (.*)', line)
+                if checkbox_match:
+                    is_checked = checkbox_match.group(1) == 'x'
+                    todo_text = checkbox_match.group(2)
+                    result['todos'].append((is_checked, todo_text))
+                    status = "✅ Completed" if is_checked else "⬜ Pending"
+                    print(f"{status}: {todo_text}")
     
     return result
 
-def merge_todos(existing_todos, new_todos_text):
-    """Merge existing todos with new ones, avoiding duplicates"""
-    if not new_todos_text:
-        return existing_todos
+def merge_todos(existing_todos, new_todos):
+    """Merge two lists of todos, avoiding duplicates and preserving order and state"""
+    # Create a dictionary with todo text as key and (index, check state) as value
+    todo_map = {}
+    for idx, (checked, text) in enumerate(existing_todos):
+        todo_map[text] = (idx, checked)
     
-    # Convert existing todos to dict for easy duplicate checking
-    todo_dict = {todo[1]: todo[0] for todo in existing_todos}
+    # Initialize result list (with existing size)
+    result = list(existing_todos)
     
-    # Parse and add new todos
-    for line in new_todos_text.strip().split('\n'):
-        if line.startswith('- '):
-            todo_text = line[5:] if line.startswith('- [ ]') else line[2:]
-            if todo_text not in todo_dict:
-                todo_dict[todo_text] = False
+    # Add new todos (check for duplicates)
+    for checked, text in new_todos:
+        if text in todo_map:
+            # For existing todos, update check state only if newly checked
+            idx, existing_checked = todo_map[text]
+            if checked and not existing_checked:
+                result[idx] = (True, text)
+        else:
+            # Add new todo
+            result.append((checked, text))
+            todo_map[text] = (len(result) - 1, checked)
     
-    # Convert back to list of tuples
-    return [(checked, text) for text, checked in todo_dict.items()]
+    return result
 
 def create_todo_section(todos):
     """Create todo section from list of (checked, text) tuples"""
@@ -135,6 +150,26 @@ def create_todo_section(todos):
         todo_lines.append(f'- {checkbox} {text}')
     
     return '\n'.join(todo_lines)
+
+def get_previous_day_todos(repo, issue_label, current_date):
+    """Get unchecked todos from the previous day's issue"""
+    # Find previous day's issue
+    previous_issues = repo.get_issues(state='open', labels=[issue_label])
+    previous_todos = []
+    previous_issue = None
+    
+    for issue in previous_issues:
+        if issue.title.startswith('📅 Daily Development Log') and issue.title != f'📅 Daily Development Log ({current_date})':
+            previous_issue = issue
+            # Parse todos from previous issue
+            existing_content = parse_existing_issue(issue.body)
+            # Get only unchecked todos
+            previous_todos = [(False, todo[1]) for todo in existing_content['todos'] if not todo[0]]
+            # Close previous issue
+            issue.edit(state='closed')
+            break
+    
+    return previous_todos
 
 def main():
     # Initialize GitHub token and environment variables
@@ -154,6 +189,14 @@ def main():
     commit = repo.get_commit(commit_sha)
     branch = os.environ['GITHUB_REF'].replace('refs/heads/', '')
 
+    # Get parent commits to find actual work commits
+    if commit.commit.message.startswith('Merge'):
+        # If it's a merge commit, get both parents
+        parent_commits = commit.parents
+        # Process the non-merge parent (usually the second parent is the feature branch)
+        if len(parent_commits) > 1:
+            commit = parent_commits[1]  # Use the second parent (feature branch commits)
+    
     # Check for excluded commit types
     if re.match(excluded_pattern, commit.commit.message):
         print(f"Excluded commit type: {commit.commit.message}")
@@ -173,9 +216,29 @@ def main():
 
     # Get repository name from full path
     repo_name = repository.split('/')[-1]
+    if repo_name.startswith('.'):
+        repo_name = repo_name[1:]
 
     # Create issue title
     issue_title = f"{issue_prefix} Daily Development Log ({date_string}) - {repo_name}"
+
+    # Search for existing issues
+    issues = repo.get_issues(state='open', labels=[issue_label])
+    today_issue = None
+    previous_todos = []
+
+    for issue in issues:
+        if f"Daily Development Log ({date_string})" in issue.title:
+            # Find today's issue
+            today_issue = issue
+        elif issue.title.startswith('📅 Daily Development Log'):
+            # Get TODOs from previous day's issue
+            existing_content = parse_existing_issue(issue.body)
+            # Get only unchecked TODOs
+            previous_todos.extend([(False, todo[1]) for todo in existing_content['todos'] if not todo[0]])
+            # Close previous issue
+            issue.edit(state='closed')
+            print(f"Closed previous issue #{issue.number}")
 
     # Create commit section
     commit_details = create_commit_section(
@@ -186,49 +249,40 @@ def main():
         time_string
     )
 
-    # Create todo section
-    todo_section = convert_to_checkbox_list(commit_data['todo']) if commit_data['todo'] else ''
-
-    # Create full body
-    body = f'''# {issue_title}
-
-<div align="center">
-
-## 📊 Branch Summary
-
-</div>
-
-<details>
-<summary><h3 style="display: inline;">✨ {branch.title()}</h3></summary>
-
-{commit_details}
-</details>
-
-<div align="center">
-
-## 📝 Todo
-
-</div>
-
-{todo_section}'''
-
-    # Search for existing issue
-    issues = repo.get_issues(state='open', labels=[issue_label])
-    today_issue = None
-    for issue in issues:
-        if issue.title == issue_title:
-            today_issue = issue
-            break
-
+    # Create todo section and merge with previous todos
     if today_issue:
         # Parse existing issue
         existing_content = parse_existing_issue(today_issue.body)
+        print(f"\n=== TODO Statistics ===")
+        print(f"Current TODOs in issue: {len(existing_content['todos'])} items")
         
-        # Add or update branch section
-        existing_content['branches'][branch.title()] = commit_details
+        # Add new commit to branch section
+        branch_title = branch.title()
+        if branch_title in existing_content['branches']:
+            existing_content['branches'][branch_title] = f"{existing_content['branches'][branch_title]}\n\n{commit_details}"
+        else:
+            existing_content['branches'][branch_title] = commit_details
         
-        # Merge todos
-        all_todos = merge_todos(existing_content['todos'], commit_data['todo'])
+        # Convert new todos from commit message
+        new_todos = []
+        if commit_data['todo']:
+            todo_lines = convert_to_checkbox_list(commit_data['todo']).split('\n')
+            new_todos = [(False, line[5:].strip()) for line in todo_lines if line.startswith('- [ ]')]
+            print(f"New TODOs to be added: {len(new_todos)} items")
+            print("\n=== New TODOs List ===")
+            for _, todo_text in new_todos:
+                print(f"⬜ {todo_text}")
+        
+        # Maintain existing todos while adding new ones
+        all_todos = merge_todos(existing_content['todos'], new_todos)
+        if previous_todos:
+            print(f"\n=== TODOs Migrated from Previous Day ===")
+            for _, todo_text in previous_todos:
+                print(f"⬜ {todo_text}")
+            all_todos = merge_todos(all_todos, previous_todos)
+        
+        print(f"\n=== Final Result ===")
+        print(f"Total TODOs: {len(all_todos)} items")
         
         # Create updated body
         branch_sections = []
@@ -260,6 +314,38 @@ def main():
         today_issue.edit(body=updated_body)
         print(f"Updated issue #{today_issue.number}")
     else:
+        # For new issue, merge previous todos with new ones
+        new_todos = []
+        if commit_data['todo']:
+            todo_lines = convert_to_checkbox_list(commit_data['todo']).split('\n')
+            new_todos = [(False, line[5:].strip()) for line in todo_lines if line.startswith('- [ ]')]
+        
+        # Merge all todos: 새 todo + 이전 날짜 todo
+        all_todos = merge_todos(new_todos, previous_todos)
+        
+        # Create initial body
+        body = f'''# {issue_title}
+
+<div align="center">
+
+## 📊 Branch Summary
+
+</div>
+
+<details>
+<summary><h3 style="display: inline;">✨ {branch.title()}</h3></summary>
+
+{commit_details}
+</details>
+
+<div align="center">
+
+## 📝 Todo
+
+</div>
+
+{create_todo_section(all_todos)}'''
+
         # Create new issue with initial content
         new_issue = repo.create_issue(
             title=issue_title,
@@ -269,4 +355,4 @@ def main():
         print(f"Created new issue #{new_issue.number}")
 
 if __name__ == '__main__':
-    main() 
+    main()
