@@ -50,11 +50,11 @@ def convert_to_checkbox_list(text):
 
 def create_commit_section(commit_data, branch, commit_sha, author, time_string):
     """Create commit section with details tag"""
-    # 본문의 각 줄에 blockquote 적용
+    # Apply blockquote to each line of the body
     body_lines = [f"> {line}" for line in commit_data['body'].strip().split('\n')]
     quoted_body = '\n'.join(body_lines)
     
-    # 관련 이슈가 있는 경우 blockquote 적용
+    # Apply blockquote to related issues if they exist
     related_issues = f"\n> **Related Issues:**\n> {commit_data['footer'].strip()}" if commit_data['footer'] else ''
     
     section = f'''> <details>
@@ -87,7 +87,7 @@ def parse_existing_issue(body):
         'todos': []
     }
     
-    # 브랜치 섹션 파싱
+    # Parse branch section
     branch_pattern = r'<details>\s*<summary><h3 style="display: inline;">✨\s*(\w+)</h3></summary>(.*?)</details>'
     branch_blocks = re.finditer(branch_pattern, body, re.DOTALL)
     
@@ -96,12 +96,12 @@ def parse_existing_issue(body):
         branch_content = block.group(2).strip()
         result['branches'][branch_name] = branch_content
     
-    # Todo 섹션 파싱
+    # Parse Todo section
     todo_pattern = r'## 📝 Todo\s*\n\n(.*?)(?=\n\n<div align="center">|$)'
     todo_match = re.search(todo_pattern, body, re.DOTALL)
     if todo_match:
         todo_section = todo_match.group(1).strip()
-        print(f"\n=== 현재 이슈의 TODO 목록 ===")
+        print(f"\n=== Current Issue's TODO List ===")
         if todo_section:
             todo_lines = [line.strip() for line in todo_section.split('\n') if line.strip()]
             for line in todo_lines:
@@ -110,30 +110,30 @@ def parse_existing_issue(body):
                     is_checked = checkbox_match.group(1) == 'x'
                     todo_text = checkbox_match.group(2)
                     result['todos'].append((is_checked, todo_text))
-                    status = "✅ 완료" if is_checked else "⬜ 미완료"
+                    status = "✅ Completed" if is_checked else "⬜ Pending"
                     print(f"{status}: {todo_text}")
     
     return result
 
 def merge_todos(existing_todos, new_todos):
     """Merge two lists of todos, avoiding duplicates and preserving order and state"""
-    # 기존 todo의 텍스트를 키로 하고, (인덱스, 체크 상태)를 값으로 하는 딕셔너리 생성
+    # Create a dictionary with todo text as key and (index, check state) as value
     todo_map = {}
     for idx, (checked, text) in enumerate(existing_todos):
         todo_map[text] = (idx, checked)
     
-    # 결과 리스트 초기화 (기존 크기만큼)
+    # Initialize result list (with existing size)
     result = list(existing_todos)
     
-    # 새로운 todo 추가 (중복 체크)
+    # Add new todos (check for duplicates)
     for checked, text in new_todos:
         if text in todo_map:
-            # 이미 존재하는 todo의 경우, 체크 상태만 업데이트 (체크된 경우에만)
+            # For existing todos, update check state only if newly checked
             idx, existing_checked = todo_map[text]
             if checked and not existing_checked:
                 result[idx] = (True, text)
         else:
-            # 새로운 todo 추가
+            # Add new todo
             result.append((checked, text))
             todo_map[text] = (len(result) - 1, checked)
     
@@ -229,14 +229,14 @@ def main():
 
     for issue in issues:
         if f"Daily Development Log ({date_string})" in issue.title:
-            # 오늘 날짜의 이슈 찾기
+            # Find today's issue
             today_issue = issue
         elif issue.title.startswith('📅 Daily Development Log'):
-            # 이전 날짜의 이슈에서 todo 가져오기
+            # Get TODOs from previous day's issue
             existing_content = parse_existing_issue(issue.body)
-            # 체크되지 않은 todo만 가져오기
+            # Get only unchecked TODOs
             previous_todos.extend([(False, todo[1]) for todo in existing_content['todos'] if not todo[0]])
-            # 이전 이슈 닫기
+            # Close previous issue
             issue.edit(state='closed')
             print(f"Closed previous issue #{issue.number}")
 
@@ -253,8 +253,8 @@ def main():
     if today_issue:
         # Parse existing issue
         existing_content = parse_existing_issue(today_issue.body)
-        print(f"\n=== TODO 항목 통계 ===")
-        print(f"현재 이슈의 TODO 항목: {len(existing_content['todos'])}개")
+        print(f"\n=== TODO Statistics ===")
+        print(f"Current TODOs in issue: {len(existing_content['todos'])} items")
         
         # Add new commit to branch section
         branch_title = branch.title()
@@ -268,21 +268,21 @@ def main():
         if commit_data['todo']:
             todo_lines = convert_to_checkbox_list(commit_data['todo']).split('\n')
             new_todos = [(False, line[5:].strip()) for line in todo_lines if line.startswith('- [ ]')]
-            print(f"새로 추가될 TODO 항목: {len(new_todos)}개")
-            print("\n=== 새로 추가되는 TODO 목록 ===")
+            print(f"New TODOs to be added: {len(new_todos)} items")
+            print("\n=== New TODOs List ===")
             for _, todo_text in new_todos:
                 print(f"⬜ {todo_text}")
         
-        # 기존 todo를 유지하면서 새로운 todo 추가
+        # Maintain existing todos while adding new ones
         all_todos = merge_todos(existing_content['todos'], new_todos)
         if previous_todos:
-            print(f"\n=== 이전 날짜에서 이전된 TODO 목록 ===")
+            print(f"\n=== TODOs Migrated from Previous Day ===")
             for _, todo_text in previous_todos:
                 print(f"⬜ {todo_text}")
             all_todos = merge_todos(all_todos, previous_todos)
         
-        print(f"\n=== 최종 결과 ===")
-        print(f"최종 TODO 항목: {len(all_todos)}개")
+        print(f"\n=== Final Result ===")
+        print(f"Total TODOs: {len(all_todos)} items")
         
         # Create updated body
         branch_sections = []
