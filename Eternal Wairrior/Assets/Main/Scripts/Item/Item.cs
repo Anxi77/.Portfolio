@@ -24,13 +24,11 @@ public abstract class Item
 
         if (inventory != null && playerStat != null)
         {
-            // 기존 장비 해제
             if (inventory.GetEquippedItem(slot) != null)
             {
                 inventory.UnequipFromSlot(slot);
             }
 
-            // 새 장비 장착
             foreach (var stat in itemData.Stats)
             {
                 playerStat.AddModifier(stat);

@@ -1,12 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+using System;
+using Newtonsoft.Json;
 
-[System.Serializable]
+[Serializable]
 public class SkillMetadata
 {
     public SkillID ID;
@@ -20,28 +18,33 @@ public class SkillMetadata
     public Sprite Icon;
 }
 
-[System.Serializable]
-public class SerializableSkillStat
+[Serializable]
+public class SkillData
 {
-    public int level;
-    public string statJson;
-    public SkillType skillType;
-}
-
-[System.Serializable]
-public class SkillData : ISerializationCallbackReceiver
-{
-    public SkillMetadata metadata;
-
-    [SerializeField]
-    private List<SerializableSkillStat> serializedStats = new List<SerializableSkillStat>();
-
-    [System.NonSerialized]
+    public SkillID ID;
+    public string skillName;
+    public string description;
+    public SkillType type;
+    public ElementType element;
+    public int tier;
+    public string[] tags;
+    [JsonIgnore]
+    public GameObject defualtPrefab { get => Resources.Load<GameObject>(prefabPath); private set => prefabPath = value.name; }
+    public string prefabPath;
+    [JsonIgnore]
     private Dictionary<int, ISkillStat> statsByLevel;
 
+    [JsonIgnore]
     public Sprite icon;
-    public GameObject projectile;
+    public string iconPath;
+
+    [JsonIgnore]
+    public GameObject projectile { get => Resources.Load<GameObject>(projectilePath); private set => projectilePath = value.name; }
+    public string projectilePath;
+
+    [JsonIgnore]
     public GameObject[] prefabsByLevel;
+    public string[] prefabsByLevelPaths;
 
     public BaseSkillStat baseStats;
     public ProjectileSkillStat projectileStat;
@@ -51,129 +54,29 @@ public class SkillData : ISerializationCallbackReceiver
 
     public SkillData()
     {
-        metadata = new SkillMetadata();
-        statsByLevel = new Dictionary<int, ISkillStat>();
-        serializedStats = new List<SerializableSkillStat>();
-        prefabsByLevel = new GameObject[0];
+        ID = SkillID.None;
+        skillName = "None";
+        description = "None";
+        type = SkillType.None;
+        element = ElementType.None;
+        tier = 0;
+        tags = new string[0];
         baseStats = new BaseSkillStat();
+        statsByLevel = new Dictionary<int, ISkillStat>();
+        prefabsByLevel = new GameObject[0];
         projectileStat = new ProjectileSkillStat { baseStat = baseStats };
         areaStat = new AreaSkillStat { baseStat = baseStats };
         passiveStat = new PassiveSkillStat { baseStat = baseStats };
         resourceReferences = new ResourceReferenceData();
+
     }
 
-    void ISerializationCallbackReceiver.OnBeforeSerialize()
-    {
-        if (statsByLevel == null)
-        {
-            statsByLevel = new Dictionary<int, ISkillStat>();
-        }
-
-        serializedStats.Clear();
-        foreach (var kvp in statsByLevel)
-        {
-            serializedStats.Add(new SerializableSkillStat
-            {
-                level = kvp.Key,
-                statJson = JsonUtility.ToJson(kvp.Value),
-                skillType = metadata?.Type ?? SkillType.None
-            });
-        }
-#if UNITY_EDITOR
-        SaveResourceReferences();
-#endif
-    }
-
-    void ISerializationCallbackReceiver.OnAfterDeserialize()
-    {
-        statsByLevel = new Dictionary<int, ISkillStat>();
-
-        if (serializedStats != null)
-        {
-            foreach (var stat in serializedStats)
-            {
-                if (stat == null) continue;
-
-                ISkillStat skillStat = null;
-                try
-                {
-                    switch (stat.skillType)
-                    {
-                        case SkillType.Projectile:
-                            skillStat = JsonUtility.FromJson<ProjectileSkillStat>(stat.statJson);
-                            break;
-                        case SkillType.Area:
-                            skillStat = JsonUtility.FromJson<AreaSkillStat>(stat.statJson);
-                            break;
-                        case SkillType.Passive:
-                            skillStat = JsonUtility.FromJson<PassiveSkillStat>(stat.statJson);
-                            break;
-                    }
-
-                    if (skillStat != null)
-                    {
-                        statsByLevel[stat.level] = skillStat;
-                    }
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogError($"Error deserializing stat for level {stat.level}: {e.Message}");
-                }
-            }
-        }
-
-        baseStats ??= new BaseSkillStat();
-        projectileStat ??= new ProjectileSkillStat { baseStat = baseStats };
-        areaStat ??= new AreaSkillStat { baseStat = baseStats };
-        passiveStat ??= new PassiveSkillStat { baseStat = baseStats };
-        resourceReferences ??= new ResourceReferenceData();
-    }
-#if UNITY_EDITOR
-    private void SaveResourceReferences()
-    {
-        resourceReferences.Clear();
-
-        if (icon != null)
-        {
-            string path = AssetDatabase.GetAssetPath(icon);
-            string guid = AssetDatabase.AssetPathToGUID(path);
-            resourceReferences.Add("icon", new AssetReference { guid = guid, path = path });
-        }
-
-        if (metadata.Prefab != null)
-        {
-            string path = AssetDatabase.GetAssetPath(metadata.Prefab);
-            string guid = AssetDatabase.AssetPathToGUID(path);
-            resourceReferences.Add("prefab", new AssetReference { guid = guid, path = path });
-        }
-
-        if (projectile != null)
-        {
-            string path = AssetDatabase.GetAssetPath(projectile);
-            string guid = AssetDatabase.AssetPathToGUID(path);
-            resourceReferences.Add("projectile", new AssetReference { guid = guid, path = path });
-        }
-
-        if (prefabsByLevel != null)
-        {
-            for (int i = 0; i < prefabsByLevel.Length; i++)
-            {
-                if (prefabsByLevel[i] != null)
-                {
-                    string path = AssetDatabase.GetAssetPath(prefabsByLevel[i]);
-                    string guid = AssetDatabase.AssetPathToGUID(path);
-                    resourceReferences.Add($"level_prefab_{i}", new AssetReference { guid = guid, path = path });
-                }
-            }
-        }
-    }
-#endif
     public ISkillStat GetStatsForLevel(int level)
     {
         if (statsByLevel == null)
         {
             statsByLevel = new Dictionary<int, ISkillStat>();
-            Debug.LogWarning($"statsByLevel was null for skill {metadata?.Name ?? "Unknown"}");
+            Debug.LogWarning($"statsByLevel was null for skill {skillName ?? "Unknown"}");
         }
 
         if (statsByLevel.TryGetValue(level, out var stats))
@@ -222,11 +125,12 @@ public class SkillData : ISerializationCallbackReceiver
 
     public ISkillStat GetCurrentTypeStat()
     {
-        switch (metadata.Type)
+        switch (type)
         {
             case SkillType.Projectile:
                 return projectileStat;
             case SkillType.Area:
+
                 return areaStat;
             case SkillType.Passive:
                 return passiveStat;
@@ -237,32 +141,17 @@ public class SkillData : ISerializationCallbackReceiver
 
     private ISkillStat CreateDefaultStats()
     {
-        if (metadata.Type == SkillType.None)
-        {
-            return new ProjectileSkillStat
-            {
-                baseStat = new BaseSkillStat
-                {
-                    damage = 10f,
-                    skillName = metadata.Name,
-                    skillLevel = 1,
-                    maxSkillLevel = 5,
-                    element = metadata.Element,
-                    elementalPower = 1f
-                }
-            };
-        }
-
-        switch (metadata.Type)
+        switch (type)
         {
             case SkillType.Projectile:
                 return new ProjectileSkillStat();
+
             case SkillType.Area:
                 return new AreaSkillStat();
             case SkillType.Passive:
                 return new PassiveSkillStat();
             default:
-                Debug.LogWarning($"Creating default ProjectileSkillStat for unknown type: {metadata.Type}");
+                Debug.LogWarning($"Creating default ProjectileSkillStat for unknown type: {type}");
                 return new ProjectileSkillStat();
         }
     }
@@ -279,29 +168,12 @@ public class SkillData : ISerializationCallbackReceiver
             statsByLevel.Remove(level);
         }
     }
-
-    public void ClearAllStats()
-    {
-        statsByLevel.Clear();
-    }
 }
 
-[System.Serializable]
-public class SkillDataWrapper
-{
-    public List<SkillData> skillDatas;
-    public ResourceReferenceData resourceReferences;
-
-    public SkillDataWrapper()
-    {
-        skillDatas = new List<SkillData>();
-        resourceReferences = new ResourceReferenceData();
-    }
-}
-
-[System.Serializable]
+[Serializable]
 public class ResourceReferenceData
 {
+
     public List<string> keys = new List<string>();
     public List<AssetReference> values = new List<AssetReference>();
 
@@ -335,9 +207,8 @@ public class ResourceReferenceData
     }
 }
 
-[System.Serializable]
+[Serializable]
 public class AssetReference
 {
-    public string guid;
     public string path;
 }

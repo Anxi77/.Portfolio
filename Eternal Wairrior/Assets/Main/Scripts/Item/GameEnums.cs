@@ -21,4 +21,3 @@ public enum EquipmentSlot
     Ring2,
     Special
 }
-

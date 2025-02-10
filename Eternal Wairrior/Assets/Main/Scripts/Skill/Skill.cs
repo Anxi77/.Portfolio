@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System;
 
-[Serializable]
 public abstract class Skill : MonoBehaviour
 {
     [SerializeField] protected SkillData skillData;
@@ -21,19 +20,10 @@ public abstract class Skill : MonoBehaviour
     {
         if (skillData == null || !IsValidSkillData(skillData))
         {
-            skillData = new SkillData
-            {
-                metadata = new SkillMetadata
-                {
-                    Type = GetSkillType(),
-                    Name = GetDefaultSkillName(),
-                    Description = GetDefaultDescription(),
-                    Element = GetDefaultElement(),
-                    Tier = 1
-                }
-            };
+            skillData = new SkillData();
             Debug.Log($"Created default skill data for {gameObject.name}");
         }
+
     }
 
     protected abstract string GetDefaultSkillName();
@@ -47,24 +37,23 @@ public abstract class Skill : MonoBehaviour
 
     protected virtual void CleanupSkill()
     {
-        // ڽ Ŭ
     }
 
     protected bool IsValidSkillData(SkillData data)
+
     {
-        // SkillDataManager SkillManager ʱȭ ʱ
         if (SkillDataManager.Instance == null || !SkillDataManager.Instance.IsInitialized ||
             SkillManager.Instance == null || !SkillManager.Instance.IsInitialized)
         {
+
             return true;
         }
 
-        if (data.metadata == null) return false;
-        if (data.metadata.Type == SkillType.None) return false;
-        if (string.IsNullOrEmpty(data.metadata.Name)) return false;
-        if (data.metadata.ID == SkillID.None) return false;
+        if (data.skillName == null) return false;
+        if (data.type == SkillType.None) return false;
+        if (string.IsNullOrEmpty(data.skillName)) return false;
+        if (data.ID == SkillID.None) return false;
 
-        // ų ŸԺ ʼ
         var currentStats = data.GetCurrentTypeStat();
         if (currentStats == null) return false;
         if (currentStats.baseStat == null) return false;
@@ -72,10 +61,10 @@ public abstract class Skill : MonoBehaviour
         return true;
     }
 
-    // ⺻ 
     public virtual float Damage => skillData?.GetCurrentTypeStat()?.baseStat?.damage ?? 0f;
-    public string SkillName => skillData?.metadata?.Name ?? "Unknown";
-    protected int _skillLevel = 1;  // ⺻ ʵ
+    public string SkillName => skillData?.skillName ?? "Unknown";
+    protected int _skillLevel = 1;
+
     public int SkillLevel
     {
         get
@@ -94,9 +83,8 @@ public abstract class Skill : MonoBehaviour
         }
     }
     public int MaxSkillLevel => skillData?.GetCurrentTypeStat()?.baseStat?.maxSkillLevel ?? 1;
-    public SkillID SkillID => skillData?.metadata?.ID ?? SkillID.None;
+    public SkillID SkillID => skillData?.ID ?? SkillID.None;
 
-    // ŸԺ 
     protected T GetTypeStats<T>() where T : ISkillStat
     {
         if (skillData == null) return default(T);
@@ -112,13 +100,11 @@ public abstract class Skill : MonoBehaviour
         return default(T);
     }
 
-    // Unity νͿ ֵ ޼
     public virtual void SetSkillData(SkillData data)
     {
         skillData = data;
     }
 
-    // ʹ ų 
     public virtual SkillData GetSkillData()
     {
         return skillData;
@@ -129,7 +115,6 @@ public abstract class Skill : MonoBehaviour
         Debug.Log($"=== Starting SkillLevelUpdate for {SkillName} ===");
         Debug.Log($"Current Level: {SkillLevel}, Attempting to upgrade to: {newLevel}");
 
-        // ȿ˻
         if (newLevel <= 0)
         {
             Debug.LogError($"Invalid level: {newLevel}");
@@ -142,7 +127,6 @@ public abstract class Skill : MonoBehaviour
             return false;
         }
 
-        // ʹ ų ǳʶ
         if (newLevel < SkillLevel)
         {
             Debug.LogError($"Cannot downgrade skill level. Current: {SkillLevel}, Attempted: {newLevel}");
@@ -151,15 +135,13 @@ public abstract class Skill : MonoBehaviour
 
         try
         {
-            // ʹ 
             var currentStats = GetSkillData()?.GetCurrentTypeStat();
             Debug.Log($"Current stats - Level: {currentStats?.baseStat?.skillLevel}, Damage: {currentStats?.baseStat?.damage}");
 
-            // ʹ 
             var newStats = SkillDataManager.Instance.GetSkillStatsForLevel(
-                skillData.metadata.ID,
+                skillData.ID,
                 newLevel,
-                skillData.metadata.Type);
+                skillData.type);
 
             if (newStats == null)
             {
@@ -194,12 +176,11 @@ public abstract class Skill : MonoBehaviour
 
     public virtual string GetDetailedDescription()
     {
-        return skillData?.metadata?.Description ?? "No description available";
+        return skillData?.description ?? "No description available";
     }
 
     protected virtual void OnValidate()
     {
-        // Application.isPlaying üũ, ʱȭ Ϸ 쿡 ϵ
         if (SkillDataManager.Instance != null && SkillDataManager.Instance.IsInitialized)
         {
             if (skillData == null)
@@ -214,13 +195,13 @@ public abstract class Skill : MonoBehaviour
                 return;
             }
 
-            Debug.Log($"Validated skill data for {skillData.metadata.Name}");
+            Debug.Log($"Validated skill data for {skillData.skillName}");
         }
     }
 
     public virtual MonoBehaviour GetOwner() => owner;
-    public virtual SkillType GetSkillType() => skillData?.metadata?.Type ?? SkillType.None;
-    public virtual ElementType GetElementType() => skillData?.metadata?.Element ?? ElementType.None;
+    public virtual SkillType GetSkillType() => skillData?.type ?? SkillType.None;
+    public virtual ElementType GetElementType() => skillData?.element ?? ElementType.None;
 
     public virtual void SetOwner(MonoBehaviour newOwner)
     {
@@ -234,7 +215,6 @@ public abstract class Skill : MonoBehaviour
 
     public virtual void RemoveItemEffect(ISkillInteractionEffect effect)
     {
-        // 효과 제거 로직
     }
 
     public virtual void ModifyDamage(float multiplier)
@@ -247,6 +227,5 @@ public abstract class Skill : MonoBehaviour
 
     public virtual void ModifyCooldown(float multiplier)
     {
-        // 쿨다운 수정 로직 구현
     }
 }

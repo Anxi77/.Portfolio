@@ -2,7 +2,15 @@
   "dropTables": [
     {
       "enemyType": 1,
-      "dropEntries": [],
+      "dropEntries": [
+        {
+          "itemId": "NEW_ITEM_a2fb0cd4",
+          "dropRate": 0.1,
+          "rarity": 1,
+          "minAmount": 1,
+          "maxAmount": 1
+        }
+      ],
       "guaranteedDropRate": 0.1,
       "maxDrops": 2
     },

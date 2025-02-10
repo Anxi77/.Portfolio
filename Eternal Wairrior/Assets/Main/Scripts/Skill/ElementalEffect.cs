@@ -2,7 +2,6 @@ using UnityEngine;
 
 public static class ElementalEffects
 {
-    // 각 속성별 기본 지속시간 정의
     private const float DARK_EFFECT_DURATION = 5f;
     private const float WATER_EFFECT_DURATION = 3f;
     private const float FIRE_EFFECT_DURATION = 3f;

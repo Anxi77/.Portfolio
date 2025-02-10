@@ -11,7 +11,6 @@ public class WorldDropItem : MonoBehaviour
     private ItemData itemData;
     private bool canPickup = false;
     private Rigidbody2D rb;
-    private float dropTime;
 
     private void Awake()
     {
@@ -22,7 +21,6 @@ public class WorldDropItem : MonoBehaviour
 
     private void Start()
     {
-        dropTime = Time.time;
         StartCoroutine(EnablePickup());
     }
 
