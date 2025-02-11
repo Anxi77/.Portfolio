@@ -19,7 +19,7 @@ public abstract class AreaSkills : Skill
         if (skillData == null) return;
 
         var csvStats = SkillDataManager.Instance.GetSkillStatsForLevel(
-            skillData.metadata.ID,
+            skillData.ID,
             SkillLevel,
             SkillType.Area
         ) as AreaSkillStat;
@@ -31,7 +31,7 @@ public abstract class AreaSkills : Skill
         }
         else
         {
-            Debug.LogWarning($"No CSV data found for {skillData.metadata.Name}, using default values");
+            Debug.LogWarning($"No CSV data found for {skillData.skillName}, using default values");
             var defaultStats = new AreaSkillStat
             {
                 baseStat = new BaseSkillStat
@@ -39,7 +39,7 @@ public abstract class AreaSkills : Skill
                     damage = _damage,
                     skillLevel = _skillLevel,
                     maxSkillLevel = 5,
-                    element = skillData?.metadata.Element ?? ElementType.None,
+                    element = skillData?.element ?? ElementType.None,
                     elementalPower = _elementalPower
                 },
                 radius = _radius,
@@ -66,7 +66,7 @@ public abstract class AreaSkills : Skill
                         damage = _damage,
                         skillLevel = 1,
                         maxSkillLevel = 5,
-                        element = skillData?.metadata.Element ?? ElementType.None,
+                        element = skillData?.element ?? ElementType.None,
                         elementalPower = 1f
                     },
                     radius = _radius,
@@ -118,10 +118,8 @@ public abstract class AreaSkills : Skill
 
         Debug.Log($"[AreaSkills] Before Update - Level: {_skillLevel}");
 
-        // Ʈ
-        _skillLevel = stats.baseStat.skillLevel;  // νƮ
+        _skillLevel = stats.baseStat.skillLevel;
 
-        // 
         _damage = stats.baseStat.damage;
         _elementalPower = stats.baseStat.elementalPower;
         _radius = stats.radius;
@@ -135,7 +133,7 @@ public abstract class AreaSkills : Skill
 
     public override string GetDetailedDescription()
     {
-        string baseDesc = skillData?.metadata?.Description ?? "Area skill description";
+        string baseDesc = skillData?.description ?? "Area skill description";
         if (skillData?.GetCurrentTypeStat() != null)
         {
             baseDesc += $"\n\nCurrent Effects:" +

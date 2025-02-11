@@ -98,7 +98,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         newStats = SkillDataManager.Instance.GetSkillStatsForLevel(
             skill.SkillID,
             targetLevel,
-            skill.GetSkillData().metadata.Type);
+            skill.GetSkillData().type);
 
         if (newStats == null)
         {
@@ -121,7 +121,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
         try
         {
-            Debug.Log($"Adding/Upgrading skill: {skillData.metadata.Name} (ID: {skillData.metadata.ID})");
+            Debug.Log($"Adding/Upgrading skill: {skillData.skillName} (ID: {skillData.ID})");
 
             var playerStat = GameManager.Instance.player.GetComponent<PlayerStatSystem>();
             float currentHpRatio = 1f;
@@ -131,7 +131,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
                 Debug.Log($"Before AddOrUpgradeSkill - HP: {playerStat.GetStat(StatType.CurrentHp)}/{playerStat.GetStat(StatType.MaxHp)} ({currentHpRatio:F2})");
             }
 
-            var existingSkill = GetPlayerSkill(skillData.metadata.ID);
+            var existingSkill = GetPlayerSkill(skillData.ID);
             Debug.Log($"Existing skill check - Found: {existingSkill != null}");
 
             if (existingSkill != null)
@@ -139,7 +139,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
                 int nextLevel = existingSkill.SkillLevel + 1;
                 Debug.Log($"Current level: {existingSkill.SkillLevel}, Attempting upgrade to level: {nextLevel}");
 
-                GameObject levelPrefab = SkillDataManager.Instance.GetLevelPrefab(skillData.metadata.ID, nextLevel);
+                GameObject levelPrefab = SkillDataManager.Instance.GetLevelPrefab(skillData.ID, nextLevel);
                 if (levelPrefab != null)
                 {
                     Debug.Log($"Found level {nextLevel} prefab, replacing skill");
@@ -156,8 +156,8 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             }
             else
             {
-                GameObject prefab = SkillDataManager.Instance.GetLevelPrefab(skillData.metadata.ID, 1)
-                    ?? skillData.metadata.Prefab;
+                GameObject prefab = SkillDataManager.Instance.GetLevelPrefab(skillData.ID, 1)
+                    ?? skillData.defualtPrefab;
 
                 if (prefab != null)
                 {
@@ -176,7 +176,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
                         tempObj.SetActive(true);
                         GameManager.Instance.player.skills.Add(skillComponent);
-                        Debug.Log($"Successfully added new skill: {skillData.metadata.Name} at position {tempObj.transform.localPosition}");
+                        Debug.Log($"Successfully added new skill: {skillData.skillName} at position {tempObj.transform.localPosition}");
                     }
                 }
             }
@@ -216,9 +216,9 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         }
 
         // 기존 스킬의 효과를 먼저 제거
-        if (existingSkill is PermanentPassiveSkill permanentSkill)
+        if (existingSkill is PassiveSkill passiveSkill)
         {
-            permanentSkill.RemoveEffectFromPlayer(GameManager.Instance.player);
+            passiveSkill.RemoveEffectFromPlayer(GameManager.Instance.player);
         }
 
         // 기존 스킬 제거

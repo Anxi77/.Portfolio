@@ -70,8 +70,9 @@ public class SkillDataEditorWindow : EditorWindow
 
         if (editorData.lastSelectedSkillID != SkillID.None)
         {
-            currentSkill = editorData.skillList.Find(s => s.metadata.ID == editorData.lastSelectedSkillID);
+            currentSkill = editorData.skillList.Find(s => s.ID == editorData.lastSelectedSkillID);
         }
+
     }
 
     private void OnGUI()
@@ -144,15 +145,16 @@ public class SkillDataEditorWindow : EditorWindow
                 {
                     foreach (var skill in editorData.skillList)
                     {
-                        if (skill?.metadata == null) continue;
+                        if (skill?.ID == null) continue;
 
                         GUI.backgroundColor = currentSkill == skill ? Color.cyan : Color.white;
-                        if (GUILayout.Button(skill.metadata.Name, GUILayout.Height(30)))
+                        if (GUILayout.Button(skill.skillName, GUILayout.Height(30)))
                         {
                             currentSkill = skill;
-                            editorData.lastSelectedSkillID = skill.metadata.ID;
+                            editorData.lastSelectedSkillID = skill.ID;
                             EditorUtility.SetDirty(editorData);
                         }
+
                     }
                 }
                 GUI.backgroundColor = Color.white;
@@ -228,14 +230,11 @@ public class SkillDataEditorWindow : EditorWindow
         // 새 스킬 생성 시에는 임시로 None ID 사용
         var newSkill = new SkillData
         {
-            metadata = new SkillMetadata
-            {
-                Name = "New Skill",
-                Description = "New skill description",
-                Type = SkillType.None,
-                ID = SkillID.None,  // 임시로 None 할당
-                Element = ElementType.None
-            }
+            skillName = "New Skill",
+            description = "New skill description",
+            type = SkillType.None,
+            ID = SkillID.None,  // 임시로 None 할당
+            element = ElementType.None
         };
 
         if (editorData.skillList == null)
@@ -245,22 +244,22 @@ public class SkillDataEditorWindow : EditorWindow
 
         editorData.skillList.Add(newSkill);
         currentSkill = newSkill;
-        editorData.lastSelectedSkillID = newSkill.metadata.ID;
+        editorData.lastSelectedSkillID = newSkill.ID;
 
         // 기본 레벨 1 스탯 생성
         var defaultStat = new SkillStatData
         {
-            skillID = newSkill.metadata.ID,
+            skillID = newSkill.ID,
             level = 1,
             damage = 10f,
             maxSkillLevel = 5,
-            element = newSkill.metadata.Element,
+            element = newSkill.element,
             elementalPower = 1f
         };
 
         var stats = new SkillEditorDataContainer.SkillLevelStats
         {
-            skillID = newSkill.metadata.ID,
+            skillID = newSkill.ID,
             levelStats = new List<SkillStatData> { defaultStat }
         };
 
@@ -276,8 +275,8 @@ public class SkillDataEditorWindow : EditorWindow
     private SkillID GetNextAvailableSkillID()
     {
         var existingIDs = editorData.skillList
-            .Where(s => s.metadata.ID != SkillID.None)  // None ID는 제외
-            .Select(s => (int)s.metadata.ID)
+            .Where(s => s.ID != SkillID.None)  // None ID는 제외
+            .Select(s => (int)s.ID)
             .ToList();
 
         var allIDs = System.Enum.GetValues(typeof(SkillID))
@@ -303,11 +302,12 @@ public class SkillDataEditorWindow : EditorWindow
         if (currentSkill == null) return;
 
         if (EditorUtility.DisplayDialog("Delete Skill",
-            $"Are you sure you want to delete '{currentSkill.metadata.Name}'?",
+            $"Are you sure you want to delete '{currentSkill.skillName}'?",
             "Delete", "Cancel"))
+
         {
             editorData.skillList.Remove(currentSkill);
-            var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.metadata.ID);
+            var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.ID);
             if (stats != null)
             {
                 editorData.skillStats.Remove(stats);
@@ -323,12 +323,13 @@ public class SkillDataEditorWindow : EditorWindow
     {
         if (currentSkill == null) return;
 
-        var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.metadata.ID);
+        var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.ID);
         if (stats == null)
+
         {
             stats = new SkillEditorDataContainer.SkillLevelStats
             {
-                skillID = currentSkill.metadata.ID,
+                skillID = currentSkill.ID,
                 levelStats = new List<SkillStatData>()
             };
             editorData.skillStats.Add(stats);
@@ -339,7 +340,7 @@ public class SkillDataEditorWindow : EditorWindow
         // 이전 레벨의 스탯을 복사하여 새 레벨 생성
         var prevStat = stats.levelStats.LastOrDefault()?.Clone() ?? new SkillStatData();
         prevStat.level = newLevel;
-        prevStat.skillID = currentSkill.metadata.ID;
+        prevStat.skillID = currentSkill.ID;
 
         // 기본적인 스탯 증가
         prevStat.damage *= 1.1f;
@@ -364,20 +365,21 @@ public class SkillDataEditorWindow : EditorWindow
             // 저장 전에 None ID를 가진 스킬들에 대해 새로운 ID 할당
             foreach (var skill in editorData.skillList)
             {
-                if (skill.metadata.ID == SkillID.None)
+                if (skill.ID == SkillID.None)
                 {
-                    skill.metadata.ID = GetNextAvailableSkillID();
+                    skill.ID = GetNextAvailableSkillID();
 
                     // 관련된 스탯 데이터의 ID도 업데이트
                     var stats = editorData.skillStats.Find(s => s.skillID == SkillID.None);
                     if (stats != null)
                     {
-                        stats.skillID = skill.metadata.ID;
+                        stats.skillID = skill.ID;
                         foreach (var stat in stats.levelStats)
                         {
-                            stat.skillID = skill.metadata.ID;
+                            stat.skillID = skill.ID;
                         }
                     }
+
                 }
             }
 
@@ -406,7 +408,7 @@ public class SkillDataEditorWindow : EditorWindow
             // 데이터 유효성 검사 및 직렬화 준비
             foreach (var skill in editorData.skillList)
             {
-                if (skill?.metadata == null)
+                if (skill == null)
                 {
                     Debug.LogError($"Invalid skill data found");
                     continue;
@@ -418,7 +420,7 @@ public class SkillDataEditorWindow : EditorWindow
                     receiver.OnBeforeSerialize();
                 }
 
-                Debug.Log($"Preparing to save skill: {skill.metadata.Name} (ID: {skill.metadata.ID})");
+                Debug.Log($"Preparing to save skill: {skill.skillName} (ID: {skill.ID})");
             }
 
             // 실제 데이터 저장
@@ -454,19 +456,19 @@ public class SkillDataEditorWindow : EditorWindow
             EditorGUILayout.LabelField("Metadata", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
-            currentSkill.metadata.Name = EditorGUILayout.TextField("Name", currentSkill.metadata.Name);
-            currentSkill.metadata.Description = EditorGUILayout.TextField("Description", currentSkill.metadata.Description);
+            currentSkill.skillName = EditorGUILayout.TextField("Name", currentSkill.skillName);
+            currentSkill.description = EditorGUILayout.TextField("Description", currentSkill.description);
 
             // 스킬 타입이 변경되면 스탯 초기화
-            SkillType newType = (SkillType)EditorGUILayout.EnumPopup("Skill Type", currentSkill.metadata.Type);
-            if (newType != currentSkill.metadata.Type)
+            SkillType newType = (SkillType)EditorGUILayout.EnumPopup("Skill Type", currentSkill.type);
+            if (newType != currentSkill.type)
             {
-                currentSkill.metadata.Type = newType;
+                currentSkill.type = newType;
                 InitializeSkillStats();
             }
 
-            currentSkill.metadata.ID = (SkillID)EditorGUILayout.EnumPopup("Skill ID", currentSkill.metadata.ID);
-            currentSkill.metadata.Element = (ElementType)EditorGUILayout.EnumPopup("Element", currentSkill.metadata.Element);
+            currentSkill.ID = (SkillID)EditorGUILayout.EnumPopup("Skill ID", currentSkill.ID);
+            currentSkill.element = (ElementType)EditorGUILayout.EnumPopup("Element", currentSkill.element);
 
             EditorGUI.indentLevel--;
         }
@@ -490,13 +492,14 @@ public class SkillDataEditorWindow : EditorWindow
             currentSkill.baseStats.elementalPower = EditorGUILayout.FloatField("Elemental Power", currentSkill.baseStats.elementalPower);
 
             // 메타데이터와 베이스 스탯의 엘리먼트 동기화
-            if (currentSkill.baseStats.element != currentSkill.metadata.Element)
+            if (currentSkill.baseStats.element != currentSkill.element)
             {
                 if (EditorUtility.DisplayDialog("Element Mismatch",
                     "Base Stats element differs from Metadata element. Would you like to sync them?",
+
                     "Yes", "No"))
                 {
-                    currentSkill.baseStats.element = currentSkill.metadata.Element;
+                    currentSkill.baseStats.element = currentSkill.element;
                 }
             }
 
@@ -527,11 +530,6 @@ public class SkillDataEditorWindow : EditorWindow
                 typeof(Sprite),
                 false
             );
-            if (EditorGUI.EndChangeCheck() && currentSkill.icon != null)
-            {
-                currentSkill.metadata.Icon = currentSkill.icon;
-                EditorUtility.SetDirty(editorData);
-            }
 
             if (currentSkill.icon != null)
             {
@@ -546,12 +544,13 @@ public class SkillDataEditorWindow : EditorWindow
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
             EditorGUILayout.LabelField("Metadata Prefab", EditorStyles.boldLabel);
-            currentSkill.metadata.Prefab = (GameObject)EditorGUILayout.ObjectField(
+            currentSkill.prefabop = (GameObject)EditorGUILayout.ObjectField(
                 "Base Prefab",
-                currentSkill.metadata.Prefab,
+                currentSkill.prefab,
                 typeof(GameObject),
                 false
             );
+
         }
         EditorGUILayout.EndVertical();
 
@@ -604,15 +603,16 @@ public class SkillDataEditorWindow : EditorWindow
 
     private void InitializeSkillStats()
     {
-        var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.metadata.ID);
+        var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.ID);
         if (stats == null)
         {
             stats = new SkillEditorDataContainer.SkillLevelStats
             {
-                skillID = currentSkill.metadata.ID,
+                skillID = currentSkill.ID,
                 levelStats = new List<SkillStatData>()
             };
             editorData.skillStats.Add(stats);
+
         }
 
         // 기존 스탯 초기화
@@ -621,11 +621,11 @@ public class SkillDataEditorWindow : EditorWindow
         // 레벨 1 기본 스탯 생성
         var defaultStat = new SkillStatData
         {
-            skillID = currentSkill.metadata.ID,
+            skillID = currentSkill.ID,
             level = 1,
             damage = 10f,
             maxSkillLevel = 5,
-            element = currentSkill.metadata.Element,
+            element = currentSkill.element,
             elementalPower = 1f
         };
 
@@ -638,14 +638,16 @@ public class SkillDataEditorWindow : EditorWindow
         EditorGUILayout.LabelField("Skill Stats", headerStyle);
         EditorGUI.indentLevel++;
 
-        var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.metadata.ID);
+        var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.ID);
         if (stats == null)
+
         {
             stats = new SkillEditorDataContainer.SkillLevelStats
             {
-                skillID = currentSkill.metadata.ID,
+                skillID = currentSkill.ID,
                 levelStats = new List<SkillStatData>()
             };
+
             editorData.skillStats.Add(stats);
         }
 
@@ -676,7 +678,7 @@ public class SkillDataEditorWindow : EditorWindow
         stat.elementalPower = EditorGUILayout.FloatField("Elemental Power", stat.elementalPower);
 
         // 스킬 타입별 특수 스탯
-        switch (currentSkill.metadata.Type)
+        switch (currentSkill.type)
         {
             case SkillType.Projectile:
                 DrawProjectileStats(stat);
@@ -698,11 +700,11 @@ public class SkillDataEditorWindow : EditorWindow
         var newLevel = stats.levelStats.Count + 1;
         var newStat = new SkillStatData
         {
-            skillID = currentSkill.metadata.ID,
+            skillID = currentSkill.ID,
             level = newLevel,
             damage = 10f,
             maxSkillLevel = 5,
-            element = currentSkill.metadata.Element,
+            element = currentSkill.element,
             elementalPower = 1f
         };
         stats.levelStats.Add(newStat);

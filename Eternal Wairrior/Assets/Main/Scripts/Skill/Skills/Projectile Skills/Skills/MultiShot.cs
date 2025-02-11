@@ -17,14 +17,11 @@ public class MultiShot : ProjectileSkills
         {
             skillData = new SkillData
             {
-                metadata = new SkillMetadata
-                {
-                    Name = "Multi Shot",
-                    Description = "Fires multiple projectiles",
-                    Type = SkillType.Projectile,
-                    Element = ElementType.None,
-                    Tier = 1
-                }
+                skillName = "Multi Shot",
+                description = "Fires multiple projectiles",
+                type = SkillType.Projectile,
+                element = ElementType.None,
+                tier = 1
             };
         }
     }
@@ -56,10 +53,10 @@ public class MultiShot : ProjectileSkills
                 baseStat = new BaseSkillStat
                 {
                     damage = _damage,
-                    skillName = skillData.metadata.Name,
+                    skillName = skillData.skillName,
                     skillLevel = 1,
                     maxSkillLevel = 5,
-                    element = skillData.metadata.Element,
+                    element = skillData.element,
                     elementalPower = _elementalPower
                 },
                 projectileSpeed = _projectileSpeed,

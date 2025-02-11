@@ -5,20 +5,6 @@ using System;
 using Newtonsoft.Json;
 
 [Serializable]
-public class SkillMetadata
-{
-    public SkillID ID;
-    public string Name;
-    public string Description;
-    public SkillType Type;
-    public ElementType Element;
-    public int Tier;
-    public string[] Tags;
-    public GameObject Prefab;
-    public Sprite Icon;
-}
-
-[Serializable]
 public class SkillData
 {
     public SkillID ID;
@@ -130,7 +116,6 @@ public class SkillData
             case SkillType.Projectile:
                 return projectileStat;
             case SkillType.Area:
-
                 return areaStat;
             case SkillType.Passive:
                 return passiveStat;

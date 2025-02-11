@@ -176,6 +176,17 @@ public class PlayerStatSystem : MonoBehaviour
         }
     }
 
+    public void RemoveStatsBySource(StatType statType, SourceType source)
+    {
+        if (activeModifiers.ContainsKey(source))
+        {
+            if (activeModifiers[source].Any(modifier => modifier.Type == statType))
+            {
+                RemoveModifier(activeModifiers[source].First(modifier => modifier.Type == statType));
+            }
+        }
+    }
+
     public void UpdateStatsForLevel(int level)
     {
         // 레벨에 따라 스탯 업데이트

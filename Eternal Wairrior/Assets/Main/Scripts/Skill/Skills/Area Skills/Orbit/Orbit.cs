@@ -14,16 +14,14 @@ public class Orbit : AreaSkills
         {
             skillData = new SkillData
             {
-                metadata = new SkillMetadata
-                {
-                    Name = "Orbit",
-                    Description = "Rotating orbs that damage enemies",
-                    Type = SkillType.Area,
-                    Element = ElementType.None,
-                    Tier = 1
-                }
+                skillName = "Orbit",
+                description = "Rotating orbs that damage enemies",
+                type = SkillType.Area,
+                element = ElementType.None,
+                tier = 1
             };
             InitializeSkillStats();
+
         }
         orbs = GetComponentInChildren<RotatingOrb>();
     }
@@ -37,11 +35,12 @@ public class Orbit : AreaSkills
                 baseStat = new BaseSkillStat
                 {
                     damage = 8f,
-                    skillName = skillData.metadata.Name,
+                    skillName = skillData.skillName,
                     skillLevel = 1,
                     maxSkillLevel = 5,
-                    element = skillData.metadata.Element,
+                    element = skillData.element,
                     elementalPower = 1f
+
                 },
                 radius = 2f,
                 duration = 0f,

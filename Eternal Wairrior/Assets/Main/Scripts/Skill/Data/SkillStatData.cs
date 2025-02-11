@@ -255,7 +255,7 @@ public class SkillStatData
             return false;
         }
 
-        switch (skillData.metadata.Type)
+        switch (skillData.type)
         {
             case SkillType.Projectile:
                 return ValidateProjectileStats();
