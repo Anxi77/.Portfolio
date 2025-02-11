@@ -17,7 +17,7 @@ COMMIT_TYPES = {
 
 def parse_commit_message(message):
     """Parse commit message"""
-    pattern = r'(?i)\[(.*?)\] (.*?)\n\n\[body\](.*?)(?:\n\n\[todo\](.*?))?(?:\n\n\[footer\](.*?))?$'
+    pattern = r'(?i)\[(.*?)\] (.*?)(?:\s*\n\s*\[body\](.*?))?(?:\s*\n\s*\[todo\](.*?))?(?:\s*\n\s*\[footer\](.*?))?$'
     match = re.search(pattern, message, re.DOTALL | re.IGNORECASE)
     if not match:
         return None
@@ -101,7 +101,6 @@ def parse_existing_issue(body):
     todo_match = re.search(todo_pattern, body, re.DOTALL)
     if todo_match:
         todo_section = todo_match.group(1).strip()
-        print(f"\n=== Current Issue's TODO List ===")
         if todo_section:
             todo_lines = [line.strip() for line in todo_section.split('\n') if line.strip()]
             for line in todo_lines:
@@ -110,8 +109,6 @@ def parse_existing_issue(body):
                     is_checked = checkbox_match.group(1) == 'x'
                     todo_text = checkbox_match.group(2)
                     result['todos'].append((is_checked, todo_text))
-                    status = "✅ Completed" if is_checked else "⬜ Pending"
-                    print(f"{status}: {todo_text}")
     
     return result
 
@@ -171,6 +168,39 @@ def get_previous_day_todos(repo, issue_label, current_date):
     
     return previous_todos
 
+def is_commit_already_logged(commit_message, existing_content):
+    """check if the commit is already logged"""
+    # extract the title part of the commit message
+    commit_title = commit_message.split('\n')[0].strip()
+    
+    # check if the commit is already logged
+    for branch_content in existing_content['branches'].values():
+        if commit_title in branch_content:
+            return True
+    return False
+
+def get_merge_commits(repo, merge_commit):
+    """get the child commits of the merge commit"""
+    if len(merge_commit.parents) != 2:  # not a merge commit
+        return []
+    
+    main_parent = merge_commit.parents[0]  # main branch
+    feature_parent = merge_commit.parents[1]  # feature branch
+    
+    try:
+        # find the commits in the feature branch that are not in the main branch
+        comparison = repo.compare(main_parent.sha, feature_parent.sha)
+        commits = list(comparison.commits)  # PaginatedList를 list로 변환
+        
+        print(f"Found {len(commits)} commits in merge")
+        for commit in commits:
+            print(f"- {commit.commit.message.split('\n')[0]}")
+            
+        return commits
+    except Exception as e:
+        print(f"Error getting merge commits: {e}")
+        return []
+
 def main():
     # Initialize GitHub token and environment variables
     github_token = os.environ['GITHUB_TOKEN']
@@ -188,18 +218,59 @@ def main():
     commit_sha = os.environ['GITHUB_SHA']
     commit = repo.get_commit(commit_sha)
     branch = os.environ['GITHUB_REF'].replace('refs/heads/', '')
-
-    # Get parent commits to find actual work commits
-    if commit.commit.message.startswith('Merge'):
-        # If it's a merge commit, get both parents
-        parent_commits = commit.parents
-        # Process the non-merge parent (usually the second parent is the feature branch)
-        if len(parent_commits) > 1:
-            commit = parent_commits[1]  # Use the second parent (feature branch commits)
     
     # Check for excluded commit types
     if re.match(excluded_pattern, commit.commit.message):
         print(f"Excluded commit type: {commit.commit.message}")
+        return
+        
+    # if the commit is a merge commit, process the child commits
+    commits_to_process = []
+    if len(commit.parents) == 2:  # merge commit
+        print("Merge commit detected - processing child commits...")
+
+        commits_to_process = get_merge_commits(repo, commit)
+
+    if not commits_to_process:  # not a merge commit or failed to get child commits
+        commits_to_process = [commit]
+
+    # Search for existing issues
+    issues = repo.get_issues(state='open', labels=[issue_label])
+    today_issue = None
+    previous_todos = []
+    existing_content = {'branches': {}}
+
+    # find today's issue
+    for issue in issues:
+        if f"Daily Development Log ({datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d')})" in issue.title:
+            today_issue = issue
+            existing_content = parse_existing_issue(issue.body)
+            # TODO list is printed only once
+            if existing_content['todos']:
+                print(f"\n=== Current Issue's TODO List ===")
+                for todo in existing_content['todos']:
+                    status = "✅ Completed" if todo[0] else "⬜ Pending"
+                    print(f"{status}: {todo[1]}")
+            break
+
+    # find previous issues
+    for issue in issues:
+        if issue != today_issue and issue.title.startswith('📅 Daily Development Log'):
+            print(f"\n=== Processing Previous Issue #{issue.number} ===")
+
+            prev_content = parse_existing_issue(issue.body)
+            unchecked_todos = [(False, todo[1]) for todo in prev_content['todos'] if not todo[0]]
+            if unchecked_todos:
+                print(f"Found {len(unchecked_todos)} unchecked TODOs")
+                for _, todo_text in unchecked_todos:
+                    print(f"⬜ Migrating: {todo_text}")
+                previous_todos.extend(unchecked_todos)
+            issue.edit(state='closed')
+            print(f"Closed previous issue #{issue.number}")
+
+    # check if the commit is already logged
+    if is_commit_already_logged(commit.commit.message, existing_content):
+        print(f"Skipping existing commit: {commit.commit.message.split('\n')[0]}")
         return
 
     # Parse commit message
@@ -222,24 +293,6 @@ def main():
     # Create issue title
     issue_title = f"{issue_prefix} Daily Development Log ({date_string}) - {repo_name}"
 
-    # Search for existing issues
-    issues = repo.get_issues(state='open', labels=[issue_label])
-    today_issue = None
-    previous_todos = []
-
-    for issue in issues:
-        if f"Daily Development Log ({date_string})" in issue.title:
-            # Find today's issue
-            today_issue = issue
-        elif issue.title.startswith('📅 Daily Development Log'):
-            # Get TODOs from previous day's issue
-            existing_content = parse_existing_issue(issue.body)
-            # Get only unchecked TODOs
-            previous_todos.extend([(False, todo[1]) for todo in existing_content['todos'] if not todo[0]])
-            # Close previous issue
-            issue.edit(state='closed')
-            print(f"Closed previous issue #{issue.number}")
-
     # Create commit section
     commit_details = create_commit_section(
         commit_data,
@@ -252,7 +305,6 @@ def main():
     # Create todo section and merge with previous todos
     if today_issue:
         # Parse existing issue
-        existing_content = parse_existing_issue(today_issue.body)
         print(f"\n=== TODO Statistics ===")
         print(f"Current TODOs in issue: {len(existing_content['todos'])} items")
         
@@ -320,7 +372,7 @@ def main():
             todo_lines = convert_to_checkbox_list(commit_data['todo']).split('\n')
             new_todos = [(False, line[5:].strip()) for line in todo_lines if line.startswith('- [ ]')]
         
-        # Merge all todos: 새 todo + 이전 날짜 todo
+        # Merge all todos
         all_todos = merge_todos(new_todos, previous_todos)
         
         # Create initial body
