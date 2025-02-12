@@ -120,16 +120,6 @@ public class GravityProjectileSkill : ProjectileSkills
         }
     }
 
-    protected override void Awake()
-    {
-        base.Awake();
-        if (skillData == null)
-        {
-            skillData = new SkillData();
-            skillData.metadata.Type = SkillType.Projectile;
-        }
-    }
-
     protected override void UpdateInspectorValues(ProjectileSkillStat stats)
     {
         base.UpdateInspectorValues(stats);

@@ -11,10 +11,6 @@ public enum FireMode
 
 public abstract class ProjectileSkills : Skill
 {
-    protected override void Awake()
-    {
-        base.Awake();
-    }
 
     public override void Initialize()
     {
@@ -26,19 +22,18 @@ public abstract class ProjectileSkills : Skill
         if (skillData == null) return;
 
         var csvStats = SkillDataManager.Instance.GetSkillStatsForLevel(
-            skillData.metadata.ID,
+            skillData.ID,
             SkillLevel,
             SkillType.Projectile
         ) as ProjectileSkillStat;
 
         if (csvStats != null)
         {
-            UpdateInspectorValues(csvStats);
             skillData.SetStatsForLevel(SkillLevel, csvStats);
         }
         else
         {
-            Debug.LogWarning($"No CSV data found for {skillData.metadata.Name}, using default values");
+            Debug.LogWarning($"No CSV data found for {skillData.skillName}, using default values");
             var defaultStats = new ProjectileSkillStat
             {
                 baseStat = new BaseSkillStat
@@ -46,7 +41,7 @@ public abstract class ProjectileSkills : Skill
                     damage = _damage,
                     skillLevel = _skillLevel,
                     maxSkillLevel = 5,
-                    element = skillData?.metadata.Element ?? ElementType.None,
+                    element = skillData.element,
                     elementalPower = _elementalPower
                 },
                 projectileSpeed = _projectileSpeed,
@@ -78,7 +73,7 @@ public abstract class ProjectileSkills : Skill
                         damage = _damage,
                         skillLevel = 1,
                         maxSkillLevel = 5,
-                        element = skillData?.metadata.Element ?? ElementType.None,
+                        element = skillData.element,
                         elementalPower = _elementalPower
                     },
                     projectileSpeed = _projectileSpeed,
@@ -99,20 +94,20 @@ public abstract class ProjectileSkills : Skill
     }
 
     [Header("Base Stats")]
-    [SerializeField] protected float _damage = 10f;
-    [SerializeField] protected float _elementalPower = 1f;
+    protected float _damage = 10f;
+    protected float _elementalPower = 1f;
 
     [Header("Projectile Stats")]
-    [SerializeField] protected float _projectileSpeed = 25f;
-    [SerializeField] protected float _projectileScale = 1f;
-    [SerializeField] protected float _shotInterval = 0.5f;
-    [SerializeField] protected int _pierceCount = 1;
-    [SerializeField] protected float _attackRange = 6f;
-    [SerializeField] protected float _homingRange = 3.5f;
-    [SerializeField] protected bool _isHoming = false;
-    [SerializeField] protected float _explosionRadius = 0f;
-    [SerializeField] protected int _projectileCount = 1;
-    [SerializeField] protected float _innerInterval = 0.1f;
+    protected float _projectileSpeed = 25f;
+    protected float _projectileScale = 1f;
+    protected float _shotInterval = 0.5f;
+    protected int _pierceCount = 1;
+    protected float _attackRange = 6f;
+    protected float _homingRange = 3.5f;
+    protected bool _isHoming = false;
+    protected float _explosionRadius = 0f;
+    protected int _projectileCount = 1;
+    protected float _innerInterval = 0.1f;
 
     public override float Damage => _damage;
     public float ElementalPower => _elementalPower;
@@ -243,8 +238,8 @@ public abstract class ProjectileSkills : Skill
         proj.transform.localScale *= ProjectileScale;
         proj.pierceCount = PierceCount;
         proj.maxTravelDistance = AttackRange;
-        proj.elementType = skillData.metadata.Element;
-        proj.elementalPower = TypedStats.baseStat.elementalPower;
+        proj.elementType = skillData.element;
+        proj.elementalPower = ElementalPower;
 
         proj.SetInitialTarget(FindNearestEnemy());
     }
@@ -301,10 +296,10 @@ public abstract class ProjectileSkills : Skill
         }
         else
         {
-            _homingRange = TypedStats.homingRange;
+            _homingRange = skillData.projectileStat.homingRange;
         }
 
-        Debug.Log($"Homing state updated for {skillData.metadata.Name}: {activate}");
+        Debug.Log($"Homing state updated for {skillData.skillName}: {activate}");
     }
 
     protected override void UpdateSkillTypeStats(ISkillStat newStats)
@@ -345,7 +340,7 @@ public abstract class ProjectileSkills : Skill
 
     public override string GetDetailedDescription()
     {
-        string baseDesc = skillData?.metadata?.Description ?? "Projectile skill description";
+        string baseDesc = skillData?.description ?? "Projectile skill description";
         if (skillData?.GetCurrentTypeStat() != null)
         {
             baseDesc += $"\n\nCurrent Effects:" +

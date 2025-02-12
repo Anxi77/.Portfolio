@@ -22,10 +22,8 @@ public static class CSVIO<T> where T : class, new()
         var csv = new StringBuilder();
         var properties = typeof(T).GetProperties();
 
-        // ��� �ۼ�
         csv.AppendLine(string.Join(",", properties.Select(p => p.Name)));
 
-        // ������ �ۼ�
         var values = properties.Select(p => p.GetValue(data)?.ToString() ?? "");
         csv.AppendLine(string.Join(",", values));
 
@@ -50,10 +48,10 @@ public static class CSVIO<T> where T : class, new()
                 Directory.CreateDirectory(directory);
 
             var csv = new StringBuilder();
-            var properties = typeof(T).GetProperties(System.Reflection.BindingFlags.Public |
-                                                   System.Reflection.BindingFlags.Instance);
+            var properties = typeof(T).GetProperties
+            (System.Reflection.BindingFlags.Public |
+            System.Reflection.BindingFlags.Instance);
 
-            // ��� �ۼ� (�� ����)
             var headerLine = string.Join(",", properties.Select(p => p.Name.ToLower()));
             csv.AppendLine(headerLine);
 

@@ -10,7 +10,6 @@ public class SkillDataEditorWindow : EditorWindow
     private Vector2 statsScrollPosition;
     private SkillData currentSkill;
     private GUIStyle headerStyle;
-    private SkillEditorDataContainer editorData;
 
     [MenuItem("Tools/Skill Data Editor")]
     public static void ShowWindow()
