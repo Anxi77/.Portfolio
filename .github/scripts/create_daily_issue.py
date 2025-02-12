@@ -21,11 +21,6 @@ def is_merge_commit_message(message):
 
 def parse_commit_message(message):
     """Parse commit message"""
-    # Skip merge commits
-    if is_merge_commit_message(message):
-        print(f"Skipping merge commit message: {message.split('\n')[0]}")
-        return None
-        
     pattern = r'(?i)\[(.*?)\] (.*?)(?:\s*\n\s*\[body\](.*?))?(?:\s*\n\s*\[todo\](.*?))?(?:\s*\n\s*\[footer\](.*?))?$'
     match = re.search(pattern, message, re.DOTALL | re.IGNORECASE)
     if not match:
@@ -93,7 +88,7 @@ def parse_categorized_todos(text):
     
     categories = {}
     category_manager = CategoryManager()
-    has_uncategorized_items = False
+    current_category = 'General'
     
     for line in text.strip().split('\n'):
         line = line.strip()
@@ -103,54 +98,75 @@ def parse_categorized_todos(text):
         print(f"Processing line: {line}")
         
         if line.startswith('@'):
-            category = line[1:].strip()
-            category = category_manager.add_category(category)
-            category_manager.set_current(category)
-            print(f"Found category: {category}")
+            current_category = line[1:].strip()
+            if current_category not in categories:
+                categories[current_category] = []
+            print(f"Found category: {current_category}")
             continue
             
         if line.startswith(('-', '*')):
-            category = category_manager.current
-            if category not in categories:
-                categories[category] = []
+            if current_category not in categories:
+                categories[current_category] = []
             
             item = line[1:].strip()
-            categories[category].append(item)
-            print(f"Added todo item to {category}: {item}")
-            
-            # Mark if we have items without explicit category
-            if category == 'General':
-                has_uncategorized_items = True
-    
-    # Ensure General category exists if we have uncategorized items
-    if has_uncategorized_items and 'General' not in categories:
-        categories['General'] = []
-    
-    print("\nParsed categories:")
-    for category, items in categories.items():
-        print(f"{category}: {len(items)} items")
-        for item in items:
-            print(f"  - {item}")
+            categories[current_category].append(item)
+            print(f"Added todo item to {current_category}: {item}")
     
     return categories
 
-def create_commit_section(commit_data, branch, commit_sha, author, time_string):
+def create_commit_section(commit_data, branch, commit_sha, author, time_string, repo):
     """Create commit section with details tag"""
-    # Apply blockquote to each line of the body
-    body_lines = [f"> {line}" for line in commit_data['body'].strip().split('\n')]
+    # Handle None values in commit data
+    body = commit_data.get('body', '').strip() if commit_data.get('body') else ''
+    footer = commit_data.get('footer', '').strip() if commit_data.get('footer') else ''
+    
+    # Format body with bullet points
+    body_lines = []
+    if body:
+        for line in body.split('\n'):
+            line = line.strip()
+            if line:
+                body_lines.append(f"> • {line}")
     quoted_body = '\n'.join(body_lines)
     
-    # Apply blockquote to related issues if they exist
-    related_issues = f"\n> **Related Issues:**\n> {commit_data['footer'].strip()}" if commit_data['footer'] else ''
+    # Extract issue numbers from entire commit message
+    full_message = f"{commit_data['title']}\n{body}\n{footer}"
+    issue_numbers = set(re.findall(r'#(\d+)', full_message))
+    
+    # Add comments to referenced issues and prepare related issues section
+    related_issues = []
+    
+    # Always add reference to current daily log
+    try:
+        issues = repo.get_issues(state='open', labels=['daily-log'])
+        for issue in issues:
+            if issue.title.startswith('📅 Daily Development Log'):
+                related_issues.append(f"Daily Development Log: #{issue.number}")
+                break
+    except Exception as e:
+        print(f"Failed to find current daily log issue: {str(e)}")
+    
+    # Process other referenced issues
+    for issue_num in issue_numbers:
+        try:
+            issue = repo.get_issue(int(issue_num))
+            issue.create_comment(f"Referenced in commit {commit_sha[:7]}\n\nCommit message:\n```\n{commit_data['title']}\n```")
+            related_issues.append(f"Related to #{issue_num}")
+        except Exception as e:
+            print(f"Failed to add comment to issue #{issue_num}: {str(e)}")
+    
+    # Add related issues section
+    if related_issues:
+        quoted_body += "\n> \n> Related Issues:\n> " + "\n> ".join(related_issues)
     
     section = f'''> <details>
 > <summary>💫 {time_string} - {commit_data['title'].strip()}</summary>
 >
 > Type: {commit_data['type']} ({commit_data['type_info']['description']})
-> Commit: `{commit_sha}`
+> Commit: {commit_sha[:7]}
 > Author: {author}
 >
-{quoted_body}{related_issues}
+{quoted_body}
 > </details>'''
     return section
 
@@ -200,10 +216,12 @@ def parse_existing_issue(body):
                 if '</details>' in line:
                     continue
                     
-                # process category header
+                # process category header - extract only category name, ignore statistics
                 if '<summary>📑' in line:
-                    current_category = line.split('📑')[1].split('</summary>')[0].strip()
-                    result['todos'].append((False, f"@{current_category}"))
+                    category_match = re.match(r'<summary>📑\s*([^(]+)', line)
+                    if category_match:
+                        current_category = category_match.group(1).strip()
+                        result['todos'].append((False, f"@{current_category}"))
                     continue
                 
                 # process todo items
@@ -220,38 +238,44 @@ def merge_todos(existing_todos, new_todos):
     result = []
     todo_map = {}
     category_manager = CategoryManager()
+    processed_categories = set()  # Track processed categories
     
     # Process existing todos
     current_category = 'General'  # Set default category as General
     for checked, text in existing_todos:
         if text.startswith('@'):
             current_category = text[1:].strip()
-            result.append((False, f"@{current_category}"))
+            if current_category.lower() not in processed_categories:  # Only add if not processed
+                result.append((False, f"@{current_category}"))
+                processed_categories.add(current_category.lower())
             continue
             
         todo_map[text] = len(result)
         result.append((checked, text))
     
     # Process new todos
-    # Add General category if there are uncategorized items
-    if not any(t[1].startswith('@') for t in new_todos):
+    # Add General category if there are uncategorized items and not already added
+    if not any(t[1].startswith('@') for t in new_todos) and 'general' not in processed_categories:
         result.insert(0, (False, "@General"))
+        processed_categories.add('general')
         
     for checked, text in new_todos:
         if text.startswith('@'):
             current_category = text[1:].strip()
             # Add category marker if not exists
-            if not any(t[1] == f"@{current_category}" for t in result):
+            if current_category.lower() not in processed_categories:
                 result.append((False, f"@{current_category}"))
+                processed_categories.add(current_category.lower())
             continue
             
-        # Add General category marker for uncategorized items
-        if current_category == 'General' and not any(t[1] == "@General" for t in result):
+        # Add General category marker for uncategorized items if not already added
+        if current_category == 'General' and 'general' not in processed_categories:
             result.insert(0, (False, "@General"))
+            processed_categories.add('general')
             
         # Find the appropriate category section
         category_index = next((i for i, (_, t) in enumerate(result) 
-                            if t == f"@{current_category}"), None)
+                            if t.startswith('@') and t[1:].strip().lower() == current_category.lower()), None)
         
         if category_index is not None:
             # Find the next category marker or end of list
@@ -316,26 +340,32 @@ def create_todo_section(todos):
     
     # process categorized todos
     sections = []
+    processed_categories = set()  # Track processed categories
     
     # Add General category first if it has items
     if general_todos:
+        completed = sum(1 for checked, _ in general_todos if checked)
+        total = len(general_todos)
         section = f'''<details>
-<summary>📑 General</summary>
+<summary>📑 General ({completed}/{total})</summary>
 
 {'\n'.join(f"- {'[x]' if checked else '[ ]'} {text}" for checked, text in general_todos)}
 </details>'''
         sections.append(section)
+        processed_categories.add('general')
         print(f"\nProcessing category: General")
-        print(f"Items in category: {len(general_todos)}")
+        print(f"Items in category: {total} (Completed: {completed})")
     
     # Process other categories
     for category_lower, data in categorized.items():
-        if not data['todos']:  # skip empty categories
+        if not data['todos'] or category_lower in processed_categories:  # Skip empty or already processed categories
             continue
             
         category = data['name']
+        completed = sum(1 for checked, _ in data['todos'] if checked)
+        total = len(data['todos'])
         print(f"\nProcessing category: {category}")
-        print(f"Items in category: {len(data['todos'])}")
+        print(f"Items in category: {total} (Completed: {completed})")
         
         todo_lines = []
         for checked, text in data['todos']:
@@ -344,11 +374,12 @@ def create_todo_section(todos):
             print(f"Added todo line: {text}")
         
         section = f'''<details>
-<summary>📑 {category}</summary>
+<summary>📑 {category} ({completed}/{total})</summary>
 
 {'\n'.join(todo_lines)}
 </details>'''
         sections.append(section)
+        processed_categories.add(category_lower)
         print(f"Created details section for {category}")
     
     # Add extra newline between sections for better readability
@@ -366,33 +397,29 @@ def convert_to_checkbox_list(text):
     print("\n=== Converting to Checkbox List ===")
     print(f"Input text:\n{text}")
     
-    categories = parse_categorized_todos(text)
     lines = []
+    current_category = None
     
-    # Find uncategorized items first
-    uncategorized = [line.strip()[2:] for line in text.split('\n') 
-                    if line.strip().startswith(('-', '*')) 
-                    and not any(line.strip() in todos for todos in categories.values())]
-    
-    # Always process General category first
-    if 'General' in categories or uncategorized:
-        lines.append('@General')  # Add General category marker
-        if 'General' in categories:
-            lines.extend(f'- {todo}' for todo in categories['General'])
-        if uncategorized:
-            lines.extend(f'- {todo}' for todo in uncategorized)
-    
-    # Process other categories in order, preserving original case
-    for category, todos in categories.items():
-        if category == 'General':
+    # Process each line
+    for line in text.strip().split('\n'):
+        line = line.strip()
+        if not line:
             continue
             
-        # Preserve the original category case from the commit message
-        original_case = next((line[1:].strip() for line in text.split('\n') 
-                          if line.strip().startswith('@') 
-                          and line[1:].strip().lower() == category.lower()), category)
-        lines.append(f'@{original_case}')  # add category marker with original case
-        lines.extend(f'- {todo}' for todo in todos)
+        if line.startswith('@'):
+            current_category = line
+            lines.append(current_category)
+            print(f"Found category: {current_category}")
+        elif line.startswith(('-', '*')):
+            if current_category is None:
+                if not any(l.startswith('@General') for l in lines):
+                    lines.insert(0, '@General')
+                    current_category = '@General'
+                    print("Created General category for uncategorized items")
+            
+            todo_text = line[1:].strip()
+            lines.append(f"- {todo_text}")
+            print(f"Added todo item to {current_category}: {todo_text}")
     
     result = '\n'.join(lines)
     print(f"\nConverted result:\n{result}")
@@ -502,6 +529,90 @@ def get_merge_commits(repo, merge_commit):
         print(f"Error message: {str(e)}")
         return []
 
+def get_commit_summary(commit):
+    """Get a formatted commit summary"""
+    sha = commit.sha[:7]
+    msg = commit.commit.message.strip().split('\n')[0]
+    return f"[{sha}] {msg}"
+
+def log_commit_status(commit, status, extra_info=''):
+    """Log commit status with consistent format"""
+    summary = get_commit_summary(commit)
+    print(f"{status}: {summary}{' - ' + extra_info if extra_info else ''}")
+
+def is_daily_log_issue(issue_title):
+    """Check if an issue is a daily log"""
+    return issue_title.startswith('📅 Daily Development Log')
+
+def is_issue_todo(todo_text):
+    """Check if todo item should be created as an issue"""
+    return todo_text.strip().startswith('(issue)')
+
+def create_issue_from_todo(repo, todo_text, category, parent_issue_number=None):
+    """Create a new issue from todo item"""
+    # Remove '(issue)' prefix and strip whitespace
+    title = todo_text.replace('(issue)', '', 1).strip()
+    
+    # Create issue title with category
+    issue_title = f"[{category}] {title}"
+    
+    # Create issue body with daily log reference
+    body = f"""## 📌 Task Description
+{title}
+
+## 🏷 Category
+{category}
+
+## 🔗 References
+- Created from Daily Log: #{parent_issue_number}
+"""
+    
+    # Create labels
+    labels = ['todo-generated', f'category:{category}']
+    
+    try:
+        new_issue = repo.create_issue(
+            title=issue_title,
+            body=body,
+            labels=labels
+        )
+        print(f"Created new issue #{new_issue.number}: {issue_title}")
+        
+        # Add reference comment to the parent issue
+        if parent_issue_number:
+            parent_issue = repo.get_issue(parent_issue_number)
+            parent_issue.create_comment(f"Created issue #{new_issue.number} from todo item")
+        
+        return new_issue
+    except Exception as e:
+        print(f"Failed to create issue for todo: {title}")
+        print(f"Error: {str(e)}")
+        return None
+
+def process_todo_items(repo, todos, parent_issue_number):
+    """Process todo items and create issues for marked items"""
+    processed_todos = []
+    created_issues = []
+    
+    current_category = 'General'
+    for checked, text in todos:
+        if text.startswith('@'):
+            current_category = text[1:].strip()
+            processed_todos.append((checked, text))
+            continue
+            
+        if is_issue_todo(text):
+            # Create new issue
+            new_issue = create_issue_from_todo(repo, text, current_category, parent_issue_number)
+            if new_issue:
+                created_issues.append(new_issue)
+                # Add only the issue number as a todo item
+                processed_todos.append((checked, f"#{new_issue.number}"))
+        else:
+            processed_todos.append((checked, text))
+    
+    return processed_todos, created_issues
+
 def main():
     # Initialize GitHub token and environment variables
     github_token = os.environ['GITHUB_TOKEN']
@@ -555,9 +666,8 @@ def main():
 
     # find previous issues
     for issue in issues:
-        if issue != today_issue and issue.title.startswith('📅 Daily Development Log'):
+        if issue != today_issue and is_daily_log_issue(issue.title):
             print(f"\n=== Processing Previous Issue #{issue.number} ===")
-
             prev_content = parse_existing_issue(issue.body)
             unchecked_todos = [(False, todo[1]) for todo in prev_content['todos'] if not todo[0]]
             if unchecked_todos:
@@ -568,24 +678,28 @@ def main():
             issue.edit(state='closed')
             print(f"Closed previous issue #{issue.number}")
 
-    # process commits which are not logged in the issue
+    # process commits
+    print("\n=== Filtering commits ===")
     filtered_commits = []
     seen_messages = set()
     
-    print("\n=== Filtering commits ===")
     for commit_to_process in commits_to_process:
         msg = commit_to_process.commit.message.strip()
-        # skip merge commit messages
+        
         if is_merge_commit_message(msg):
-            print(f"Skipping merge commit: [{commit_to_process.sha[:7]}] {msg.split('\n')[0]}")
+            log_commit_status(commit_to_process, "Skipping merge commit")
+            if len(commit_to_process.parents) == 2:
+                print("Processing child commits from merge...")
+                child_commits = get_merge_commits(repo, commit_to_process)
+                commits_to_process.extend(child_commits)
             continue
             
         if msg not in seen_messages and not is_commit_already_logged(msg, existing_content):
             seen_messages.add(msg)
             filtered_commits.append(commit_to_process)
-            print(f"Adding commit: [{commit_to_process.sha[:7]}] {msg.split('\n')[0]}")
+            log_commit_status(commit_to_process, "Adding commit")
         else:
-            print(f"Skipping duplicate commit: [{commit_to_process.sha[:7]}] {msg.split('\n')[0]}")
+            log_commit_status(commit_to_process, "Skipping duplicate commit")
     
     commits_to_process = filtered_commits
     
@@ -620,7 +734,8 @@ def main():
             branch,
             commit_to_process.sha,
             commit_to_process.commit.author.name,
-            time_string
+            time_string,
+            repo
         )
 
         # Create todo section and merge with previous todos
@@ -663,10 +778,17 @@ def main():
                     print(f"⬜ {todo_text}")
                 all_todos = merge_todos(all_todos, previous_todos)
             
-            print(f"\n=== Final Result ===")
-            print(f"Total TODOs: {len(all_todos)} items")
+            # Process todos and create issues for marked items
+            processed_todos, created_issues = process_todo_items(repo, all_todos, today_issue.number)
             
-            # Create updated body
+            print(f"\n=== Created {len(created_issues)} new issues from todos ===")
+            for issue in created_issues:
+                print(f"#{issue.number}: {issue.title}")
+            
+            print(f"\n=== Final Result ===")
+            print(f"Total TODOs: {len(processed_todos)} items")
+            
+            # Create updated body with processed todos
             branch_sections = []
             for branch_name, branch_content in existing_content['branches'].items():
                 branch_sections.append(f'''<details>
@@ -691,7 +813,7 @@ def main():
 
 </div>
 
-{create_todo_section(all_todos)}'''
+{create_todo_section(processed_todos)}'''
             
             today_issue.edit(body=updated_body)
             print(f"Updated issue #{today_issue.number}")
