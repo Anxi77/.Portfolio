@@ -40,7 +40,7 @@ public class PlayerSkillIcon : MonoBehaviour
 
             if (elementalBorder != null && skill != null)
             {
-                ElementType element = skill.GetSkillData()?.metadata.Element ?? ElementType.None;
+                ElementType element = skill.GetSkillData()?.Element ?? ElementType.None;
                 elementalBorder.color = GetElementColor(element);
                 elementalBorder.gameObject.SetActive(element != ElementType.None);
             }

@@ -18,13 +18,13 @@ public class SkillTester : MonoBehaviour
 
     private IEnumerator InitializeWhenReady()
     {
-        // ÇÊ¿äÇÑ ¸Å´ÏÀúµéÀÌ ÃÊ±âÈ­µÉ ¶§±îÁö ´ë±â
+        // ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
         yield return new WaitUntil(() =>
             GameManager.Instance != null &&
             SkillDataManager.Instance != null &&
             SkillDataManager.Instance.IsInitialized);
 
-        // UI ¿ä¼ÒµéÀÌ ÇÒ´çµÇ¾ú´ÂÁö È®ÀÎ
+        // UI ï¿½ï¿½Òµï¿½ï¿½ï¿½ ï¿½Ò´ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
         if (!ValidateComponents())
         {
             Debug.LogError("SkillTester: Required UI components are missing!");
@@ -62,7 +62,7 @@ public class SkillTester : MonoBehaviour
         foreach (var skillData in skillDatas)
         {
             skillDropdown.options.Add(new TMP_Dropdown.OptionData(
-                $"{skillData.metadata.Name} ({skillData.metadata.Type})"
+                $"{skillData.Name} ({skillData.Type})"
             ));
         }
 
@@ -96,7 +96,7 @@ public class SkillTester : MonoBehaviour
         {
             var selectedSkill = skillDatas[skillDropdown.value];
             GameManager.Instance.player.AddOrUpgradeSkill(selectedSkill);
-            Debug.Log($"SkillTester: Added/Upgraded skill: {selectedSkill.metadata.Name}");
+            Debug.Log($"SkillTester: Added/Upgraded skill: {selectedSkill.Name}");
         }
     }
 
@@ -104,7 +104,7 @@ public class SkillTester : MonoBehaviour
     {
         if (!isInitialized) return;
 
-        // TÅ°·Î ÇöÀç ¼±ÅÃµÈ ½ºÅ³ Ãß°¡
+        // TÅ°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½Å³ ï¿½ß°ï¿½
         if (Input.GetKeyDown(KeyCode.T))
         {
             AddSelectedSkill();

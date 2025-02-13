@@ -2,14 +2,45 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using System.IO;
 
 public class SkillDataEditorWindow : EditorWindow
 {
-    private Vector2 scrollPosition;
-    private Vector2 statsScrollPosition;
-    private SkillData currentSkill;
+    private enum EditorTab
+    {
+        Skills,
+        Stats
+    }
+
+    #region Fields
+    private Dictionary<SkillID, SkillData> skillDatabase = new();
+    private Dictionary<SkillID, Dictionary<int, SkillStatData>> statDatabase = new();
+    private string searchText = "";
+    private SkillType typeFilter = SkillType.None;
+    private ElementType elementFilter = ElementType.None;
+    private SkillID selectedSkillId;
+    private Vector2 mainScrollPosition;
     private GUIStyle headerStyle;
+    private Vector2 skillListScrollPosition;
+    private Vector2 skillDetailScrollPosition;
+    private Dictionary<SkillID, bool> levelFoldouts = new();
+
+    // 섹션 토글 상태
+    private bool showBasicInfo = true;
+    private bool showResources = true;
+    private bool showLevelStats = true;
+    #endregion
+
+    #region Properties
+    private SkillData CurrentSkill
+    {
+        get
+        {
+            return skillDatabase.TryGetValue(selectedSkillId, out var skill) ? skill : null;
+        }
+    }
+    #endregion
 
     [MenuItem("Tools/Skill Data Editor")]
     public static void ShowWindow()
@@ -19,8 +50,51 @@ public class SkillDataEditorWindow : EditorWindow
 
     private void OnEnable()
     {
-        LoadEditorData();
-        InitializeStyles();
+        RefreshData();
+    }
+
+    private void RefreshData()
+    {
+        Debug.Log("RefreshData called");
+        RefreshSkillDatabase();
+        RefreshStatDatabase();
+    }
+
+    private void RefreshSkillDatabase()
+    {
+        Debug.Log("RefreshSkillDatabase called");
+        skillDatabase = SkillDataEditorUtility.GetSkillDatabase();
+    }
+
+    private void RefreshStatDatabase()
+    {
+        Debug.Log("RefreshStatDatabase called");
+        statDatabase = SkillDataEditorUtility.GetStatDatabase();
+    }
+
+    private void OnGUI()
+    {
+        if (headerStyle == null)
+        {
+            InitializeStyles();
+        }
+
+        EditorGUILayout.BeginVertical();
+        {
+            EditorGUILayout.Space(10);
+
+            float footerHeight = 25f;
+            float contentHeight = position.height - footerHeight - 35f;
+            EditorGUILayout.BeginVertical(GUILayout.Height(contentHeight));
+            {
+                DrawMainContent();
+            }
+            EditorGUILayout.EndVertical();
+
+            GUILayout.FlexibleSpace();
+            DrawFooter();
+        }
+        EditorGUILayout.EndVertical();
     }
 
     private void InitializeStyles()
@@ -33,415 +107,231 @@ public class SkillDataEditorWindow : EditorWindow
         };
     }
 
-    private void LoadEditorData()
+    private void DrawMainContent()
     {
-        // 먼저 SkillDataManager 초기화
-        var skillDataManager = FindObjectOfType<SkillDataManager>();
-        if (skillDataManager == null)
+        mainScrollPosition = EditorGUILayout.BeginScrollView(mainScrollPosition);
         {
-            var go = new GameObject("SkillDataManager");
-            skillDataManager = go.AddComponent<SkillDataManager>();
-            skillDataManager.InitializeDefaultData();
-            Debug.Log("Created and initialized new SkillDataManager");
-        }
-
-        editorData = AssetDatabase.LoadAssetAtPath<SkillEditorDataContainer>(
-            "Assets/Resources/SkillEditorData.asset"
-        );
-
-        if (editorData == null)
-        {
-            string resourcesPath = Path.Combine(Application.dataPath, "Resources");
-            if (!Directory.Exists(resourcesPath))
-            {
-                Directory.CreateDirectory(resourcesPath);
-                Debug.Log($"Created Resources directory at: {resourcesPath}");
-            }
-
-            editorData = CreateInstance<SkillEditorDataContainer>();
-            AssetDatabase.CreateAsset(editorData, "Assets/Resources/SkillEditorData.asset");
-            AssetDatabase.SaveAssets();
-            Debug.Log("Created new SkillEditorData asset");
-        }
-
-        scrollPosition = editorData.scrollPosition;
-        statsScrollPosition = Vector2.zero;
-
-        if (editorData.lastSelectedSkillID != SkillID.None)
-        {
-            currentSkill = editorData.skillList.Find(s => s.ID == editorData.lastSelectedSkillID);
-        }
-
-    }
-
-    private void OnGUI()
-    {
-        if (editorData == null)
-        {
-            LoadEditorData();
-            if (editorData == null) return;
-        }
-
-        // 전체 윈도우를 수직으로 분할
-        EditorGUILayout.BeginVertical();
-        {
-            // 메인 영역 (상단)
-            EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
-            {
-                // 왼쪽 패널 (고정 너비)
-                EditorGUILayout.BeginVertical(GUILayout.Width(250));
-                DrawLeftPanel();
-                EditorGUILayout.EndVertical();
-
-                // 구분선
-                EditorGUILayout.Space(2);
-                DrawVerticalLine(Color.gray);
-                EditorGUILayout.Space(2);
-
-                // 오른쪽 패널 (나머지 공간)
-                EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-                DrawRightPanel();
-                EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndHorizontal();
-
-            // 구분선
-            DrawHorizontalLine(Color.gray);
-
-            // 하단 버튼 영역
-            EditorGUILayout.BeginVertical(GUILayout.Height(40));
-            DrawBottomPanel();
-            EditorGUILayout.EndVertical();
-        }
-        EditorGUILayout.EndVertical();
-
-        if (GUI.changed)
-        {
-            EditorUtility.SetDirty(editorData);
-        }
-    }
-
-    private void DrawLeftPanel()
-    {
-        EditorGUILayout.BeginVertical(GUILayout.Width(250));
-        {
-            EditorGUILayout.BeginHorizontal();
-            {
-                EditorGUILayout.LabelField("Skills", headerStyle);
-                if (currentSkill != null)
-                {
-                    if (GUILayout.Button("Delete", GUILayout.Width(60)))
-                    {
-                        DeleteCurrentSkill();
-                    }
-                }
-            }
-            EditorGUILayout.EndHorizontal();
-
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
-            {
-                if (editorData.skillList != null)
-                {
-                    foreach (var skill in editorData.skillList)
-                    {
-                        if (skill?.ID == null) continue;
-
-                        GUI.backgroundColor = currentSkill == skill ? Color.cyan : Color.white;
-                        if (GUILayout.Button(skill.skillName, GUILayout.Height(30)))
-                        {
-                            currentSkill = skill;
-                            editorData.lastSelectedSkillID = skill.ID;
-                            EditorUtility.SetDirty(editorData);
-                        }
-
-                    }
-                }
-                GUI.backgroundColor = Color.white;
-            }
-            EditorGUILayout.EndScrollView();
-
-            if (GUILayout.Button("Create New Skill", GUILayout.Height(30)))
-            {
-                CreateNewSkill();
-            }
-        }
-        EditorGUILayout.EndVertical();
-    }
-
-    private void DrawRightPanel()
-    {
-        if (currentSkill == null)
-        {
-            EditorGUILayout.LabelField("Select a skill to edit", headerStyle);
-            return;
-        }
-
-        statsScrollPosition = EditorGUILayout.BeginScrollView(statsScrollPosition);
-        {
-            DrawBasicInfo();
-            EditorGUILayout.Space(10);
-            DrawPrefabSettings();
-            EditorGUILayout.Space(10);
-            DrawSkillStats();
+            DrawSkillsTab();
         }
         EditorGUILayout.EndScrollView();
     }
 
-    private void DrawBottomPanel()
+    private void DrawFooter()
     {
-        EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+        EditorGUILayout.BeginHorizontal(EditorStyles.toolbar, GUILayout.Height(25));
         {
+            GUILayout.FlexibleSpace();
             if (GUILayout.Button("Save All", EditorStyles.toolbarButton, GUILayout.Width(100)))
             {
                 SaveAllData();
             }
-
-            if (GUILayout.Button("Load All", EditorStyles.toolbarButton, GUILayout.Width(100)))
+            if (GUILayout.Button("Refresh", EditorStyles.toolbarButton, GUILayout.Width(100)))
             {
                 LoadAllData();
             }
-
-            GUILayout.FlexibleSpace();
-
+            GUILayout.Space(10);
             if (GUILayout.Button("Create Backup", EditorStyles.toolbarButton, GUILayout.Width(100)))
             {
-                var skillDataManager = FindObjectOfType<SkillDataManager>();
-                skillDataManager?.SaveAllData(editorData.skillList, editorData.skillStats);
+                SkillDataEditorUtility.SaveWithBackup();
+            }
+            GUILayout.Space(10);
+            if (GUILayout.Button("Reset to Default", EditorStyles.toolbarButton, GUILayout.Width(100)))
+            {
+                if (EditorUtility.DisplayDialog("Reset to Default",
+                    "Are you sure you want to reset all data to default? This cannot be undone.",
+                    "Reset", "Cancel"))
+                {
+                    SkillDataEditorUtility.InitializeDefaultData();
+                    selectedSkillId = SkillID.None;
+
+                    EditorApplication.delayCall += () =>
+                    {
+                        RefreshData();
+                        Repaint();
+                    };
+
+                    EditorUtility.SetDirty(this);
+                }
             }
         }
         EditorGUILayout.EndHorizontal();
     }
 
-    private void DrawVerticalLine(Color color)
+    private void DrawSkillsTab()
     {
-        var rect = EditorGUILayout.GetControlRect(false, 1, GUILayout.Width(1));
-        EditorGUI.DrawRect(rect, color);
-    }
-
-    private void DrawHorizontalLine(Color color)
-    {
-        var rect = EditorGUILayout.GetControlRect(false, 1);
-        EditorGUI.DrawRect(rect, color);
-    }
-
-    private void CreateNewSkill()
-    {
-        // 새 스킬 생성 시에는 임시로 None ID 사용
-        var newSkill = new SkillData
+        EditorGUILayout.BeginHorizontal();
         {
-            skillName = "New Skill",
-            description = "New skill description",
-            type = SkillType.None,
-            ID = SkillID.None,  // 임시로 None 할당
-            element = ElementType.None
-        };
-
-        if (editorData.skillList == null)
-        {
-            editorData.skillList = new List<SkillData>();
-        }
-
-        editorData.skillList.Add(newSkill);
-        currentSkill = newSkill;
-        editorData.lastSelectedSkillID = newSkill.ID;
-
-        // 기본 레벨 1 스탯 생성
-        var defaultStat = new SkillStatData
-        {
-            skillID = newSkill.ID,
-            level = 1,
-            damage = 10f,
-            maxSkillLevel = 5,
-            element = newSkill.element,
-            elementalPower = 1f
-        };
-
-        var stats = new SkillEditorDataContainer.SkillLevelStats
-        {
-            skillID = newSkill.ID,
-            levelStats = new List<SkillStatData> { defaultStat }
-        };
-
-        if (editorData.skillStats == null)
-        {
-            editorData.skillStats = new List<SkillEditorDataContainer.SkillLevelStats>();
-        }
-
-        editorData.skillStats.Add(stats);
-        EditorUtility.SetDirty(editorData);
-    }
-
-    private SkillID GetNextAvailableSkillID()
-    {
-        var existingIDs = editorData.skillList
-            .Where(s => s.ID != SkillID.None)  // None ID는 제외
-            .Select(s => (int)s.ID)
-            .ToList();
-
-        var allIDs = System.Enum.GetValues(typeof(SkillID))
-            .Cast<int>()
-            .Where(id => id != (int)SkillID.None)
-            .OrderBy(id => id)
-            .ToList();
-
-        foreach (int id in allIDs)
-        {
-            if (!existingIDs.Contains(id))
+            EditorGUILayout.BeginVertical(GUILayout.Width(250));
             {
-                return (SkillID)id;
+                DrawSkillList();
             }
-        }
-
-        Debug.LogError("No available SkillID found!");
-        return SkillID.None;
-    }
-
-    private void DeleteCurrentSkill()
-    {
-        if (currentSkill == null) return;
-
-        if (EditorUtility.DisplayDialog("Delete Skill",
-            $"Are you sure you want to delete '{currentSkill.skillName}'?",
-            "Delete", "Cancel"))
-
-        {
-            editorData.skillList.Remove(currentSkill);
-            var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.ID);
-            if (stats != null)
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space(5);
+            DrawVerticalLine(Color.gray);
+            EditorGUILayout.Space(5);
+            EditorGUILayout.BeginVertical();
             {
-                editorData.skillStats.Remove(stats);
+                DrawSkillDetails();
             }
-
-            currentSkill = null;
-            editorData.lastSelectedSkillID = SkillID.None;
-            EditorUtility.SetDirty(editorData);
+            EditorGUILayout.EndVertical();
         }
+        EditorGUILayout.EndHorizontal();
     }
 
-    private void AddNewLevel()
+    private void DrawSkillList()
     {
-        if (currentSkill == null) return;
-
-        var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.ID);
-        if (stats == null)
-
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
-            stats = new SkillEditorDataContainer.SkillLevelStats
+            EditorGUILayout.LabelField("Search & Filter", EditorStyles.boldLabel);
+            EditorGUILayout.Space(2);
+            searchText = EditorGUILayout.TextField("Search", searchText);
+            typeFilter = (SkillType)EditorGUILayout.EnumPopup("Type", typeFilter);
+            elementFilter = (ElementType)EditorGUILayout.EnumPopup("Element", elementFilter);
+        }
+        EditorGUILayout.EndVertical();
+        EditorGUILayout.Space(5);
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+        {
+            EditorGUILayout.LabelField("Skills", EditorStyles.boldLabel);
+            EditorGUILayout.Space(2);
+            float listHeight = position.height - 300;
+            skillListScrollPosition = EditorGUILayout.BeginScrollView(
+                skillListScrollPosition,
+                GUILayout.Height(listHeight)
+            );
             {
-                skillID = currentSkill.ID,
-                levelStats = new List<SkillStatData>()
-            };
-            editorData.skillStats.Add(stats);
+                var filteredSkills = FilterSkills();
+                foreach (var skill in filteredSkills)
+                {
+                    bool isSelected = skill.ID == selectedSkillId;
+                    GUI.backgroundColor = isSelected ? Color.cyan : Color.white;
+                    if (GUILayout.Button(skill.Name, GUILayout.Height(25)))
+                    {
+                        selectedSkillId = skill.ID;
+                    }
+                }
+                GUI.backgroundColor = Color.white;
+            }
+            EditorGUILayout.EndScrollView();
         }
+        EditorGUILayout.EndVertical();
+        EditorGUILayout.Space(5);
 
-        int newLevel = stats.levelStats.Count + 1;
-
-        // 이전 레벨의 스탯을 복사하여 새 레벨 생성
-        var prevStat = stats.levelStats.LastOrDefault()?.Clone() ?? new SkillStatData();
-        prevStat.level = newLevel;
-        prevStat.skillID = currentSkill.ID;
-
-        // 기본적인 스탯 증가
-        prevStat.damage *= 1.1f;
-        prevStat.elementalPower *= 1.1f;
-
-        stats.levelStats.Add(prevStat);
-        EditorUtility.SetDirty(editorData);
+        if (GUILayout.Button("Create New Skill", GUILayout.Height(30)))
+        {
+            CreateNewSkill();
+        }
     }
 
-    private void SaveAllData()
+    private void DrawSkillDetails()
     {
-        if (editorData == null)
-        {
-            Debug.LogError("EditorData is null");
-            return;
-        }
-
-        EditorUtility.DisplayProgressBar("Saving Data", "Initializing...", 0f);
-
         try
         {
-            // 저장 전에 None ID를 가진 스킬들에 대해 새로운 ID 할당
-            foreach (var skill in editorData.skillList)
+            if (CurrentSkill == null)
             {
-                if (skill.ID == SkillID.None)
-                {
-                    skill.ID = GetNextAvailableSkillID();
+                EditorGUILayout.LabelField("Select a skill to edit", headerStyle);
+                return;
+            }
 
-                    // 관련된 스탯 데이터의 ID도 업데이트
-                    var stats = editorData.skillStats.Find(s => s.skillID == SkillID.None);
-                    if (stats != null)
+            EditorGUILayout.BeginVertical();
+            {
+                skillDetailScrollPosition = EditorGUILayout.BeginScrollView(
+                    skillDetailScrollPosition,
+                    GUILayout.Height(position.height - 100)
+                );
+                try
+                {
+                    if (showBasicInfo)
                     {
-                        stats.skillID = skill.ID;
-                        foreach (var stat in stats.levelStats)
-                        {
-                            stat.skillID = skill.ID;
-                        }
+                        DrawBasicInfo();
                     }
 
+                    if (showResources)
+                    {
+                        EditorGUILayout.Space(10);
+                        DrawResources();
+                    }
+
+                    if (showLevelStats)
+                    {
+                        EditorGUILayout.Space(10);
+                        DrawLevelStats();
+                    }
+
+                    EditorGUILayout.Space(20);
+                    DrawDeleteButton();
                 }
-            }
-
-            Debug.Log($"Attempting to save {editorData.skillList.Count} skills and {editorData.skillStats?.Count ?? 0} stat entries");
-
-            // SkillDataManager 찾기 또는 생성
-            var skillDataManager = FindObjectOfType<SkillDataManager>();
-            if (skillDataManager == null)
-            {
-                var go = new GameObject("SkillDataManager");
-                skillDataManager = go.AddComponent<SkillDataManager>();
-            }
-
-            // 초기화 시도
-            EditorUtility.DisplayProgressBar("Saving Data", "Initializing SkillDataManager...", 0.2f);
-            skillDataManager.InitializeDefaultData();
-
-            // 초기화 확인
-            if (!skillDataManager.IsInitialized)
-            {
-                throw new System.Exception("Failed to initialize SkillDataManager");
-            }
-
-            EditorUtility.DisplayProgressBar("Saving Data", "Saving skill data...", 0.4f);
-
-            // 데이터 유효성 검사 및 직렬화 준비
-            foreach (var skill in editorData.skillList)
-            {
-                if (skill == null)
+                finally
                 {
-                    Debug.LogError($"Invalid skill data found");
-                    continue;
+                    EditorGUILayout.EndScrollView();
                 }
+            }
+            EditorGUILayout.EndVertical();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error in DrawSkillDetails: {e.Message}\n{e.StackTrace}");
+            EditorGUIUtility.ExitGUI();
+        }
+    }
 
-                // ISerializationCallbackReceiver 인터페이스 구현 확인 및 호출
-                if (skill is ISerializationCallbackReceiver receiver)
+    private void DrawLevelStats()
+    {
+        if (CurrentSkill == null) return;
+
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+        {
+            EditorGUILayout.LabelField("Level Stats", EditorStyles.boldLabel);
+            EditorGUILayout.Space(5);
+
+            var stats = SkillDataEditorUtility.GetStatDatabase().GetValueOrDefault(CurrentSkill.ID);
+            if (stats == null || !stats.Any())
+            {
+                EditorGUILayout.HelpBox("No level stats found. Click 'Add Level' to create level 1 stats.", MessageType.Info);
+            }
+            else
+            {
+                EditorGUI.BeginChangeCheck();
+
+                foreach (var levelStat in stats.Values.OrderBy(s => s.Level))
                 {
-                    receiver.OnBeforeSerialize();
+                    if (!levelFoldouts.ContainsKey(CurrentSkill.ID))
+                        levelFoldouts[CurrentSkill.ID] = false;
+
+                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    {
+                        levelFoldouts[CurrentSkill.ID] = EditorGUILayout.Foldout(
+                            levelFoldouts[CurrentSkill.ID],
+                            $"Level {levelStat.Level}",
+                            true
+                        );
+
+                        if (levelFoldouts[CurrentSkill.ID])
+                        {
+                            EditorGUILayout.Space(5);
+                            DrawStatFields(levelStat);
+                            EditorGUILayout.Space(5);
+                        }
+                    }
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.Space(5);
                 }
 
-                Debug.Log($"Preparing to save skill: {skill.skillName} (ID: {skill.ID})");
+                if (EditorGUI.EndChangeCheck())
+                {
+                    SkillDataEditorUtility.SaveStatDatabase();
+                    EditorUtility.SetDirty(this);
+                }
             }
 
-            // 실제 데이터 저장
-            EditorUtility.DisplayProgressBar("Saving Data", "Writing files...", 0.6f);
-            skillDataManager.SaveAllData(editorData.skillList, editorData.skillStats);
-
-            // 에디터 데이터 저장
-            EditorUtility.DisplayProgressBar("Saving Data", "Saving editor data...", 0.8f);
-            EditorUtility.SetDirty(editorData);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
-            Debug.Log("All skill data saved successfully!");
+            if (GUILayout.Button("Add Level"))
+            {
+                AddNewLevel(CurrentSkill.ID);
+                EditorUtility.SetDirty(this);
+                Repaint();
+            }
         }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"Error saving skill data: {e.Message}\n{e.StackTrace}");
-        }
-        finally
-        {
-            EditorUtility.ClearProgressBar();
-        }
+        EditorGUILayout.EndVertical();
     }
 
     private void DrawBasicInfo()
@@ -449,147 +339,199 @@ public class SkillDataEditorWindow : EditorWindow
         EditorGUILayout.Space(10);
         EditorGUILayout.LabelField("Basic Information", headerStyle);
 
-        // 메타데이터 정보
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
-            EditorGUILayout.LabelField("Metadata", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Basic Info", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
-            currentSkill.skillName = EditorGUILayout.TextField("Name", currentSkill.skillName);
-            currentSkill.description = EditorGUILayout.TextField("Description", currentSkill.description);
-
-            // 스킬 타입이 변경되면 스탯 초기화
-            SkillType newType = (SkillType)EditorGUILayout.EnumPopup("Skill Type", currentSkill.type);
-            if (newType != currentSkill.type)
+            // SkillID 수정 가능하도록 추가
+            EditorGUI.BeginChangeCheck();
+            SkillID newId = (SkillID)EditorGUILayout.EnumPopup("Skill ID", CurrentSkill.ID);
+            if (EditorGUI.EndChangeCheck() && newId != CurrentSkill.ID)
             {
-                currentSkill.type = newType;
-                InitializeSkillStats();
-            }
-
-            currentSkill.ID = (SkillID)EditorGUILayout.EnumPopup("Skill ID", currentSkill.ID);
-            currentSkill.element = (ElementType)EditorGUILayout.EnumPopup("Element", currentSkill.element);
-
-            EditorGUI.indentLevel--;
-        }
-        EditorGUILayout.EndVertical();
-
-        // 기본 스탯 정보
-        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-        {
-            EditorGUILayout.LabelField("Base Stats", EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-
-            if (currentSkill.baseStats == null)
-            {
-                currentSkill.baseStats = new BaseSkillStat();
-            }
-
-            currentSkill.baseStats.damage = EditorGUILayout.FloatField("Base Damage", currentSkill.baseStats.damage);
-            currentSkill.baseStats.skillLevel = EditorGUILayout.IntField("Current Level", currentSkill.baseStats.skillLevel);
-            currentSkill.baseStats.maxSkillLevel = EditorGUILayout.IntField("Max Level", currentSkill.baseStats.maxSkillLevel);
-            currentSkill.baseStats.element = (ElementType)EditorGUILayout.EnumPopup("Base Element", currentSkill.baseStats.element);
-            currentSkill.baseStats.elementalPower = EditorGUILayout.FloatField("Elemental Power", currentSkill.baseStats.elementalPower);
-
-            // 메타데이터와 베이스 스탯의 엘리먼트 동기화
-            if (currentSkill.baseStats.element != currentSkill.element)
-            {
-                if (EditorUtility.DisplayDialog("Element Mismatch",
-                    "Base Stats element differs from Metadata element. Would you like to sync them?",
-
-                    "Yes", "No"))
+                // 기존 데이터베이스에서 해당 ID가 있는지 확인
+                if (newId != SkillID.None && skillDatabase.ContainsKey(newId))
                 {
-                    currentSkill.baseStats.element = currentSkill.element;
+                    EditorUtility.DisplayDialog("Error", $"SkillID {newId} already exists!", "OK");
+                }
+                else
+                {
+                    try
+                    {
+                        var oldId = CurrentSkill.ID;
+                        Debug.Log($"Changing skill ID from {oldId} to {newId}");
+
+                        // 1. 스킬 데이터의 ID 변경
+                        CurrentSkill.ID = newId;
+
+                        // 2. 데이터베이스 업데이트
+                        skillDatabase.Remove(oldId);
+                        skillDatabase[newId] = CurrentSkill;
+
+                        // 3. 스탯 데이터베이스 업데이트 (있는 경우에만)
+                        if (statDatabase.TryGetValue(oldId, out var stats))
+                        {
+                            statDatabase.Remove(oldId);
+                            var newStats = new Dictionary<int, SkillStatData>();
+                            foreach (var kvp in stats)
+                            {
+                                var statData = kvp.Value;
+                                statData.SkillID = newId;
+                                newStats[kvp.Key] = statData;
+                            }
+                            statDatabase[newId] = newStats;
+                            Debug.Log($"Updated stats for {stats.Count} levels");
+                        }
+
+                        // 4. 리소스 파일 경로 및 파일 이름 업데이트 (있는 경우에만)
+                        CurrentSkill.IconPath = UpdateResourceIfExists(
+                            $"Assets/Resources/SkillData/Icons/{oldId}_Icon.png",
+                            $"Assets/Resources/SkillData/Icons/{newId}_Icon.png",
+                            CurrentSkill.IconPath);
+
+                        CurrentSkill.PrefabPath = UpdateResourceIfExists(
+                            $"Assets/Resources/SkillData/Prefabs/{oldId}_Prefab.prefab",
+                            $"Assets/Resources/SkillData/Prefabs/{newId}_Prefab.prefab",
+                            CurrentSkill.PrefabPath);
+
+                        CurrentSkill.ProjectilePath = UpdateResourceIfExists(
+                            $"Assets/Resources/SkillData/Prefabs/{oldId}_Projectile.prefab",
+                            $"Assets/Resources/SkillData/Prefabs/{newId}_Projectile.prefab",
+                            CurrentSkill.ProjectilePath);
+                        // 5. JSON 파일 업데이트 (있는 경우에만)
+                        string oldJsonFile = $"Assets/Resources/SkillData/Json/{oldId}_Data.json";
+                        string newJsonFile = $"Assets/Resources/SkillData/Json/{newId}_Data.json";
+                        if (System.IO.File.Exists(oldJsonFile))
+                        {
+                            AssetDatabase.MoveAsset(oldJsonFile, newJsonFile);
+                            Debug.Log($"Moved JSON file from {oldJsonFile} to {newJsonFile}");
+                        }
+
+                        // 6. 레벨별 프리팹 업데이트 (있는 경우에만)
+                        if (CurrentSkill.PrefabsByLevelPaths != null)
+                        {
+                            for (int i = 0; i < CurrentSkill.PrefabsByLevelPaths.Length; i++)
+                            {
+                                if (!string.IsNullOrEmpty(CurrentSkill.PrefabsByLevelPaths[i]))
+                                {
+                                    string oldLevelFile = $"Assets/Resources/SkillData/Prefabs/{oldId}_Level_{i + 1}.prefab";
+                                    string newLevelFile = $"Assets/Resources/SkillData/Prefabs/{newId}_Level_{i + 1}.prefab";
+                                    CurrentSkill.PrefabsByLevelPaths[i] = UpdateResourceIfExists(oldLevelFile, newLevelFile, CurrentSkill.PrefabsByLevelPaths[i]);
+                                }
+                            }
+                        }
+
+                        // 7. 선택된 스킬 ID 업데이트
+                        selectedSkillId = newId;
+
+                        // 8. 변경사항 저장
+                        SkillDataEditorUtility.SaveSkillData(CurrentSkill);
+                        SkillDataEditorUtility.SaveStatDatabase();
+
+                        // 9. 에디터 갱신
+                        AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
+                        EditorUtility.SetDirty(this);
+
+                        Debug.Log($"Successfully changed skill ID from {oldId} to {newId}");
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"Error changing skill ID: {e.Message}\n{e.StackTrace}");
+                        EditorUtility.DisplayDialog("Error", "Failed to change skill ID. Check console for details.", "OK");
+                    }
                 }
             }
 
+            EditorGUI.BeginChangeCheck();
+            CurrentSkill.Name = EditorGUILayout.TextField("Name", CurrentSkill.Name);
+            CurrentSkill.Description = EditorGUILayout.TextField("Description", CurrentSkill.Description);
+            CurrentSkill.Type = (SkillType)EditorGUILayout.EnumPopup("Type", CurrentSkill.Type);
+            CurrentSkill.Element = (ElementType)EditorGUILayout.EnumPopup("Element", CurrentSkill.Element);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                SkillDataEditorUtility.SaveSkillData(CurrentSkill);
+                EditorUtility.SetDirty(this);
+            }
+
             EditorGUI.indentLevel--;
         }
         EditorGUILayout.EndVertical();
-
-        if (GUI.changed)
-        {
-            EditorUtility.SetDirty(editorData);
-        }
     }
 
-    private void DrawPrefabSettings()
+    private void DrawResources()
     {
-        EditorGUILayout.Space(10);
-        EditorGUILayout.LabelField("Prefab Settings", headerStyle);
+        if (CurrentSkill == null) return;
 
-        // 아이콘 설정
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
-            EditorGUILayout.LabelField("Icon", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Resources", EditorStyles.boldLabel);
+            EditorGUILayout.Space(5);
+
+            // 현재 아이콘 표시
+            if (CurrentSkill.Icon != null)
+            {
+                float size = 64f;
+                var rect = EditorGUILayout.GetControlRect(GUILayout.Width(size), GUILayout.Height(size));
+                EditorGUI.DrawPreviewTexture(rect, CurrentSkill.Icon.texture);
+                EditorGUILayout.Space(5);
+            }
 
             EditorGUI.BeginChangeCheck();
-            currentSkill.icon = (Sprite)EditorGUILayout.ObjectField(
-                "Icon Sprite",
-                currentSkill.icon,
+            var newIcon = (Sprite)EditorGUILayout.ObjectField(
+                "Icon",
+                CurrentSkill.Icon,
                 typeof(Sprite),
                 false
             );
 
-            if (currentSkill.icon != null)
+            if (EditorGUI.EndChangeCheck() && newIcon != null)
             {
-                var rect = EditorGUILayout.GetControlRect(false, 64);
-                rect.width = 64;
-                EditorGUI.DrawPreviewTexture(rect, currentSkill.icon.texture);
+                CurrentSkill.Icon = newIcon;
+                GUI.changed = true;
             }
-        }
-        EditorGUILayout.EndVertical();
 
-        // 메타데이터 프리팹
-        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-        {
-            EditorGUILayout.LabelField("Metadata Prefab", EditorStyles.boldLabel);
-            currentSkill.prefabop = (GameObject)EditorGUILayout.ObjectField(
+            EditorGUILayout.Space(5);
+
+            // 기본 프리팹
+            CurrentSkill.Prefab = (GameObject)EditorGUILayout.ObjectField(
                 "Base Prefab",
-                currentSkill.prefab,
+                CurrentSkill.Prefab,
                 typeof(GameObject),
                 false
             );
 
-        }
-        EditorGUILayout.EndVertical();
-
-        // 프로젝타일 프리팹 (해당하는 경우)
-        if (currentSkill.metadata.Type == SkillType.Projectile)
-        {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            // 프로젝타일 프리팹 (해당하는 경우)
+            if (CurrentSkill.Type == SkillType.Projectile)
             {
-                EditorGUILayout.LabelField("Projectile Prefab", EditorStyles.boldLabel);
-                currentSkill.projectile = (GameObject)EditorGUILayout.ObjectField(
-                    "Projectile",
-                    currentSkill.projectile,
+                CurrentSkill.ProjectilePrefab = (GameObject)EditorGUILayout.ObjectField(
+                    "Projectile Prefab",
+                    CurrentSkill.ProjectilePrefab,
                     typeof(GameObject),
                     false
                 );
             }
-            EditorGUILayout.EndVertical();
-        }
 
-        // 레벨별 프리팹
-        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-        {
+            // 레벨별 프리팹
+            EditorGUILayout.Space(5);
             EditorGUILayout.LabelField("Level Prefabs", EditorStyles.boldLabel);
 
-            // 레벨별 프리팹 배열 크기 조정
-            int newSize = EditorGUILayout.IntField("Level Count", currentSkill.prefabsByLevel?.Length ?? 0);
-            if (newSize != currentSkill.prefabsByLevel?.Length)
+            int newSize = EditorGUILayout.IntField("Level Count", CurrentSkill.PrefabsByLevel?.Length ?? 0);
+            if (newSize != CurrentSkill.PrefabsByLevel?.Length)
             {
-                System.Array.Resize(ref currentSkill.prefabsByLevel, newSize);
-                EditorUtility.SetDirty(editorData);
+                Array.Resize(ref CurrentSkill.PrefabsByLevel, newSize);
+                GUI.changed = true;
             }
 
-            if (currentSkill.prefabsByLevel != null)
+            if (CurrentSkill.PrefabsByLevel != null)
             {
                 EditorGUI.indentLevel++;
-                for (int i = 0; i < currentSkill.prefabsByLevel.Length; i++)
+                for (int i = 0; i < CurrentSkill.PrefabsByLevel.Length; i++)
                 {
-                    currentSkill.prefabsByLevel[i] = (GameObject)EditorGUILayout.ObjectField(
+                    CurrentSkill.PrefabsByLevel[i] = (GameObject)EditorGUILayout.ObjectField(
                         $"Level {i + 1}",
-                        currentSkill.prefabsByLevel[i],
+                        CurrentSkill.PrefabsByLevel[i],
                         typeof(GameObject),
                         false
                     );
@@ -600,84 +542,16 @@ public class SkillDataEditorWindow : EditorWindow
         EditorGUILayout.EndVertical();
     }
 
-    private void InitializeSkillStats()
-    {
-        var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.ID);
-        if (stats == null)
-        {
-            stats = new SkillEditorDataContainer.SkillLevelStats
-            {
-                skillID = currentSkill.ID,
-                levelStats = new List<SkillStatData>()
-            };
-            editorData.skillStats.Add(stats);
-
-        }
-
-        // 기존 스탯 초기화
-        stats.levelStats.Clear();
-
-        // 레벨 1 기본 스탯 생성
-        var defaultStat = new SkillStatData
-        {
-            skillID = currentSkill.ID,
-            level = 1,
-            damage = 10f,
-            maxSkillLevel = 5,
-            element = currentSkill.element,
-            elementalPower = 1f
-        };
-
-        stats.levelStats.Add(defaultStat);
-        EditorUtility.SetDirty(editorData);
-    }
-
-    private void DrawSkillStats()
-    {
-        EditorGUILayout.LabelField("Skill Stats", headerStyle);
-        EditorGUI.indentLevel++;
-
-        var stats = editorData.skillStats.Find(s => s.skillID == currentSkill.ID);
-        if (stats == null)
-
-        {
-            stats = new SkillEditorDataContainer.SkillLevelStats
-            {
-                skillID = currentSkill.ID,
-                levelStats = new List<SkillStatData>()
-            };
-
-            editorData.skillStats.Add(stats);
-        }
-
-        foreach (var stat in stats.levelStats)
-        {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            {
-                EditorGUILayout.LabelField($"Level {stat.level}", EditorStyles.boldLabel);
-                DrawStatFields(stat);
-            }
-            EditorGUILayout.EndVertical();
-            EditorGUILayout.Space(5);
-        }
-
-        if (GUILayout.Button("Add Level"))
-        {
-            AddNewLevel(stats);
-        }
-
-        EditorGUI.indentLevel--;
-    }
-
     private void DrawStatFields(SkillStatData stat)
     {
         // 기본 스탯
-        stat.damage = EditorGUILayout.FloatField("Damage", stat.damage);
-        stat.maxSkillLevel = EditorGUILayout.IntField("Max Level", stat.maxSkillLevel);
-        stat.elementalPower = EditorGUILayout.FloatField("Elemental Power", stat.elementalPower);
+        stat.Damage = EditorGUILayout.FloatField("Damage", stat.Damage);
+        stat.MaxSkillLevel = EditorGUILayout.IntField("Max Level", stat.MaxSkillLevel);
+        stat.ElementalPower = EditorGUILayout.FloatField("Elemental Power", stat.ElementalPower);
 
         // 스킬 타입별 특수 스탯
-        switch (currentSkill.type)
+        var skill = skillDatabase[stat.SkillID];
+        switch (skill.Type)
         {
             case SkillType.Projectile:
                 DrawProjectileStats(stat);
@@ -688,26 +562,7 @@ public class SkillDataEditorWindow : EditorWindow
             case SkillType.Passive:
                 DrawPassiveStats(stat);
                 break;
-            case SkillType.None:
-                EditorGUILayout.HelpBox("Please select a skill type", MessageType.Warning);
-                break;
         }
-    }
-
-    private void AddNewLevel(SkillEditorDataContainer.SkillLevelStats stats)
-    {
-        var newLevel = stats.levelStats.Count + 1;
-        var newStat = new SkillStatData
-        {
-            skillID = currentSkill.ID,
-            level = newLevel,
-            damage = 10f,
-            maxSkillLevel = 5,
-            element = currentSkill.element,
-            elementalPower = 1f
-        };
-        stats.levelStats.Add(newStat);
-        EditorUtility.SetDirty(editorData);
     }
 
     private void DrawProjectileStats(SkillStatData stat)
@@ -717,16 +572,16 @@ public class SkillDataEditorWindow : EditorWindow
 
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
-            stat.projectileSpeed = EditorGUILayout.FloatField("Speed", stat.projectileSpeed);
-            stat.projectileScale = EditorGUILayout.FloatField("Scale", stat.projectileScale);
-            stat.shotInterval = EditorGUILayout.FloatField("Shot Interval", stat.shotInterval);
-            stat.pierceCount = EditorGUILayout.IntField("Pierce Count", stat.pierceCount);
-            stat.attackRange = EditorGUILayout.FloatField("Attack Range", stat.attackRange);
-            stat.homingRange = EditorGUILayout.FloatField("Homing Range", stat.homingRange);
-            stat.isHoming = EditorGUILayout.Toggle("Is Homing", stat.isHoming);
-            stat.explosionRad = EditorGUILayout.FloatField("Explosion Radius", stat.explosionRad);
-            stat.projectileCount = EditorGUILayout.IntField("Projectile Count", stat.projectileCount);
-            stat.innerInterval = EditorGUILayout.FloatField("Inner Interval", stat.innerInterval);
+            stat.ProjectileSpeed = EditorGUILayout.FloatField("Speed", stat.ProjectileSpeed);
+            stat.ProjectileScale = EditorGUILayout.FloatField("Scale", stat.ProjectileScale);
+            stat.ShotInterval = EditorGUILayout.FloatField("Shot Interval", stat.ShotInterval);
+            stat.PierceCount = EditorGUILayout.IntField("Pierce Count", stat.PierceCount);
+            stat.AttackRange = EditorGUILayout.FloatField("Attack Range", stat.AttackRange);
+            stat.HomingRange = EditorGUILayout.FloatField("Homing Range", stat.HomingRange);
+            stat.IsHoming = EditorGUILayout.Toggle("Is Homing", stat.IsHoming);
+            stat.ExplosionRad = EditorGUILayout.FloatField("Explosion Radius", stat.ExplosionRad);
+            stat.ProjectileCount = EditorGUILayout.IntField("Projectile Count", stat.ProjectileCount);
+            stat.InnerInterval = EditorGUILayout.FloatField("Inner Interval", stat.InnerInterval);
         }
         EditorGUILayout.EndVertical();
     }
@@ -738,11 +593,11 @@ public class SkillDataEditorWindow : EditorWindow
 
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
-            stat.radius = EditorGUILayout.FloatField("Radius", stat.radius);
-            stat.duration = EditorGUILayout.FloatField("Duration", stat.duration);
-            stat.tickRate = EditorGUILayout.FloatField("Tick Rate", stat.tickRate);
-            stat.isPersistent = EditorGUILayout.Toggle("Is Persistent", stat.isPersistent);
-            stat.moveSpeed = EditorGUILayout.FloatField("Move Speed", stat.moveSpeed);
+            stat.Radius = EditorGUILayout.FloatField("Radius", stat.Radius);
+            stat.Duration = EditorGUILayout.FloatField("Duration", stat.Duration);
+            stat.TickRate = EditorGUILayout.FloatField("Tick Rate", stat.TickRate);
+            stat.IsPersistent = EditorGUILayout.Toggle("Is Persistent", stat.IsPersistent);
+            stat.MoveSpeed = EditorGUILayout.FloatField("Move Speed", stat.MoveSpeed);
         }
         EditorGUILayout.EndVertical();
     }
@@ -754,9 +609,9 @@ public class SkillDataEditorWindow : EditorWindow
 
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
-            stat.effectDuration = EditorGUILayout.FloatField("Effect Duration", stat.effectDuration);
-            stat.cooldown = EditorGUILayout.FloatField("Cooldown", stat.cooldown);
-            stat.triggerChance = EditorGUILayout.FloatField("Trigger Chance", stat.triggerChance);
+            stat.EffectDuration = EditorGUILayout.FloatField("Effect Duration", stat.EffectDuration);
+            stat.Cooldown = EditorGUILayout.FloatField("Cooldown", stat.Cooldown);
+            stat.TriggerChance = EditorGUILayout.FloatField("Trigger Chance", stat.TriggerChance);
         }
         EditorGUILayout.EndVertical();
 
@@ -765,33 +620,241 @@ public class SkillDataEditorWindow : EditorWindow
 
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
-            stat.damageIncrease = EditorGUILayout.FloatField("Damage Increase (%)", stat.damageIncrease);
-            stat.defenseIncrease = EditorGUILayout.FloatField("Defense Increase (%)", stat.defenseIncrease);
-            stat.expAreaIncrease = EditorGUILayout.FloatField("Exp Area Increase (%)", stat.expAreaIncrease);
-            stat.homingActivate = EditorGUILayout.Toggle("Homing Activate", stat.homingActivate);
-            stat.hpIncrease = EditorGUILayout.FloatField("HP Increase (%)", stat.hpIncrease);
-            stat.moveSpeedIncrease = EditorGUILayout.FloatField("Move Speed Increase (%)", stat.moveSpeedIncrease);
-            stat.attackSpeedIncrease = EditorGUILayout.FloatField("Attack Speed Increase (%)", stat.attackSpeedIncrease);
-            stat.attackRangeIncrease = EditorGUILayout.FloatField("Attack Range Increase (%)", stat.attackRangeIncrease);
-            stat.hpRegenIncrease = EditorGUILayout.FloatField("HP Regen Increase (%)", stat.hpRegenIncrease);
+            stat.DamageIncrease = EditorGUILayout.FloatField("Damage Increase (%)", stat.DamageIncrease);
+            stat.DefenseIncrease = EditorGUILayout.FloatField("Defense Increase (%)", stat.DefenseIncrease);
+            stat.ExpAreaIncrease = EditorGUILayout.FloatField("Exp Area Increase (%)", stat.ExpAreaIncrease);
+            stat.HomingActivate = EditorGUILayout.Toggle("Homing Activate", stat.HomingActivate);
+            stat.HpIncrease = EditorGUILayout.FloatField("HP Increase (%)", stat.HpIncrease);
+            stat.MoveSpeedIncrease = EditorGUILayout.FloatField("Move Speed Increase (%)", stat.MoveSpeedIncrease);
+            stat.AttackSpeedIncrease = EditorGUILayout.FloatField("Attack Speed Increase (%)", stat.AttackSpeedIncrease);
+            stat.AttackRangeIncrease = EditorGUILayout.FloatField("Attack Range Increase (%)", stat.AttackRangeIncrease);
+            stat.HpRegenIncrease = EditorGUILayout.FloatField("HP Regen Increase (%)", stat.HpRegenIncrease);
         }
         EditorGUILayout.EndVertical();
     }
 
-    private void LoadAllData()
+    private List<SkillData> FilterSkills()
     {
-        var skillDataManager = FindObjectOfType<SkillDataManager>();
-        if (skillDataManager == null)
+        return skillDatabase.Values.Where(skill =>
+            (string.IsNullOrEmpty(searchText) ||
+                skill.Name.ToLower().Contains(searchText.ToLower()))
+                &&
+            (typeFilter == SkillType.None ||
+            skill.Type == typeFilter) &&
+            (elementFilter == ElementType.None ||
+            skill.Element == elementFilter)
+        ).ToList();
+    }
+
+    private void CreateNewSkill()
+    {
+        var newSkill = new SkillData
         {
-            var go = new GameObject("SkillDataManager");
-            skillDataManager = go.AddComponent<SkillDataManager>();
+            ID = SkillID.None,
+            Name = "New Skill",
+            Description = "New skill description",
+            Type = SkillType.None,
+            Element = ElementType.None
+        };
+
+        try
+        {
+            // 데이터베이스에 추가
+            skillDatabase[SkillID.None] = newSkill;
+            SkillDataEditorUtility.SaveSkillData(newSkill);
+
+            // 로컬 데이터베이스 갱신
+            RefreshSkillDatabase();
+
+            // 새 스킬 선택
+            selectedSkillId = newSkill.ID;
+
+            // 기본 스탯 생성
+            var defaultStat = new SkillStatData
+            {
+                SkillID = newSkill.ID,
+                Level = 1,
+                MaxSkillLevel = 5,
+                Damage = 10f,
+                ElementalPower = 1f
+            };
+
+            if (!statDatabase.ContainsKey(newSkill.ID))
+            {
+                statDatabase[newSkill.ID] = new Dictionary<int, SkillStatData>();
+            }
+            statDatabase[newSkill.ID][1] = defaultStat;
+            SkillDataEditorUtility.SaveStatDatabase();
+
+            GUI.changed = true;
+            Repaint();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error creating new skill: {e.Message}\n{e.StackTrace}");
+            EditorUtility.DisplayDialog("Error",
+                "Failed to create new skill. Check console for details.",
+                "OK");
+        }
+    }
+
+    private void AddNewLevel(SkillID skillId)
+    {
+        var stats = SkillDataEditorUtility.GetStatDatabase().GetValueOrDefault(skillId);
+        if (stats == null)
+        {
+            stats = new Dictionary<int, SkillStatData>();
+            SkillDataEditorUtility.GetStatDatabase()[skillId] = stats;
         }
 
-        // 에디터 데이터 리로드
-        LoadEditorData();
+        int newLevel = stats.Count > 0 ? stats.Values.Max(s => s.Level) + 1 : 1;
+        var newStat = new SkillStatData
+        {
+            SkillID = skillId,
+            Level = newLevel,
+            Damage = 10f,
+            MaxSkillLevel = 5,
+            Element = CurrentSkill.Element,
+            ElementalPower = 1f
+        };
 
-        // 변경사항 저장
-        EditorUtility.SetDirty(editorData);
-        AssetDatabase.SaveAssets();
+        // 스킬 타입에 따른 기본값 설정
+        switch (CurrentSkill.Type)
+        {
+            case SkillType.Projectile:
+                newStat.ProjectileSpeed = 10f;
+                newStat.ProjectileScale = 1f;
+                newStat.ShotInterval = 0.5f;
+                newStat.PierceCount = 1;
+                newStat.AttackRange = 10f;
+                break;
+            case SkillType.Area:
+                newStat.Radius = 5f;
+                newStat.Duration = 3f;
+                newStat.TickRate = 1f;
+                break;
+            case SkillType.Passive:
+                newStat.EffectDuration = 5f;
+                newStat.Cooldown = 10f;
+                newStat.TriggerChance = 1f;
+                break;
+        }
+
+        stats[newLevel] = newStat;
+        SkillDataEditorUtility.SaveStatDatabase();
+    }
+
+    private void DrawDeleteButton()
+    {
+        EditorGUILayout.Space(20);
+
+        if (GUILayout.Button("Delete Skill", GUILayout.Height(30)))
+        {
+            if (EditorUtility.DisplayDialog("Delete Skill",
+                $"Are you sure you want to delete '{CurrentSkill.Name}'?",
+                "Delete", "Cancel"))
+            {
+                SkillDataEditorUtility.DeleteSkillData(CurrentSkill.ID);
+                selectedSkillId = SkillID.None;
+
+                // 에디터 데이터 새로고침
+                EditorApplication.delayCall += () =>
+                {
+                    RefreshData();
+                    Repaint();
+                };
+
+                EditorUtility.SetDirty(this);
+            }
+        }
+    }
+
+    private void DrawVerticalLine(Color color)
+    {
+        var rect = EditorGUILayout.GetControlRect(false, 1, GUILayout.Width(1));
+        EditorGUI.DrawRect(rect, color);
+    }
+
+    private void LoadAllData()
+    {
+        EditorUtility.DisplayProgressBar("Loading Data", "Loading skills...", 0.3f);
+
+        try
+        {
+            // 데이터베이스 새로고침 전에 현재 선택된 스킬 ID 저장
+            var previousSelectedId = selectedSkillId;
+
+            // 모든 데이터 새로고침
+            RefreshData();
+
+            // 이전에 선택된 스킬이 여전히 존재하는지 확인
+            if (previousSelectedId != SkillID.None && !skillDatabase.ContainsKey(previousSelectedId))
+            {
+                selectedSkillId = SkillID.None;
+            }
+
+            Debug.Log("All data loaded successfully!");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error loading data: {e.Message}");
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+        }
+    }
+
+    private void SaveAllData()
+    {
+        EditorUtility.DisplayProgressBar("Saving Data", "Saving skills...", 0.3f);
+
+        try
+        {
+            // 변경된 스킬들 저장
+            foreach (var skill in skillDatabase.Values)
+            {
+                SkillDataEditorUtility.SaveSkillData(skill);
+            }
+
+            // 스탯 데이터베이스 저장
+            SkillDataEditorUtility.SaveStatDatabase();
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            // 저장 후 즉시 리프레시하지 않고, 다음 프레임에서 수행
+            EditorApplication.delayCall += () =>
+            {
+                RefreshSkillDatabase();
+            };
+
+            Debug.Log("All data saved successfully!");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error saving data: {e.Message}");
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+        }
+    }
+
+    // 리소스 파일 업데이트를 위한 헬퍼 메서드
+    private string UpdateResourceIfExists(string oldPath, string newPath, string currentPath)
+    {
+        if (System.IO.File.Exists(oldPath))
+        {
+            AssetDatabase.MoveAsset(oldPath, newPath);
+            if (!string.IsNullOrEmpty(currentPath))
+            {
+                return currentPath.Replace(
+                    Path.GetFileNameWithoutExtension(oldPath),
+                    Path.GetFileNameWithoutExtension(newPath)
+                );
+            }
+        }
+        return currentPath;
     }
 }

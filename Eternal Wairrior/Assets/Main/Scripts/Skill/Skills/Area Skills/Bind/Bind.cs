@@ -19,11 +19,11 @@ public class Bind : AreaSkills
         {
             skillData = new SkillData
             {
-                skillName = "Bind",
-                description = "Immobilizes enemies in range",
-                type = SkillType.Area,
-                element = ElementType.Dark,
-                tier = 1
+                Name = "Bind",
+                Description = "Immobilizes enemies in range",
+                Type = SkillType.Area,
+                Element = ElementType.Dark,
+                Tier = 1
             };
         }
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
@@ -42,10 +42,10 @@ public class Bind : AreaSkills
                 baseStat = new BaseSkillStat
                 {
                     damage = 5f,
-                    skillName = skillData.skillName,
+                    skillName = skillData.Name,
                     skillLevel = 1,
                     maxSkillLevel = 5,
-                    element = skillData.element,
+                    element = skillData.Element,
                     elementalPower = 1f
                 },
 

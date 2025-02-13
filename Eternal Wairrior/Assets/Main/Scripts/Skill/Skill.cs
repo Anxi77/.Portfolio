@@ -49,9 +49,9 @@ public abstract class Skill : MonoBehaviour
             return true;
         }
 
-        if (data.skillName == null) return false;
-        if (data.type == SkillType.None) return false;
-        if (string.IsNullOrEmpty(data.skillName)) return false;
+        if (data.Name == null) return false;
+        if (data.Type == SkillType.None) return false;
+        if (string.IsNullOrEmpty(data.Name)) return false;
         if (data.ID == SkillID.None) return false;
 
         var currentStats = data.GetCurrentTypeStat();
@@ -62,7 +62,7 @@ public abstract class Skill : MonoBehaviour
     }
 
     public virtual float Damage => skillData?.GetCurrentTypeStat()?.baseStat?.damage ?? 0f;
-    public string SkillName => skillData?.skillName ?? "Unknown";
+    public string SkillName => skillData?.Name ?? "Unknown";
     protected int _skillLevel = 1;
 
     public int SkillLevel
@@ -141,7 +141,7 @@ public abstract class Skill : MonoBehaviour
             var newStats = SkillDataManager.Instance.GetSkillStatsForLevel(
                 skillData.ID,
                 newLevel,
-                skillData.type);
+                skillData.Type);
 
             if (newStats == null)
             {
@@ -176,7 +176,7 @@ public abstract class Skill : MonoBehaviour
 
     public virtual string GetDetailedDescription()
     {
-        return skillData?.description ?? "No description available";
+        return skillData?.Description ?? "No description available";
     }
 
     protected virtual void OnValidate()
@@ -195,13 +195,13 @@ public abstract class Skill : MonoBehaviour
                 return;
             }
 
-            Debug.Log($"Validated skill data for {skillData.skillName}");
+            Debug.Log($"Validated skill data for {skillData.Name}");
         }
     }
 
     public virtual MonoBehaviour GetOwner() => owner;
-    public virtual SkillType GetSkillType() => skillData?.type ?? SkillType.None;
-    public virtual ElementType GetElementType() => skillData?.element ?? ElementType.None;
+    public virtual SkillType GetSkillType() => skillData?.Type ?? SkillType.None;
+    public virtual ElementType GetElementType() => skillData?.Element ?? ElementType.None;
 
     public virtual void SetOwner(MonoBehaviour newOwner)
     {

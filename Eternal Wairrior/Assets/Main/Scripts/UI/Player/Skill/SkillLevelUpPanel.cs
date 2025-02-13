@@ -44,7 +44,7 @@ public class SkillLevelUpPanel : MonoBehaviour
                 CreateSkillUpgradeButton(skillData, playerSkills);
             }
 
-            ShowElementalHeader(availableSkills[0].metadata.Element);
+            ShowElementalHeader(availableSkills[0].Element);
         }
         catch (System.Exception e)
         {
@@ -64,13 +64,13 @@ public class SkillLevelUpPanel : MonoBehaviour
     {
         if (!ValidateSkillData(skillData)) return false;
 
-        var existingSkill = playerSkills.Find(s => s.SkillID == skillData.metadata.ID);
+        var existingSkill = playerSkills.Find(s => s.SkillID == skillData.ID);
         return existingSkill == null || existingSkill.SkillLevel < existingSkill.MaxSkillLevel;
     }
 
     private void CreateSkillUpgradeButton(SkillData skillData, List<Skill> playerSkills)
     {
-        var existingSkill = playerSkills.Find(s => s.SkillID == skillData.metadata.ID);
+        var existingSkill = playerSkills.Find(s => s.SkillID == skillData.ID);
         var button = Instantiate(buttonPrefab, list);
         var upgradeInfo = GetUpgradeInfo(existingSkill, skillData);
 
@@ -106,14 +106,14 @@ public class SkillLevelUpPanel : MonoBehaviour
             if (existingSkill != null)
             {
                 GameManager.Instance.player.AddOrUpgradeSkill(skillData);
-                var updatedSkill = GameManager.Instance.player.skills.Find(s => s.SkillID == skillData.metadata.ID);
+                var updatedSkill = GameManager.Instance.player.skills.Find(s => s.SkillID == skillData.ID);
                 skillSelectedCallback?.Invoke(updatedSkill);
             }
             else
             {
                 if (GameManager.Instance.player.AddOrUpgradeSkill(skillData))
                 {
-                    var newSkill = GameManager.Instance.player.skills.Find(s => s.SkillID == skillData.metadata.ID);
+                    var newSkill = GameManager.Instance.player.skills.Find(s => s.SkillID == skillData.ID);
                     skillSelectedCallback?.Invoke(newSkill);
                 }
             }
@@ -157,15 +157,15 @@ public class SkillLevelUpPanel : MonoBehaviour
 
     private bool ValidateSkillData(SkillData skillData)
     {
-        if (skillData == null || skillData.metadata == null)
+        if (skillData == null)
         {
-            Debug.LogError("Invalid skill data");
+            Debug.LogError("Skill Data is null");
             return false;
         }
 
-        if (skillData.metadata.Prefab == null)
+        if (skillData.Prefab == null)
         {
-            Debug.LogError($"Missing prefab for skill: {skillData.metadata.Name}");
+            Debug.LogError($"Missing prefab for skill: {skillData.Name}");
             return false;
         }
 

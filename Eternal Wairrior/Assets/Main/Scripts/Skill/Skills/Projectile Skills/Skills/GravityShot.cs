@@ -44,7 +44,7 @@ public class GravityProjectileSkill : ProjectileSkills
 
     protected override void Fire()
     {
-        if (!isInitialized || skillData?.projectile == null)
+        if (!isInitialized || skillData?.ProjectilePrefab == null)
         {
             Debug.LogWarning("Cannot fire: not initialized or missing projectile");
             return;
@@ -53,7 +53,7 @@ public class GravityProjectileSkill : ProjectileSkills
         Vector3 spawnPosition = transform.position + transform.up * 0.5f;
 
         var proj = PoolManager.Instance.Spawn<GravityProjectile>(
-            skillData.projectile,
+            skillData.ProjectilePrefab,
             spawnPosition,
             Quaternion.identity
         );

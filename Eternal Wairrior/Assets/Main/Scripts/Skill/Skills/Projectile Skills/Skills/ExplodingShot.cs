@@ -11,13 +11,13 @@ public class ExplodingShot : ProjectileSkills
     protected override void Fire()
     {
         Projectile proj = PoolManager.Instance.Spawn<Projectile>(
-            skillData.projectile,
+            skillData.ProjectilePrefab,
             transform.position,
             transform.rotation
         );
 
         if (proj != null)
-        { 
+        {
             InitializeProjectile(proj);
             proj.SetDirection(fireDir);
             proj.transform.localScale = Vector3.one * ProjectileScale;

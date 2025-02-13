@@ -31,7 +31,7 @@ public abstract class AreaSkills : Skill
         }
         else
         {
-            Debug.LogWarning($"No CSV data found for {skillData.skillName}, using default values");
+            Debug.LogWarning($"No CSV data found for {skillData.Name}, using default values");
             var defaultStats = new AreaSkillStat
             {
                 baseStat = new BaseSkillStat
@@ -39,7 +39,7 @@ public abstract class AreaSkills : Skill
                     damage = _damage,
                     skillLevel = _skillLevel,
                     maxSkillLevel = 5,
-                    element = skillData?.element ?? ElementType.None,
+                    element = skillData?.Element ?? ElementType.None,
                     elementalPower = _elementalPower
                 },
                 radius = _radius,
@@ -66,7 +66,7 @@ public abstract class AreaSkills : Skill
                         damage = _damage,
                         skillLevel = 1,
                         maxSkillLevel = 5,
-                        element = skillData?.element ?? ElementType.None,
+                        element = skillData?.Element ?? ElementType.None,
                         elementalPower = 1f
                     },
                     radius = _radius,
@@ -133,7 +133,7 @@ public abstract class AreaSkills : Skill
 
     public override string GetDetailedDescription()
     {
-        string baseDesc = skillData?.description ?? "Area skill description";
+        string baseDesc = skillData?.Description ?? "Area skill description";
         if (skillData?.GetCurrentTypeStat() != null)
         {
             baseDesc += $"\n\nCurrent Effects:" +

@@ -17,11 +17,11 @@ public class MultiShot : ProjectileSkills
         {
             skillData = new SkillData
             {
-                skillName = "Multi Shot",
-                description = "Fires multiple projectiles",
-                type = SkillType.Projectile,
-                element = ElementType.None,
-                tier = 1
+                Name = "Multi Shot",
+                Description = "Fires multiple projectiles",
+                Type = SkillType.Projectile,
+                Element = ElementType.None,
+                Tier = 1
             };
         }
     }
@@ -31,7 +31,7 @@ public class MultiShot : ProjectileSkills
         foreach (var shotPoint in shotPoints)
         {
             Projectile proj = PoolManager.Instance.Spawn<Projectile>(
-                skillData.projectile,
+                skillData.ProjectilePrefab,
                 shotPoint.position,
                 transform.rotation
             );
@@ -53,10 +53,10 @@ public class MultiShot : ProjectileSkills
                 baseStat = new BaseSkillStat
                 {
                     damage = _damage,
-                    skillName = skillData.skillName,
+                    skillName = skillData.Name,
                     skillLevel = 1,
                     maxSkillLevel = 5,
-                    element = skillData.element,
+                    element = skillData.Element,
                     elementalPower = _elementalPower
                 },
                 projectileSpeed = _projectileSpeed,

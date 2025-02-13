@@ -49,7 +49,7 @@ public class PlayerSkillList : MonoBehaviour
             {
                 var sortedSkills = player.skills
                     .Where(s => s != null)
-                    .OrderBy(s => s.GetSkillData()?.metadata.Type)
+                    .OrderBy(s => s.GetSkillData()?.Type)
                     .ThenByDescending(s => s.SkillLevel)
                     .ToList();
 
@@ -59,7 +59,7 @@ public class PlayerSkillList : MonoBehaviour
                     if (skillData != null)
                     {
                         PlayerSkillIcon icon = Instantiate(skillIconPrefab, transform);
-                        icon.SetSkillIcon(skillData.icon, skill);
+                        icon.SetSkillIcon(skillData.Icon, skill);
                         currentIcons.Add(icon);
                     }
                     else

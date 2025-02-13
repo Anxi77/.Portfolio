@@ -18,7 +18,7 @@ public class ElementalAmplifierEffect : SkillInteractionEffectBase
         var skillData = skill.GetSkillData();
         if (skillData == null) return;
 
-        if (!applicableElements.Contains(skillData.element)) return;
+        if (!applicableElements.Contains(skillData.Element)) return;
 
         var stats = skillData.GetCurrentTypeStat();
         if (stats?.baseStat != null)

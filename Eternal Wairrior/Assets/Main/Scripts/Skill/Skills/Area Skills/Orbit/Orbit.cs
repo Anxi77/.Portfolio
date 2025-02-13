@@ -14,11 +14,11 @@ public class Orbit : AreaSkills
         {
             skillData = new SkillData
             {
-                skillName = "Orbit",
-                description = "Rotating orbs that damage enemies",
-                type = SkillType.Area,
-                element = ElementType.None,
-                tier = 1
+                Name = "Orbit",
+                Description = "Rotating orbs that damage enemies",
+                Type = SkillType.Area,
+                Element = ElementType.None,
+                Tier = 1
             };
             InitializeSkillStats();
 
@@ -35,10 +35,10 @@ public class Orbit : AreaSkills
                 baseStat = new BaseSkillStat
                 {
                     damage = 8f,
-                    skillName = skillData.skillName,
+                    skillName = skillData.Name,
                     skillLevel = 1,
                     maxSkillLevel = 5,
-                    element = skillData.element,
+                    element = skillData.Element,
                     elementalPower = 1f
 
                 },

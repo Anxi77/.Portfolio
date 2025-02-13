@@ -1,0 +1,17 @@
+{
+  "ID": 100000,
+  "Name": "New Skill",
+  "Description": "New skill description",
+  "Type": 0,
+  "Element": 0,
+  "Tier": 0,
+  "Tags": [],
+  "PrefabPath": null,
+  "IconPath": null,
+  "ProjectilePath": null,
+  "PrefabsByLevelPaths": null,
+  "ResourceReferences": {
+    "Keys": [],
+    "Values": []
+  }
+}

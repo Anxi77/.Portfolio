@@ -5,71 +5,72 @@ using System;
 using Newtonsoft.Json;
 
 [Serializable]
-public class SkillData
+public class SkillData : ICloneable
 {
-    public SkillID ID;
-    public string skillName;
-    public string description;
-    public SkillType type;
-    public ElementType element;
-    public int tier;
-    public string[] tags;
+    #region Properties
+    public SkillID ID { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public SkillType Type { get; set; }
+    public ElementType Element { get; set; }
+    public int Tier { get; set; }
+    public string[] Tags { get; set; }
     [JsonIgnore]
-    public GameObject defualtPrefab { get => Resources.Load<GameObject>(prefabPath); private set => prefabPath = value.name; }
-    public string prefabPath;
+    public GameObject Prefab { get; set; }
+    public string PrefabPath { get; set; }
     [JsonIgnore]
-    private Dictionary<int, ISkillStat> statsByLevel;
-
+    private Dictionary<int, ISkillStat> StatsByLevel { get; set; }
     [JsonIgnore]
-    public Sprite icon;
-    public string iconPath;
-
+    public Sprite Icon { get; set; }
+    public string IconPath { get; set; }
     [JsonIgnore]
-    public GameObject projectile { get => Resources.Load<GameObject>(projectilePath); private set => projectilePath = value.name; }
-    public string projectilePath;
-
+    public GameObject ProjectilePrefab { get; set; }
+    public string ProjectilePath { get; set; }
     [JsonIgnore]
-    public GameObject[] prefabsByLevel;
-    public string[] prefabsByLevelPaths;
-
-    public BaseSkillStat baseStats;
-    public ProjectileSkillStat projectileStat;
-    public AreaSkillStat areaStat;
-    public PassiveSkillStat passiveStat;
-    public ResourceReferenceData resourceReferences;
+    public GameObject[] PrefabsByLevel;
+    public string[] PrefabsByLevelPaths { get; set; }
+    [JsonIgnore]
+    public BaseSkillStat BaseStats { get; set; }
+    [JsonIgnore]
+    public ProjectileSkillStat ProjectileStat { get; set; }
+    [JsonIgnore]
+    public AreaSkillStat AreaStat { get; set; }
+    [JsonIgnore]
+    public PassiveSkillStat PassiveStat { get; set; }
+    public ResourceReferenceData ResourceReferences { get; set; }
+    #endregion
 
     public SkillData()
     {
         ID = SkillID.None;
-        skillName = "None";
-        description = "None";
-        type = SkillType.None;
-        element = ElementType.None;
-        tier = 0;
-        tags = new string[0];
-        baseStats = new BaseSkillStat();
-        statsByLevel = new Dictionary<int, ISkillStat>();
-        prefabsByLevel = new GameObject[0];
-        projectileStat = new ProjectileSkillStat { baseStat = baseStats };
-        areaStat = new AreaSkillStat { baseStat = baseStats };
-        passiveStat = new PassiveSkillStat { baseStat = baseStats };
-        resourceReferences = new ResourceReferenceData();
-
+        Name = "None";
+        Description = "None";
+        Type = SkillType.None;
+        Element = ElementType.None;
+        Tier = 0;
+        Tags = new string[0];
+        BaseStats = new BaseSkillStat();
+        StatsByLevel = new Dictionary<int, ISkillStat>();
+        PrefabsByLevel = new GameObject[0];
+        ProjectileStat = new ProjectileSkillStat { baseStat = BaseStats };
+        AreaStat = new AreaSkillStat { baseStat = BaseStats };
+        PassiveStat = new PassiveSkillStat { baseStat = BaseStats };
+        ResourceReferences = new ResourceReferenceData();
     }
 
     public ISkillStat GetStatsForLevel(int level)
     {
-        if (statsByLevel == null)
+        if (StatsByLevel == null)
         {
-            statsByLevel = new Dictionary<int, ISkillStat>();
-            Debug.LogWarning($"statsByLevel was null for skill {skillName ?? "Unknown"}");
+            StatsByLevel = new Dictionary<int, ISkillStat>();
+            Debug.LogWarning($"StatsByLevel was null for skill {Name ?? "Unknown"}");
         }
 
-        if (statsByLevel.TryGetValue(level, out var stats))
+        if (StatsByLevel.TryGetValue(level, out var stats))
             return stats;
 
         var defaultStats = CreateDefaultStats();
-        statsByLevel[level] = defaultStats;
+        StatsByLevel[level] = defaultStats;
         return defaultStats;
     }
 
@@ -83,23 +84,23 @@ public class SkillData
 
         try
         {
-            baseStats = new BaseSkillStat(stats.baseStat);
+            BaseStats = new BaseSkillStat(stats.baseStat);
 
             switch (stats)
             {
                 case ProjectileSkillStat projectileStats:
-                    projectileStat = new ProjectileSkillStat(projectileStats);
+                    ProjectileStat = new ProjectileSkillStat(projectileStats);
                     break;
                 case AreaSkillStat areaStats:
-                    areaStat = new AreaSkillStat(areaStats);
+                    AreaStat = new AreaSkillStat(areaStats);
                     break;
                 case PassiveSkillStat passiveStats:
-                    passiveStat = new PassiveSkillStat(passiveStats);
+                    PassiveStat = new PassiveSkillStat(passiveStats);
                     break;
             }
 
-            if (statsByLevel == null) statsByLevel = new Dictionary<int, ISkillStat>();
-            statsByLevel[level] = stats;
+            if (StatsByLevel == null) StatsByLevel = new Dictionary<int, ISkillStat>();
+            StatsByLevel[level] = stats;
 
             Debug.Log($"Successfully set stats for level {level}");
         }
@@ -111,14 +112,14 @@ public class SkillData
 
     public ISkillStat GetCurrentTypeStat()
     {
-        switch (type)
+        switch (Type)
         {
             case SkillType.Projectile:
-                return projectileStat;
+                return ProjectileStat;
             case SkillType.Area:
-                return areaStat;
+                return AreaStat;
             case SkillType.Passive:
-                return passiveStat;
+                return PassiveStat;
             default:
                 return null;
         }
@@ -126,7 +127,7 @@ public class SkillData
 
     private ISkillStat CreateDefaultStats()
     {
-        switch (type)
+        switch (Type)
         {
             case SkillType.Projectile:
                 return new ProjectileSkillStat();
@@ -136,50 +137,74 @@ public class SkillData
             case SkillType.Passive:
                 return new PassiveSkillStat();
             default:
-                Debug.LogWarning($"Creating default ProjectileSkillStat for unknown type: {type}");
+                Debug.LogWarning($"Creating default ProjectileSkillStat for unknown type: {Type}");
                 return new ProjectileSkillStat();
         }
     }
 
     public int GetMaxLevel()
     {
-        return statsByLevel.Keys.Count > 0 ? statsByLevel.Keys.Max() : 1;
+        return StatsByLevel.Keys.Count > 0 ? StatsByLevel.Keys.Max() : 1;
     }
 
     public void RemoveLevel(int level)
     {
-        if (statsByLevel.ContainsKey(level))
+        if (StatsByLevel.ContainsKey(level))
         {
-            statsByLevel.Remove(level);
+            StatsByLevel.Remove(level);
         }
     }
+
+    #region ICloneable
+    public object Clone()
+    {
+        return new SkillData
+        {
+            ID = this.ID,
+            Name = this.Name,
+            Description = this.Description,
+            Type = this.Type,
+            Element = this.Element,
+            Tier = this.Tier,
+            Tags = (string[])this.Tags?.Clone(),
+            PrefabPath = this.PrefabPath,
+            IconPath = this.IconPath,
+            ProjectilePath = this.ProjectilePath,
+            PrefabsByLevelPaths = (string[])this.PrefabsByLevelPaths?.Clone(),
+            ResourceReferences = new ResourceReferenceData
+            {
+                Keys = new List<string>(this.ResourceReferences?.Keys ?? new List<string>()),
+                Values = new List<AssetReference>(this.ResourceReferences?.Values ?? new List<AssetReference>())
+            }
+        };
+    }
+    #endregion
 }
 
 [Serializable]
 public class ResourceReferenceData
 {
-
-    public List<string> keys = new List<string>();
-    public List<AssetReference> values = new List<AssetReference>();
+    public List<string> Keys = new List<string>();
+    public List<AssetReference> Values = new List<AssetReference>();
 
     public void Add(string key, AssetReference value)
     {
-        keys.Add(key);
-        values.Add(value);
+        Keys.Add(key);
+        Values.Add(value);
     }
 
     public void Clear()
     {
-        keys.Clear();
-        values.Clear();
+        Keys.Clear();
+        Values.Clear();
     }
 
     public bool TryGetValue(string key, out AssetReference value)
     {
-        int index = keys.IndexOf(key);
+        int index = Keys.IndexOf(key);
         if (index != -1)
         {
-            value = values[index];
+            value = Values[index];
             return true;
         }
         value = null;
@@ -188,12 +213,12 @@ public class ResourceReferenceData
 
     public bool ContainsKey(string key)
     {
-        return keys.Contains(key);
+        return Keys.Contains(key);
     }
 }
 
 [Serializable]
 public class AssetReference
 {
-    public string path;
+    public string Path;
 }

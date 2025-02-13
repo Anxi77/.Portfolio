@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -98,7 +97,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         newStats = SkillDataManager.Instance.GetSkillStatsForLevel(
             skill.SkillID,
             targetLevel,
-            skill.GetSkillData().type);
+            skill.GetSkillData().Type);
 
         if (newStats == null)
         {
@@ -121,7 +120,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
         try
         {
-            Debug.Log($"Adding/Upgrading skill: {skillData.skillName} (ID: {skillData.ID})");
+            Debug.Log($"Adding/Upgrading skill: {skillData.Name} (ID: {skillData.ID})");
 
             var playerStat = GameManager.Instance.player.GetComponent<PlayerStatSystem>();
             float currentHpRatio = 1f;
@@ -157,7 +156,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             else
             {
                 GameObject prefab = SkillDataManager.Instance.GetLevelPrefab(skillData.ID, 1)
-                    ?? skillData.defualtPrefab;
+                    ?? skillData.Prefab;
 
                 if (prefab != null)
                 {
@@ -176,7 +175,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
                         tempObj.SetActive(true);
                         GameManager.Instance.player.skills.Add(skillComponent);
-                        Debug.Log($"Successfully added new skill: {skillData.skillName} at position {tempObj.transform.localPosition}");
+                        Debug.Log($"Successfully added new skill: {skillData.Name} at position {tempObj.transform.localPosition}");
                     }
                 }
             }
@@ -259,8 +258,8 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
     private void CreateNewSkill(SkillData skillData, Transform parent)
     {
-        GameObject prefab = SkillDataManager.Instance.GetLevelPrefab(skillData.metadata.ID, 1)
-            ?? skillData.metadata.Prefab;
+        GameObject prefab = SkillDataManager.Instance.GetLevelPrefab(skillData.ID, 1)
+            ?? skillData.Prefab;
 
         if (prefab != null)
         {
@@ -278,7 +277,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         {
             GameManager.Instance.player.skills.Add(skill);
             activeSkills.Add(skill);
-            Debug.Log($"Successfully initialized skill {skillData.metadata.Name} at level {targetLevel}");
+            Debug.Log($"Successfully initialized skill {skillData.Name} at level {targetLevel}");
         }
     }
 
@@ -318,25 +317,25 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         Debug.Log($"Total available skills before filtering: {availableSkills.Count}");
         foreach (var skill in availableSkills)
         {
-            Debug.Log($"Available skill: {skill.metadata.Name}, ID: {skill.metadata.ID}, Element: {skill.metadata.Element}");
+            Debug.Log($"Available skill: {skill.Name}, ID: {skill.ID}, Element: {skill.Element}");
         }
 
         var selectedSkills = new List<SkillData>();
         var filteredSkills = availableSkills.Where(skill =>
         {
-            if (skill == null || skill.metadata == null)
+            if (skill == null)
             {
-                Debug.LogError("Found null skill or metadata");
+                Debug.LogError("Found null skill");
                 return false;
             }
 
-            var stats = SkillDataManager.Instance.GetSkillStats(skill.metadata.ID, 1);
+            var stats = SkillDataManager.Instance.GetSkillStats(skill.ID, 1);
             bool hasStats = stats != null;
-            bool matchesElement = elementType == null || skill.metadata.Element == elementType;
+            bool matchesElement = elementType == null || skill.Element == elementType;
 
-            Debug.Log($"Checking skill {skill.metadata.Name}:");
-            Debug.Log($"  - ID: {skill.metadata.ID}");
-            Debug.Log($"  - Element: {skill.metadata.Element}");
+            Debug.Log($"Checking skill {skill.Name}:");
+            Debug.Log($"  - ID: {skill.ID}");
+            Debug.Log($"  - Element: {skill.Element}");
             Debug.Log($"  - HasStats: {hasStats}");
             Debug.Log($"  - MatchesElement: {matchesElement}");
             if (!hasStats)
@@ -358,12 +357,12 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         if (elementType == null)
         {
             var availableElements = filteredSkills
-                .Select(s => s.metadata.Element)
+                .Select(s => s.Element)
                 .Distinct()
                 .ToList();
 
             elementType = availableElements[Random.Range(0, availableElements.Count)];
-            filteredSkills = filteredSkills.Where(s => s.metadata.Element == elementType).ToList();
+            filteredSkills = filteredSkills.Where(s => s.Element == elementType).ToList();
             Debug.Log($"Selected element type: {elementType}, remaining skills: {filteredSkills.Count}");
         }
 
@@ -374,7 +373,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         {
             int index = Random.Range(0, filteredSkills.Count);
             selectedSkills.Add(filteredSkills[index]);
-            Debug.Log($"Selected skill: {filteredSkills[index].metadata.Name}");
+            Debug.Log($"Selected skill: {filteredSkills[index].Name}");
             filteredSkills.RemoveAt(index);
         }
 
@@ -396,9 +395,9 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
     private bool IsSkillAvailable(SkillData skillData, List<Skill> playerSkills)
     {
-        if (skillData?.metadata == null) return false;
+        if (skillData == null) return false;
 
-        var existingSkill = playerSkills.Find(s => s.SkillID == skillData.metadata.ID);
+        var existingSkill = playerSkills.Find(s => s.SkillID == skillData.ID);
         return existingSkill == null || existingSkill.SkillLevel < existingSkill.MaxSkillLevel;
     }
 }

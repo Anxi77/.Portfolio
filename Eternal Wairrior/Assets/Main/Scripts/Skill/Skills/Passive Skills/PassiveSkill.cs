@@ -38,7 +38,7 @@ public abstract class PassiveSkill : Skill
             if (_homingActivate)
                 player.ActivateHoming(false);
 
-            Debug.Log($"Removed all effects for {skillData?.skillName ?? "Unknown Skill"}");
+            Debug.Log($"Removed all effects for {skillData?.Name ?? "Unknown Skill"}");
         }
     }
 
@@ -94,7 +94,7 @@ public abstract class PassiveSkill : Skill
         }
         else
         {
-            Debug.LogWarning($"No CSV data found for {skillData.skillName}, using default values");
+            Debug.LogWarning($"No CSV data found for {skillData.Name}, using default values");
             var defaultStats = new PassiveSkillStat
             {
                 baseStat = new BaseSkillStat
@@ -297,11 +297,11 @@ public abstract class PassiveSkill : Skill
     protected virtual SkillData CreateDefaultSkillData()
     {
         var data = new SkillData();
-        data.skillName = GetDefaultSkillName();
-        data.description = GetDefaultDescription();
-        data.type = GetSkillType();
-        data.element = ElementType.None;
-        data.tier = 1;
+        data.Name = GetDefaultSkillName();
+        data.Description = GetDefaultDescription();
+        data.Type = GetSkillType();
+        data.Element = ElementType.None;
+        data.Tier = 1;
 
         return data;
     }

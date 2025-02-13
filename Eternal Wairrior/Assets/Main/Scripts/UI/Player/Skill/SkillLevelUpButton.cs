@@ -39,9 +39,9 @@ public class SkillLevelUpButton : MonoBehaviour
 
     private bool ValidateSkillData(SkillData skillData)
     {
-        if (skillData == null || skillData.metadata == null)
+        if (skillData == null)
         {
-            Debug.LogError("Skill data or metadata is null");
+            Debug.LogError("Skill data is null");
             return false;
         }
         return true;
@@ -51,15 +51,15 @@ public class SkillLevelUpButton : MonoBehaviour
     {
         if (skillIconImage == null) return;
 
-        skillIconImage.sprite = skillData.icon;
-        skillIconImage.gameObject.SetActive(skillData.icon != null);
+        skillIconImage.sprite = skillData.Icon;
+        skillIconImage.gameObject.SetActive(skillData.Icon != null);
     }
 
     private void SetupSkillText(SkillData skillData, string levelInfo)
     {
         if (skillNameText != null)
         {
-            string nameText = skillData.metadata.Name;
+            string nameText = skillData.Name;
             if (!string.IsNullOrEmpty(levelInfo))
             {
                 nameText += $" ({levelInfo})";
@@ -69,8 +69,8 @@ public class SkillLevelUpButton : MonoBehaviour
 
         if (descriptionText != null)
         {
-            string description = skillData.metadata.Description;
-            string elementDesc = GetElementalDescription(skillData.metadata.Element);
+            string description = skillData.Description;
+            string elementDesc = GetElementalDescription(skillData.Element);
             descriptionText.text = $"{description}\n{elementDesc}";
         }
     }
@@ -79,12 +79,12 @@ public class SkillLevelUpButton : MonoBehaviour
     {
         if (elementIcon == null) return;
 
-        var sprite = GetElementSprite(skillData.metadata.Element);
+        var sprite = GetElementSprite(skillData.Element);
         if (sprite != null)
         {
             elementIcon.sprite = sprite;
             elementIcon.gameObject.SetActive(true);
-            elementIcon.color = GetElementColor(skillData.metadata.Element);
+            elementIcon.color = GetElementColor(skillData.Element);
         }
         else
         {
@@ -135,7 +135,7 @@ public class SkillLevelUpButton : MonoBehaviour
         StringBuilder statText = new StringBuilder();
         statText.AppendLine("Base Stats:");
         AppendBaseStats(statText, baseStats.baseStat);
-        AppendTypeSpecificStats(statText, baseStats, skillData.metadata.Type);
+        AppendTypeSpecificStats(statText, baseStats, skillData.Type);
 
         statComparisonText.text = statText.ToString();
     }
@@ -236,16 +236,15 @@ public class SkillLevelUpButton : MonoBehaviour
 
         var currentLevel = currentStats.baseStat.skillLevel;
         var nextLevelStats = SkillDataManager.Instance.GetSkillStatsForLevel(
-            skillData.metadata.ID,
+            skillData.ID,
             currentLevel + 1,
-            skillData.metadata.Type);
+            skillData.Type);
 
         if (nextLevelStats == null) return;
 
         CompareBasicStats(comparison, currentStats.baseStat, nextLevelStats.baseStat);
 
-        // ų ŸԺ 
-        switch (skillData.metadata.Type)
+        switch (skillData.Type)
         {
             case SkillType.Projectile:
                 CompareProjectileStats(comparison, currentStats as ProjectileSkillStat, nextLevelStats as ProjectileSkillStat);

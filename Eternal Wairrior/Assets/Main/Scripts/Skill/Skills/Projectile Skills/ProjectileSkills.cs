@@ -33,7 +33,7 @@ public abstract class ProjectileSkills : Skill
         }
         else
         {
-            Debug.LogWarning($"No CSV data found for {skillData.skillName}, using default values");
+            Debug.LogWarning($"No CSV data found for {skillData.Name}, using default values");
             var defaultStats = new ProjectileSkillStat
             {
                 baseStat = new BaseSkillStat
@@ -41,7 +41,7 @@ public abstract class ProjectileSkills : Skill
                     damage = _damage,
                     skillLevel = _skillLevel,
                     maxSkillLevel = 5,
-                    element = skillData.element,
+                    element = skillData.Element,
                     elementalPower = _elementalPower
                 },
                 projectileSpeed = _projectileSpeed,
@@ -73,7 +73,7 @@ public abstract class ProjectileSkills : Skill
                         damage = _damage,
                         skillLevel = 1,
                         maxSkillLevel = 5,
-                        element = skillData.element,
+                        element = skillData.Element,
                         elementalPower = _elementalPower
                     },
                     projectileSpeed = _projectileSpeed,
@@ -215,10 +215,10 @@ public abstract class ProjectileSkills : Skill
         Vector3 spawnPosition = transform.position + transform.up * 0.5f;
 
         var pool = GetComponent<ObjectPool>();
-        if (pool != null && skillData?.projectile != null)
+        if (pool != null && skillData?.ProjectilePrefab != null)
         {
             Projectile proj = pool.Spawn<Projectile>(
-                skillData.projectile,
+                skillData.ProjectilePrefab,
                 spawnPosition,
                 transform.rotation
             );
@@ -238,7 +238,7 @@ public abstract class ProjectileSkills : Skill
         proj.transform.localScale *= ProjectileScale;
         proj.pierceCount = PierceCount;
         proj.maxTravelDistance = AttackRange;
-        proj.elementType = skillData.element;
+        proj.elementType = skillData.Element;
         proj.elementalPower = ElementalPower;
 
         proj.SetInitialTarget(FindNearestEnemy());
@@ -296,10 +296,10 @@ public abstract class ProjectileSkills : Skill
         }
         else
         {
-            _homingRange = skillData.projectileStat.homingRange;
+            _homingRange = skillData.ProjectileStat.homingRange;
         }
 
-        Debug.Log($"Homing state updated for {skillData.skillName}: {activate}");
+        Debug.Log($"Homing state updated for {skillData.Name}: {activate}");
     }
 
     protected override void UpdateSkillTypeStats(ISkillStat newStats)
@@ -340,7 +340,7 @@ public abstract class ProjectileSkills : Skill
 
     public override string GetDetailedDescription()
     {
-        string baseDesc = skillData?.description ?? "Projectile skill description";
+        string baseDesc = skillData?.Description ?? "Projectile skill description";
         if (skillData?.GetCurrentTypeStat() != null)
         {
             baseDesc += $"\n\nCurrent Effects:" +
