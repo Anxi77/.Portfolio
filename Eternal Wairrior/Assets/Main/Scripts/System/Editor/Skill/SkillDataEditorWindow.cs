@@ -7,12 +7,6 @@ using System.IO;
 
 public class SkillDataEditorWindow : EditorWindow
 {
-    private enum EditorTab
-    {
-        Skills,
-        Stats
-    }
-
     #region Fields
     private Dictionary<SkillID, SkillData> skillDatabase = new();
     private Dictionary<SkillID, Dictionary<int, SkillStatData>> statDatabase = new();
