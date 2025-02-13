@@ -87,7 +87,6 @@ def parse_categorized_todos(text):
     print(f"Raw todo text:\n{text}")
     
     categories = {}
-    category_manager = CategoryManager()
     current_category = 'General'
     
     for line in text.strip().split('\n'):
@@ -126,6 +125,8 @@ def create_commit_section(commit_data, branch, commit_sha, author, time_string, 
         for line in body.split('\n'):
             line = line.strip()
             if line:
+                if line.startswith('-'):
+                    line = line[1:].strip()
                 body_lines.append(f"> • {line}")
     quoted_body = '\n'.join(body_lines)
     
@@ -350,6 +351,8 @@ def create_todo_section(todos):
 <summary>📑 General ({completed}/{total})</summary>
 
 {'\n'.join(f"- {'[x]' if checked else '[ ]'} {text}" for checked, text in general_todos)}
+
+⚫
 </details>'''
         sections.append(section)
         processed_categories.add('general')
@@ -370,13 +373,15 @@ def create_todo_section(todos):
         todo_lines = []
         for checked, text in data['todos']:
             checkbox = '[x]' if checked else '[ ]'
-            todo_lines.append(f'- {checkbox} {text}')
+            todo_lines.append(f"- {checkbox} {text}")
             print(f"Added todo line: {text}")
         
         section = f'''<details>
 <summary>📑 {category} ({completed}/{total})</summary>
 
 {'\n'.join(todo_lines)}
+
+⚫
 </details>'''
         sections.append(section)
         processed_categories.add(category_lower)
@@ -506,14 +511,14 @@ def get_merge_commits(repo, merge_commit):
         for c in commits2:
             print(f"- [{c.sha[:7]}] {c.commit.message.split('\n')[0]}")
         
-        # remove duplicate commits
+        # remove duplicate commits and merge commits
         unique_commits = []
         seen_messages = set()
         
         for commit_list in [commits1, commits2]:
             for commit in commit_list:
                 msg = commit.commit.message.strip()
-                if msg not in seen_messages:
+                if not is_merge_commit_message(msg) and msg not in seen_messages:  # Exclude merge commits
                     seen_messages.add(msg)
                     unique_commits.append(commit)
         
