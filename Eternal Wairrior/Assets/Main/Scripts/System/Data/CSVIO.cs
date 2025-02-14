@@ -9,11 +9,28 @@ using UnityEditor;
 public static class CSVIO<T> where T : class, new()
 {
     private static readonly string basePath;
+    private static string customPath;
     private static readonly Dictionary<string, T> cache;
+
+    static CSVIO()
+    {
+        basePath = typeof(T).Name;
+        cache = new Dictionary<string, T>();
+    }
+
+    public static void SetCustomPath(string path)
+    {
+        customPath = path;
+    }
+
+    private static string GetSavePath()
+    {
+        return customPath ?? basePath;
+    }
 
     public static void SaveData(string key, T data)
     {
-        string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.csv");
+        string fullPath = Path.Combine(Application.dataPath, "Resources", GetSavePath(), $"{key}.csv");
         string directory = Path.GetDirectoryName(fullPath);
 
         if (!Directory.Exists(directory))
@@ -41,7 +58,7 @@ public static class CSVIO<T> where T : class, new()
                 return;
             }
 
-            string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.csv");
+            string fullPath = Path.Combine(Application.dataPath, "Resources", GetSavePath(), $"{key}.csv");
             string directory = Path.GetDirectoryName(fullPath);
 
             if (!Directory.Exists(directory))
@@ -102,7 +119,7 @@ public static class CSVIO<T> where T : class, new()
         if (cache.TryGetValue(key, out T cachedData))
             return cachedData;
 
-        string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.csv");
+        string fullPath = Path.Combine(Application.dataPath, "Resources", GetSavePath(), $"{key}.csv");
         if (!File.Exists(fullPath))
             return null;
 
@@ -121,7 +138,21 @@ public static class CSVIO<T> where T : class, new()
             var prop = properties.FirstOrDefault(p => p.Name == headers[i]);
             if (prop != null && i < values.Length)
             {
-                prop.SetValue(data, Convert.ChangeType(values[i], prop.PropertyType));
+                try
+                {
+                    if (prop.PropertyType.IsEnum)
+                    {
+                        prop.SetValue(data, Enum.Parse(prop.PropertyType, values[i]));
+                    }
+                    else
+                    {
+                        prop.SetValue(data, Convert.ChangeType(values[i], prop.PropertyType));
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"Failed to parse value '{values[i]}' for property '{prop.Name}': {e.Message}");
+                }
             }
         }
 
@@ -131,7 +162,7 @@ public static class CSVIO<T> where T : class, new()
 
     public static IEnumerable<T> LoadBulkData(string key)
     {
-        string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.csv");
+        string fullPath = Path.Combine(Application.dataPath, "Resources", GetSavePath(), $"{key}.csv");
         if (!File.Exists(fullPath))
             yield break;
 
@@ -152,7 +183,21 @@ public static class CSVIO<T> where T : class, new()
                 var prop = properties.FirstOrDefault(p => p.Name == headers[j]);
                 if (prop != null && j < values.Length)
                 {
-                    prop.SetValue(data, Convert.ChangeType(values[j], prop.PropertyType));
+                    try
+                    {
+                        if (prop.PropertyType.IsEnum)
+                        {
+                            prop.SetValue(data, Enum.Parse(prop.PropertyType, values[j]));
+                        }
+                        else
+                        {
+                            prop.SetValue(data, Convert.ChangeType(values[j], prop.PropertyType));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogWarning($"Failed to parse value '{values[j]}' for property '{prop.Name}': {e.Message}");
+                    }
                 }
             }
 
@@ -162,7 +207,7 @@ public static class CSVIO<T> where T : class, new()
 
     public static bool DeleteData(string key)
     {
-        string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{key}.csv");
+        string fullPath = Path.Combine(Application.dataPath, "Resources", GetSavePath(), $"{key}.csv");
         if (File.Exists(fullPath))
         {
             File.Delete(fullPath);
@@ -175,7 +220,7 @@ public static class CSVIO<T> where T : class, new()
     public static void ClearAll()
     {
         cache.Clear();
-        string directory = Path.Combine(Application.dataPath, "Resources", basePath);
+        string directory = Path.Combine(Application.dataPath, "Resources", GetSavePath());
         if (Directory.Exists(directory))
         {
             var files = Directory.GetFiles(directory, "*.csv");
@@ -190,7 +235,7 @@ public static class CSVIO<T> where T : class, new()
     {
         try
         {
-            string fullPath = Path.Combine(Application.dataPath, "Resources", basePath, $"{fileName}.csv");
+            string fullPath = Path.Combine(Application.dataPath, "Resources", GetSavePath(), $"{fileName}.csv");
             string directory = Path.GetDirectoryName(fullPath);
 
             if (!Directory.Exists(directory))

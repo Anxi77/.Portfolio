@@ -1,15 +1,15 @@
 {
-  "ID": 100000,
-  "Name": "New Skill",
+  "ID": 100001,
+  "Name": "Vine",
   "Description": "New skill description",
-  "Type": 0,
+  "Type": 1,
   "Element": 0,
   "Tier": 0,
   "Tags": [],
-  "PrefabPath": null,
-  "IconPath": null,
-  "ProjectilePath": null,
-  "PrefabsByLevelPaths": null,
+  "PrefabPath": "",
+  "IconPath": "",
+  "ProjectilePath": "",
+  "PrefabsByLevelPaths": [],
   "ResourceReferences": {
     "Keys": [],
     "Values": []

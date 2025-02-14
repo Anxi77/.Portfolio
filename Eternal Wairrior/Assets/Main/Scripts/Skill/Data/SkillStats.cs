@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using System;
 
 public interface ISkillStat
@@ -28,12 +27,12 @@ public class BaseSkillStat
 
     public BaseSkillStat(BaseSkillStat source)
     {
-        this.damage = source.damage;
-        this.skillName = source.skillName;
-        this.skillLevel = source.skillLevel;
-        this.maxSkillLevel = source.maxSkillLevel;
-        this.element = source.element;
-        this.elementalPower = source.elementalPower;
+        damage = source.damage;
+        skillName = source.skillName;
+        skillLevel = source.skillLevel;
+        maxSkillLevel = source.maxSkillLevel;
+        element = source.element;
+        elementalPower = source.elementalPower;
     }
 }
 
@@ -58,17 +57,17 @@ public class ProjectileSkillStat : ISkillStat
 
     public ProjectileSkillStat(ProjectileSkillStat source)
     {
-        this.baseStat = new BaseSkillStat(source.baseStat);
-        this.projectileSpeed = source.projectileSpeed;
-        this.projectileScale = source.projectileScale;
-        this.shotInterval = source.shotInterval;
-        this.pierceCount = source.pierceCount;
-        this.attackRange = source.attackRange;
-        this.homingRange = source.homingRange;
-        this.isHoming = source.isHoming;
-        this.explosionRad = source.explosionRad;
-        this.projectileCount = source.projectileCount;
-        this.innerInterval = source.innerInterval;
+        baseStat = new BaseSkillStat(source.baseStat);
+        projectileSpeed = source.projectileSpeed;
+        projectileScale = source.projectileScale;
+        shotInterval = source.shotInterval;
+        pierceCount = source.pierceCount;
+        attackRange = source.attackRange;
+        homingRange = source.homingRange;
+        isHoming = source.isHoming;
+        explosionRad = source.explosionRad;
+        projectileCount = source.projectileCount;
+        innerInterval = source.innerInterval;
     }
 }
 
@@ -88,12 +87,12 @@ public class AreaSkillStat : ISkillStat
 
     public AreaSkillStat(AreaSkillStat source)
     {
-        this.baseStat = new BaseSkillStat(source.baseStat);
-        this.radius = source.radius;
-        this.duration = source.duration;
-        this.tickRate = source.tickRate;
-        this.isPersistent = source.isPersistent;
-        this.moveSpeed = source.moveSpeed;
+        baseStat = new BaseSkillStat(source.baseStat);
+        radius = source.radius;
+        duration = source.duration;
+        tickRate = source.tickRate;
+        isPersistent = source.isPersistent;
+        moveSpeed = source.moveSpeed;
     }
 }
 
@@ -135,18 +134,18 @@ public class PassiveSkillStat : ISkillStat
 
     public PassiveSkillStat(PassiveSkillStat source)
     {
-        this.baseStat = new BaseSkillStat(source.baseStat);
-        this.effectDuration = source.effectDuration;
-        this.cooldown = source.cooldown;
-        this.triggerChance = source.triggerChance;
-        this.damageIncrease = source.damageIncrease;
-        this.defenseIncrease = source.defenseIncrease;
-        this.expAreaIncrease = source.expAreaIncrease;
-        this.homingActivate = source.homingActivate;
-        this.hpIncrease = source.hpIncrease;
-        this.moveSpeedIncrease = source.moveSpeedIncrease;
-        this.attackSpeedIncrease = source.attackSpeedIncrease;
-        this.attackRangeIncrease = source.attackRangeIncrease;
-        this.hpRegenIncrease = source.hpRegenIncrease;
+        baseStat = new BaseSkillStat(source.baseStat);
+        effectDuration = source.effectDuration;
+        cooldown = source.cooldown;
+        triggerChance = source.triggerChance;
+        damageIncrease = source.damageIncrease;
+        defenseIncrease = source.defenseIncrease;
+        expAreaIncrease = source.expAreaIncrease;
+        homingActivate = source.homingActivate;
+        hpIncrease = source.hpIncrease;
+        moveSpeedIncrease = source.moveSpeedIncrease;
+        attackSpeedIncrease = source.attackSpeedIncrease;
+        attackRangeIncrease = source.attackRangeIncrease;
+        hpRegenIncrease = source.hpRegenIncrease;
     }
 }
