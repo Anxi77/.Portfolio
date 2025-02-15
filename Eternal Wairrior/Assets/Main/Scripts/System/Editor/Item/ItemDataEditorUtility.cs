@@ -44,24 +44,20 @@ public static class ItemDataEditorUtility
 
         try
         {
-            // 아이콘 리소스 저장
             if (!string.IsNullOrEmpty(itemData.IconPath))
             {
                 string sourceAssetPath = itemData.IconPath;
                 if (!string.IsNullOrEmpty(sourceAssetPath))
                 {
-                    // 이미 Resources 폴더에 있는 경우 경로만 업데이트
                     if (sourceAssetPath.Contains("/Resources/"))
                     {
                         itemData.IconPath = GetResourcePath(sourceAssetPath);
                     }
                     else
                     {
-                        // 아이콘 로드
                         var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(sourceAssetPath);
                         if (sprite != null)
                         {
-                            // ResourceIO를 통해 저장
                             string resourcePath = $"Items/Icons/{itemData.ID}_Icon";
                             ResourceIO<Sprite>.SaveData(resourcePath, sprite);
                             itemData.IconPath = resourcePath;
@@ -71,7 +67,6 @@ public static class ItemDataEditorUtility
                 }
             }
 
-            // 데이터베이스에 저장
             var clonedData = itemData.Clone();
             itemDatabase[itemData.ID] = clonedData;
 
@@ -89,10 +84,8 @@ public static class ItemDataEditorUtility
 
         try
         {
-            // 메모리에서 아이템 삭제
             if (itemDatabase.TryGetValue(itemId, out var item) && itemDatabase.Remove(itemId))
             {
-                // 아이콘 리소스 삭제
                 if (!string.IsNullOrEmpty(item.IconPath))
                 {
                     string iconPath = $"Assets/Resources/{item.IconPath}.png";
@@ -103,10 +96,8 @@ public static class ItemDataEditorUtility
                     }
                 }
 
-                // 아이템 데이터베이스 JSON 파일 저장
                 SaveDatabase();
 
-                // 드롭 테이블에서 해당 아이템 참조 제거
                 foreach (var dropTable in dropTables.Values)
                 {
                     dropTable.dropEntries.RemoveAll(entry => entry.itemId == itemId);
@@ -139,7 +130,6 @@ public static class ItemDataEditorUtility
     {
         try
         {
-            // 아이템 데이터베이스는 Items/Database 경로 사용
             JSONIO<SerializableItemList>.SetCustomPath("Items/Database");
             var wrapper = new SerializableItemList { items = itemDatabase.Values.ToList() };
             JSONIO<SerializableItemList>.SaveData("ItemDatabase", wrapper);

@@ -49,6 +49,39 @@ public class SkillDataEditorWindow : EditorWindow
     {
         skillDatabase = SkillDataEditorUtility.GetSkillDatabase();
         statDatabase = SkillDataEditorUtility.GetStatDatabase();
+
+        ResourceIO<Sprite>.ClearCache();
+        ResourceIO<GameObject>.ClearCache();
+
+        foreach (var skill in skillDatabase.Values)
+        {
+            if (!string.IsNullOrEmpty(skill.IconPath))
+            {
+                skill.Icon = ResourceIO<Sprite>.LoadData(skill.IconPath);
+            }
+
+            if (!string.IsNullOrEmpty(skill.PrefabPath))
+            {
+                skill.Prefab = ResourceIO<GameObject>.LoadData(skill.PrefabPath);
+            }
+
+            if (skill.Type == SkillType.Projectile && !string.IsNullOrEmpty(skill.ProjectilePath))
+            {
+                skill.ProjectilePrefab = ResourceIO<GameObject>.LoadData(skill.ProjectilePath);
+            }
+
+            if (skill.PrefabsByLevelPaths != null)
+            {
+                skill.PrefabsByLevel = new GameObject[skill.PrefabsByLevelPaths.Length];
+                for (int i = 0; i < skill.PrefabsByLevelPaths.Length; i++)
+                {
+                    if (!string.IsNullOrEmpty(skill.PrefabsByLevelPaths[i]))
+                    {
+                        skill.PrefabsByLevel[i] = ResourceIO<GameObject>.LoadData(skill.PrefabsByLevelPaths[i]);
+                    }
+                }
+            }
+        }
     }
 
     private void OnGUI()
@@ -258,17 +291,13 @@ public class SkillDataEditorWindow : EditorWindow
                     var skillData = CurrentSkill.Clone() as SkillData;
                     var oldId = skillData.ID;
 
-                    // 이전 ID 데이터 삭제
                     SkillDataEditorUtility.DeleteSkillData(oldId);
 
-                    // ID 변경 및 저장
                     skillData.ID = newId;
                     SkillDataEditorUtility.SaveSkillData(skillData);
 
-                    // 선택된 ID 업데이트
                     selectedSkillId = newId;
 
-                    // UI 새로고침
                     RefreshData();
                 }
             }
@@ -278,6 +307,68 @@ public class SkillDataEditorWindow : EditorWindow
             CurrentSkill.Description = EditorGUILayout.TextField("Description", CurrentSkill.Description);
             CurrentSkill.Type = (SkillType)EditorGUILayout.EnumPopup("Type", CurrentSkill.Type);
             CurrentSkill.Element = (ElementType)EditorGUILayout.EnumPopup("Element", CurrentSkill.Element);
+
+            EditorGUILayout.Space(5);
+            EditorGUILayout.LabelField("Base Stats", EditorStyles.boldLabel);
+
+            var stats = statDatabase.GetValueOrDefault(CurrentSkill.ID);
+            if (stats != null && stats.Any())
+            {
+                var firstStat = stats.Values.First();
+                EditorGUI.BeginChangeCheck();
+                int newMaxLevel = EditorGUILayout.IntField("Max Skill Level", firstStat.MaxSkillLevel);
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    foreach (var levelStat in stats.Values)
+                    {
+                        levelStat.MaxSkillLevel = newMaxLevel;
+                    }
+
+                    if (CurrentSkill.PrefabsByLevel == null || CurrentSkill.PrefabsByLevel.Length != newMaxLevel)
+                    {
+                        var prefabs = CurrentSkill.PrefabsByLevel;
+                        var paths = CurrentSkill.PrefabsByLevelPaths;
+                        Array.Resize(ref prefabs, newMaxLevel);
+                        Array.Resize(ref paths, newMaxLevel);
+                        CurrentSkill.PrefabsByLevel = prefabs;
+                        CurrentSkill.PrefabsByLevelPaths = paths;
+                    }
+
+                    if (!statDatabase.ContainsKey(CurrentSkill.ID))
+                    {
+                        statDatabase[CurrentSkill.ID] = new Dictionary<int, SkillStatData>();
+                    }
+
+                    var currentStats = statDatabase[CurrentSkill.ID];
+                    var existingLevels = currentStats.Keys.ToList();
+
+                    for (int level = 1; level <= newMaxLevel; level++)
+                    {
+                        if (!currentStats.ContainsKey(level))
+                        {
+                            var newStat = new SkillStatData
+                            {
+                                SkillID = CurrentSkill.ID,
+                                Level = level,
+                                MaxSkillLevel = newMaxLevel,
+                                Damage = 10f + (level - 1) * 5f,
+                                ElementalPower = 1f + (level - 1) * 0.2f,
+                                Element = CurrentSkill.Element
+                            };
+                            currentStats[level] = newStat;
+                        }
+                    }
+
+                    foreach (var level in existingLevels.Where(l => l > newMaxLevel))
+                    {
+                        currentStats.Remove(level);
+                    }
+
+                    SkillDataEditorUtility.SaveStatDatabase();
+                    SaveCurrentSkill();
+                }
+            }
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -291,12 +382,13 @@ public class SkillDataEditorWindow : EditorWindow
 
     private void DrawResources()
     {
+        if (CurrentSkill == null) return;
+
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
             EditorGUILayout.LabelField("Resources", EditorStyles.boldLabel);
             EditorGUILayout.Space(5);
 
-            // 현재 아이콘 표시
             if (CurrentSkill.Icon != null)
             {
                 float size = 64f;
@@ -315,61 +407,127 @@ public class SkillDataEditorWindow : EditorWindow
 
             if (EditorGUI.EndChangeCheck() && newIcon != null)
             {
-                CurrentSkill.Icon = newIcon;
+                string resourcePath = $"SkillData/Icons/{CurrentSkill.ID}_Icon";
+                ResourceIO<Sprite>.SaveData(resourcePath, newIcon);
+                CurrentSkill.IconPath = resourcePath;
+                CurrentSkill.Icon = ResourceIO<Sprite>.LoadData(resourcePath);
+
                 SaveCurrentSkill();
+
+                var currentId = selectedSkillId;
+                EditorApplication.delayCall += () =>
+                {
+                    RefreshData();
+                    selectedSkillId = currentId;
+                    Repaint();
+                };
             }
 
             EditorGUILayout.Space(5);
 
-            // 기본 프리팹
             EditorGUI.BeginChangeCheck();
-            CurrentSkill.Prefab = (GameObject)EditorGUILayout.ObjectField(
+            var newPrefab = (GameObject)EditorGUILayout.ObjectField(
                 "Base Prefab",
                 CurrentSkill.Prefab,
                 typeof(GameObject),
                 false
             );
 
-            // 프로젝타일 프리팹 (해당하는 경우)
+            if (EditorGUI.EndChangeCheck() && newPrefab != null)
+            {
+                string resourcePath = $"SkillData/Prefabs/{CurrentSkill.ID}_Prefab";
+                ResourceIO<GameObject>.SaveData(resourcePath, newPrefab);
+                CurrentSkill.PrefabPath = resourcePath;
+                CurrentSkill.Prefab = ResourceIO<GameObject>.LoadData(resourcePath);
+                SaveCurrentSkill();
+
+                var currentId = selectedSkillId;
+                EditorApplication.delayCall += () =>
+                {
+                    RefreshData();
+                    selectedSkillId = currentId;
+                    Repaint();
+                };
+            }
+
             if (CurrentSkill.Type == SkillType.Projectile)
             {
-                CurrentSkill.ProjectilePrefab = (GameObject)EditorGUILayout.ObjectField(
+                EditorGUI.BeginChangeCheck();
+                var newProjectilePrefab = (GameObject)EditorGUILayout.ObjectField(
                     "Projectile Prefab",
                     CurrentSkill.ProjectilePrefab,
                     typeof(GameObject),
                     false
                 );
+
+                if (EditorGUI.EndChangeCheck() && newProjectilePrefab != null)
+                {
+                    string resourcePath = $"SkillData/Prefabs/{CurrentSkill.ID}_Projectile";
+                    ResourceIO<GameObject>.SaveData(resourcePath, newProjectilePrefab);
+                    CurrentSkill.ProjectilePath = resourcePath;
+                    CurrentSkill.ProjectilePrefab = ResourceIO<GameObject>.LoadData(resourcePath);
+                    SaveCurrentSkill();
+
+                    var currentId = selectedSkillId;
+                    EditorApplication.delayCall += () =>
+                    {
+                        RefreshData();
+                        selectedSkillId = currentId;
+                        Repaint();
+                    };
+                }
             }
 
-            // 레벨별 프리팹
             EditorGUILayout.Space(5);
             EditorGUILayout.LabelField("Level Prefabs", EditorStyles.boldLabel);
 
-            int newSize = EditorGUILayout.IntField("Level Count", CurrentSkill.PrefabsByLevel?.Length ?? 0);
-            if (newSize != CurrentSkill.PrefabsByLevel?.Length)
+            var stats = statDatabase.GetValueOrDefault(CurrentSkill.ID);
+            if (stats != null && stats.Any())
             {
-                Array.Resize(ref CurrentSkill.PrefabsByLevel, newSize);
-                SaveCurrentSkill();
-            }
-
-            if (CurrentSkill.PrefabsByLevel != null)
-            {
-                EditorGUI.indentLevel++;
-                for (int i = 0; i < CurrentSkill.PrefabsByLevel.Length; i++)
+                var maxLevel = stats.Values.First().MaxSkillLevel;
+                if (CurrentSkill.PrefabsByLevel == null || CurrentSkill.PrefabsByLevel.Length != maxLevel)
                 {
-                    CurrentSkill.PrefabsByLevel[i] = (GameObject)EditorGUILayout.ObjectField(
-                        $"Level {i + 1}",
-                        CurrentSkill.PrefabsByLevel[i],
-                        typeof(GameObject),
-                        false
-                    );
+                    var prefabs = CurrentSkill.PrefabsByLevel;
+                    var paths = CurrentSkill.PrefabsByLevelPaths;
+                    Array.Resize(ref prefabs, maxLevel);
+                    Array.Resize(ref paths, maxLevel);
+                    CurrentSkill.PrefabsByLevel = prefabs;
+                    CurrentSkill.PrefabsByLevelPaths = paths;
+                    SaveCurrentSkill();
                 }
-                EditorGUI.indentLevel--;
-            }
 
-            if (EditorGUI.EndChangeCheck())
-            {
-                SaveCurrentSkill();
+                if (CurrentSkill.PrefabsByLevel != null)
+                {
+                    EditorGUI.indentLevel++;
+                    for (int i = 0; i < CurrentSkill.PrefabsByLevel.Length; i++)
+                    {
+                        EditorGUI.BeginChangeCheck();
+                        var newLevelPrefab = (GameObject)EditorGUILayout.ObjectField(
+                            $"Level {i + 1}",
+                            CurrentSkill.PrefabsByLevel[i],
+                            typeof(GameObject),
+                            false
+                        );
+
+                        if (EditorGUI.EndChangeCheck() && newLevelPrefab != null)
+                        {
+                            string resourcePath = $"SkillData/Prefabs/{CurrentSkill.ID}_Level_{i + 1}";
+                            ResourceIO<GameObject>.SaveData(resourcePath, newLevelPrefab);
+                            CurrentSkill.PrefabsByLevelPaths[i] = resourcePath;
+                            CurrentSkill.PrefabsByLevel[i] = ResourceIO<GameObject>.LoadData(resourcePath);
+                            SaveCurrentSkill();
+
+                            var currentId = selectedSkillId;
+                            EditorApplication.delayCall += () =>
+                            {
+                                RefreshData();
+                                selectedSkillId = currentId;
+                                Repaint();
+                            };
+                        }
+                    }
+                    EditorGUI.indentLevel--;
+                }
             }
         }
         EditorGUILayout.EndVertical();
@@ -387,7 +545,7 @@ public class SkillDataEditorWindow : EditorWindow
             var stats = statDatabase.GetValueOrDefault(CurrentSkill.ID);
             if (stats == null || !stats.Any())
             {
-                EditorGUILayout.HelpBox("No level stats found. Click 'Add Level' to create level 1 stats.", MessageType.Info);
+                EditorGUILayout.HelpBox("No level stats found. Set Max Skill Level in Basic Info to create level stats.", MessageType.Info);
             }
             else
             {
@@ -422,20 +580,14 @@ public class SkillDataEditorWindow : EditorWindow
                     SkillDataEditorUtility.SaveStatDatabase();
                 }
             }
-
-            if (GUILayout.Button("Add Level"))
-            {
-                AddNewLevel();
-            }
         }
         EditorGUILayout.EndVertical();
     }
 
     private void DrawStatFields(SkillStatData stat)
     {
-        // 기본 스탯
+        // 데미지와 ElementalPower는 레벨별로 설정 가능
         stat.Damage = EditorGUILayout.FloatField("Damage", stat.Damage);
-        stat.MaxSkillLevel = EditorGUILayout.IntField("Max Level", stat.MaxSkillLevel);
         stat.ElementalPower = EditorGUILayout.FloatField("Elemental Power", stat.ElementalPower);
 
         // 스킬 타입별 특수 스탯
@@ -536,50 +688,113 @@ public class SkillDataEditorWindow : EditorWindow
 
     private void CreateNewSkill()
     {
-        var newSkill = new SkillData
+        var window = EditorWindow.GetWindow<SkillCreationPopup>("Create New Skill");
+        window.Initialize((selectedId, selectedType) =>
         {
-            ID = SkillID.None,
-            Name = "New Skill",
-            Description = "New skill description",
-            Type = SkillType.None,
-            Element = ElementType.None,
-            IconPath = "",
-            PrefabPath = "",
-            ProjectilePath = "",
-            PrefabsByLevelPaths = new string[0],
-            ResourceReferences = new ResourceReferenceData()
-        };
+            if (selectedId != SkillID.None && selectedType != SkillType.None)
+            {
+                var newSkill = new SkillData
+                {
+                    ID = selectedId,
+                    Name = $"New {selectedType} Skill",
+                    Description = $"New {selectedType} skill description",
+                    Type = selectedType,
+                    Element = ElementType.None,
+                    IconPath = "",
+                    PrefabPath = "",
+                    ProjectilePath = "",
+                    PrefabsByLevelPaths = new string[0],
+                    ResourceReferences = new ResourceReferenceData()
+                };
 
-        SkillDataEditorUtility.SaveSkillData(newSkill);
-        selectedSkillId = newSkill.ID;
-        RefreshData();
+                SkillDataEditorUtility.SaveSkillData(newSkill);
+                selectedSkillId = newSkill.ID;
+                RefreshData();
+            }
+        });
     }
 
-    private void AddNewLevel()
+    public class SkillCreationPopup : EditorWindow
     {
-        if (CurrentSkill == null) return;
+        private SkillID selectedId = SkillID.None;
+        private SkillType selectedType = SkillType.None;
+        private System.Action<SkillID, SkillType> onConfirm;
+        private Vector2 scrollPosition;
 
-        var stats = statDatabase.GetValueOrDefault(CurrentSkill.ID);
-        int newLevel = stats?.Values.Max(s => s.Level) + 1 ?? 1;
-
-        var newStat = new SkillStatData
+        public void Initialize(System.Action<SkillID, SkillType> callback)
         {
-            SkillID = CurrentSkill.ID,
-            Level = newLevel,
-            MaxSkillLevel = 5,
-            Damage = 10f,
-            ElementalPower = 1f,
-            Element = CurrentSkill.Element
-        };
-
-        if (!statDatabase.ContainsKey(CurrentSkill.ID))
-        {
-            statDatabase[CurrentSkill.ID] = new Dictionary<int, SkillStatData>();
+            onConfirm = callback;
+            minSize = new Vector2(300, 400);
+            maxSize = new Vector2(300, 400);
+            position = new Rect(Screen.width / 2, Screen.height / 2, 300, 400);
+            Show();
         }
-        statDatabase[CurrentSkill.ID][newLevel] = newStat;
 
-        SkillDataEditorUtility.SaveStatDatabase();
-        RefreshData();
+        private void OnGUI()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            {
+                EditorGUILayout.LabelField("Create New Skill", EditorStyles.boldLabel);
+                EditorGUILayout.Space(10);
+
+                // 스킬 타입 선택
+                EditorGUI.BeginChangeCheck();
+                selectedType = (SkillType)EditorGUILayout.EnumPopup("Skill Type", selectedType);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    selectedId = SkillID.None; // 타입이 변경되면 ID 초기화
+                }
+
+                EditorGUILayout.Space(10);
+
+                // 사용 가능한 스킬 ID 목록 표시
+                EditorGUILayout.LabelField("Select Skill ID", EditorStyles.boldLabel);
+                scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+                {
+                    var skillDatabase = SkillDataEditorUtility.GetSkillDatabase();
+                    foreach (SkillID id in System.Enum.GetValues(typeof(SkillID)))
+                    {
+                        if (id == SkillID.None) continue;
+                        if (skillDatabase.ContainsKey(id)) continue;
+
+                        bool isSelected = id == selectedId;
+                        GUI.backgroundColor = isSelected ? Color.cyan : Color.white;
+                        if (GUILayout.Button(id.ToString(), GUILayout.Height(25)))
+                        {
+                            selectedId = id;
+                        }
+                        GUI.backgroundColor = Color.white;
+                    }
+                }
+                EditorGUILayout.EndScrollView();
+
+                EditorGUILayout.Space(10);
+
+                // 선택된 값들 표시
+                GUI.enabled = false;
+                EditorGUILayout.EnumPopup("Selected Type", selectedType);
+                EditorGUILayout.EnumPopup("Selected ID", selectedId);
+                GUI.enabled = true;
+
+                EditorGUILayout.Space(10);
+
+                // 확인 버튼
+                GUI.enabled = selectedId != SkillID.None && selectedType != SkillType.None;
+                if (GUILayout.Button("Create", GUILayout.Height(30)))
+                {
+                    onConfirm?.Invoke(selectedId, selectedType);
+                    Close();
+                }
+                GUI.enabled = true;
+
+                // 취소 버튼
+                if (GUILayout.Button("Cancel", GUILayout.Height(30)))
+                {
+                    Close();
+                }
+            }
+            EditorGUILayout.EndVertical();
+        }
     }
 
     private void SaveCurrentSkill()

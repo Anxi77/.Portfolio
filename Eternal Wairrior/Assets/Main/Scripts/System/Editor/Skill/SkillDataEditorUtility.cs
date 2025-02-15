@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System;
-using Newtonsoft.Json;
 
 public static class SkillDataEditorUtility
 {
@@ -56,6 +55,37 @@ public static class SkillDataEditorUtility
                 var skillData = JSONIO<SkillData>.LoadData(skillId.ToString());
                 if (skillData != null)
                 {
+                    // 아이콘 로드
+                    if (!string.IsNullOrEmpty(skillData.IconPath))
+                    {
+                        skillData.Icon = ResourceIO<Sprite>.LoadData(skillData.IconPath);
+                    }
+
+                    // 기본 프리팹 로드
+                    if (!string.IsNullOrEmpty(skillData.PrefabPath))
+                    {
+                        skillData.Prefab = ResourceIO<GameObject>.LoadData(skillData.PrefabPath);
+                    }
+
+                    // 프로젝타일 프리팹 로드 (해당하는 경우)
+                    if (skillData.Type == SkillType.Projectile && !string.IsNullOrEmpty(skillData.ProjectilePath))
+                    {
+                        skillData.ProjectilePrefab = ResourceIO<GameObject>.LoadData(skillData.ProjectilePath);
+                    }
+
+                    // 레벨별 프리팹 로드
+                    if (skillData.PrefabsByLevelPaths != null)
+                    {
+                        skillData.PrefabsByLevel = new GameObject[skillData.PrefabsByLevelPaths.Length];
+                        for (int i = 0; i < skillData.PrefabsByLevelPaths.Length; i++)
+                        {
+                            if (!string.IsNullOrEmpty(skillData.PrefabsByLevelPaths[i]))
+                            {
+                                skillData.PrefabsByLevel[i] = ResourceIO<GameObject>.LoadData(skillData.PrefabsByLevelPaths[i]);
+                            }
+                        }
+                    }
+
                     skillDatabase[skillId] = skillData;
                 }
             }
@@ -77,7 +107,6 @@ public static class SkillDataEditorUtility
             LoadStatsFromCSV("ProjectileSkillStats", SkillType.Projectile);
             LoadStatsFromCSV("AreaSkillStats", SkillType.Area);
             LoadStatsFromCSV("PassiveSkillStats", SkillType.Passive);
-            LoadStatsFromCSV("UnassignedSkillStats", SkillType.None);
         }
         catch (Exception e)
         {
@@ -102,6 +131,11 @@ public static class SkillDataEditorUtility
     public static void SaveSkillData(SkillData skillData)
     {
         if (skillData == null) return;
+        if (skillData.ID == SkillID.None || skillData.Type == SkillType.None)
+        {
+            Debug.LogError("Cannot save skill data with None ID or Type");
+            return;
+        }
 
         try
         {
@@ -123,6 +157,8 @@ public static class SkillDataEditorUtility
 
     private static void SaveStatData(SkillData skillData)
     {
+        if (skillData.ID == SkillID.None || skillData.Type == SkillType.None) return;
+
         if (!statDatabase.ContainsKey(skillData.ID))
         {
             statDatabase[skillData.ID] = new Dictionary<int, SkillStatData>();
@@ -135,10 +171,10 @@ public static class SkillDataEditorUtility
 
     private static void SaveSkillResources(SkillData skillData)
     {
-        // 아이콘 저장
-        if (skillData.Icon != null)
+        // 아이콘 경로 설정 (실제 저장은 이미 EditorWindow에서 수행됨)
+        if (skillData.Icon != null && string.IsNullOrEmpty(skillData.IconPath))
         {
-            ResourceIO<Sprite>.SaveData($"{SKILL_ICON_PATH}/{skillData.ID}_Icon", skillData.Icon);
+            skillData.IconPath = $"{SKILL_ICON_PATH}/{skillData.ID}_Icon";
         }
 
         // 프리팹 저장
@@ -174,7 +210,6 @@ public static class SkillDataEditorUtility
         var projectileStats = new List<SkillStatData>();
         var areaStats = new List<SkillStatData>();
         var passiveStats = new List<SkillStatData>();
-        var unassignedStats = new List<SkillStatData>();
 
         foreach (var skillStats in statDatabase.Values)
         {
@@ -194,9 +229,6 @@ public static class SkillDataEditorUtility
                     case SkillType.Passive:
                         passiveStats.Add(stat);
                         break;
-                    case SkillType.None:
-                        unassignedStats.Add(stat);
-                        break;
                 }
             }
         }
@@ -204,10 +236,6 @@ public static class SkillDataEditorUtility
         CSVIO<SkillStatData>.SaveBulkData("ProjectileSkillStats", projectileStats);
         CSVIO<SkillStatData>.SaveBulkData("AreaSkillStats", areaStats);
         CSVIO<SkillStatData>.SaveBulkData("PassiveSkillStats", passiveStats);
-        if (unassignedStats.Any())
-        {
-            CSVIO<SkillStatData>.SaveBulkData("UnassignedSkillStats", unassignedStats);
-        }
     }
 
     public static void DeleteSkillData(SkillID skillId)
@@ -289,38 +317,38 @@ public static class SkillDataEditorUtility
 
     private static void ClearAllData()
     {
-        // JSON 데이터 삭제
-        JSONIO<SkillData>.ClearAll();
-
-        // CSV 데이터 삭제
-        CSVIO<SkillStatData>.ClearAll();
-
-        // 캐시 초기화
-        skillDatabase.Clear();
-        statDatabase.Clear();
-
-        // Resources 폴더 정리
-        string resourceRoot = Path.Combine(Application.dataPath, "Resources");
-        if (Directory.Exists(resourceRoot))
+        try
         {
-            try
+            // JSON 데이터 삭제
+            JSONIO<SkillData>.ClearAll();
+
+            // CSV 데이터 삭제
+            CSVIO<SkillStatData>.ClearAll();
+
+            // 리소스 캐시 초기화
+            ResourceIO<Sprite>.ClearCache();
+            ResourceIO<GameObject>.ClearCache();
+
+            // 데이터베이스 초기화
+            skillDatabase.Clear();
+            statDatabase.Clear();
+
+            // Resources 폴더 정리
+            string resourceRoot = Path.Combine(Application.dataPath, "Resources");
+            if (Directory.Exists(resourceRoot))
             {
-                // 각 하위 디렉토리 정리
                 string[] paths = new[] { SKILL_DB_PATH, SKILL_ICON_PATH, SKILL_PREFAB_PATH, SKILL_STAT_PATH };
                 foreach (var path in paths)
                 {
-                    string fullPath = Path.Combine(resourceRoot, path);
-                    if (Directory.Exists(fullPath))
-                    {
-                        Directory.Delete(fullPath, true);
-                        Directory.CreateDirectory(fullPath);
-                    }
+                    CleanDirectory(Path.Combine(resourceRoot, path));
                 }
             }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error clearing directories: {e.Message}");
-            }
+
+            AssetDatabase.Refresh();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error clearing data: {e.Message}");
         }
     }
 
@@ -330,6 +358,22 @@ public static class SkillDataEditorUtility
         {
             try
             {
+                // 디렉토리 내의 모든 파일 삭제
+                string[] files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+                foreach (string file in files)
+                {
+                    if (File.Exists(file))
+                    {
+                        string assetPath = file.Replace('\\', '/');
+                        if (assetPath.StartsWith(Application.dataPath))
+                        {
+                            assetPath = "Assets" + assetPath.Substring(Application.dataPath.Length);
+                            AssetDatabase.DeleteAsset(assetPath);
+                        }
+                    }
+                }
+
+                // 디렉토리 재생성
                 Directory.Delete(path, true);
                 Directory.CreateDirectory(path);
             }
@@ -357,11 +401,13 @@ public static class SkillDataEditorUtility
         CSVIO<SkillStatData>.CreateDefaultFile("ProjectileSkillStats", headerLine);
         CSVIO<SkillStatData>.CreateDefaultFile("AreaSkillStats", headerLine);
         CSVIO<SkillStatData>.CreateDefaultFile("PassiveSkillStats", headerLine);
-        CSVIO<SkillStatData>.CreateDefaultFile("UnassignedSkillStats", headerLine);
     }
 
     private static SkillStatData CreateDefaultStatData(SkillData skillData)
     {
+        if (skillData.ID == SkillID.None || skillData.Type == SkillType.None)
+            throw new ArgumentException("Cannot create default stats for skill with None ID or Type");
+
         var defaultStat = new SkillStatData
         {
             SkillID = skillData.ID,
@@ -394,6 +440,9 @@ public static class SkillDataEditorUtility
                 defaultStat.Cooldown = 10f;
                 defaultStat.TriggerChance = 1f;
                 break;
+
+            default:
+                throw new ArgumentException($"Invalid skill type: {skillData.Type}");
         }
 
         return defaultStat;
@@ -422,7 +471,6 @@ public static class SkillDataEditorUtility
         var projectileStats = new List<SkillStatData>();
         var areaStats = new List<SkillStatData>();
         var passiveStats = new List<SkillStatData>();
-        var unassignedStats = new List<SkillStatData>();
 
         foreach (var skillStats in statDatabase.Values)
         {
@@ -442,9 +490,6 @@ public static class SkillDataEditorUtility
                     case SkillType.Passive:
                         passiveStats.Add(stat);
                         break;
-                    case SkillType.None:
-                        unassignedStats.Add(stat);
-                        break;
                 }
             }
         }
@@ -455,9 +500,5 @@ public static class SkillDataEditorUtility
         CSVIO<SkillStatData>.SaveBulkData($"{backupPath}/ProjectileSkillStats", projectileStats);
         CSVIO<SkillStatData>.SaveBulkData($"{backupPath}/AreaSkillStats", areaStats);
         CSVIO<SkillStatData>.SaveBulkData($"{backupPath}/PassiveSkillStats", passiveStats);
-        if (unassignedStats.Any())
-        {
-            CSVIO<SkillStatData>.SaveBulkData($"{backupPath}/UnassignedSkillStats", unassignedStats);
-        }
     }
 }

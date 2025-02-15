@@ -28,7 +28,6 @@ public class ItemDataEditorWindow : EditorWindow
     private Vector2 dropTableScrollPosition;
     private Dictionary<EnemyType, bool> dropTableFoldouts = new();
 
-    // 섹션 토글 상태
     private bool showStatRanges = true;
     private bool showEffects = true;
     private bool showResources = true;
@@ -271,7 +270,6 @@ public class ItemDataEditorWindow : EditorWindow
                 );
                 try
                 {
-                    // 기본 정보
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                     {
                         EditorGUI.BeginChangeCheck();
@@ -602,7 +600,6 @@ public class ItemDataEditorWindow : EditorWindow
             EditorGUILayout.LabelField("Resources", EditorStyles.boldLabel);
             EditorGUILayout.Space(5);
 
-            // 현재 아이콘 표시
             if (CurrentItem.Icon != null)
             {
                 float size = 64f;
@@ -624,22 +621,18 @@ public class ItemDataEditorWindow : EditorWindow
                 string sourceAssetPath = AssetDatabase.GetAssetPath(newIcon);
                 if (!string.IsNullOrEmpty(sourceAssetPath))
                 {
-                    // 먼저 IconPath 설정
                     CurrentItem.IconPath = sourceAssetPath;
 
-                    // 아이템 데이터 저장 (아이콘 포함)
                     ItemDataEditorUtility.SaveItemData(CurrentItem);
 
-                    // 데이터베이스 새로고침 및 UI 갱신
                     string currentId = CurrentItem.ID;
 
-                    // 리소스 캐시 클리어 및 리로드
                     Resources.UnloadUnusedAssets();
                     EditorApplication.delayCall += () =>
                     {
                         RefreshItemDatabase();
-                        selectedItemId = currentId;  // 선택된 아이템 유지
-                        Repaint();  // 윈도우 강제 갱신
+                        selectedItemId = currentId;
+                        Repaint();
                     };
 
                     // UI 갱신

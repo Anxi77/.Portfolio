@@ -54,7 +54,6 @@ public static class CSVIO<T> where T : class, new()
         {
             if (!dataList.Any())
             {
-                Debug.LogWarning($"No data to save for {key}");
                 return;
             }
 
@@ -72,7 +71,6 @@ public static class CSVIO<T> where T : class, new()
             var headerLine = string.Join(",", properties.Select(p => p.Name.ToLower()));
             csv.AppendLine(headerLine);
 
-            // ������ �ۼ�
             int count = 0;
             foreach (var data in dataList)
             {
@@ -101,7 +99,6 @@ public static class CSVIO<T> where T : class, new()
                 count++;
             }
 
-            // ���� ����
             File.WriteAllText(fullPath, csv.ToString());
             Debug.Log($"Successfully saved {count} entries to {fullPath}");
 #if UNITY_EDITOR
@@ -124,7 +121,7 @@ public static class CSVIO<T> where T : class, new()
             return null;
 
         var lines = File.ReadAllLines(fullPath);
-        if (lines.Length < 2) // ��� + ������ �ּ� 2��
+        if (lines.Length < 2)
             return null;
 
         var headers = lines[0].Split(',');
@@ -243,10 +240,9 @@ public static class CSVIO<T> where T : class, new()
                 Directory.CreateDirectory(directory);
             }
 
-            // �̹� ������ �����ϸ� ����� ����
             if (!File.Exists(fullPath))
             {
-                File.WriteAllText(fullPath, headers + "\n");  // �� �� ���� �߰�
+                File.WriteAllText(fullPath, headers + "\n");
                 Debug.Log($"Created new CSV file: {fullPath}");
 #if UNITY_EDITOR
                 AssetDatabase.Refresh();

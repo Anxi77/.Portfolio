@@ -22,7 +22,6 @@ public static class ResourceIO<T> where T : UnityEngine.Object
             }
 
 #if UNITY_EDITOR
-            // 에셋 타입에 따른 저장 처리
             if (data is Sprite sprite)
             {
                 SaveSprite(path, sprite);
@@ -52,12 +51,28 @@ public static class ResourceIO<T> where T : UnityEngine.Object
             if (cache.TryGetValue(key, out T cachedData))
                 return cachedData;
 
-            T data = Resources.Load<T>(key);
+#if UNITY_EDITOR
+            string assetPath = $"Assets/Resources/{key}.{GetExtensionForType()}";
+            if (File.Exists(assetPath))
+            {
+                T data = AssetDatabase.LoadAssetAtPath<T>(assetPath);
+                if (data != null)
+                {
+                    cache[key] = data;
+                    return data;
+                }
+            }
+#endif
 
-            if (data != null)
-                cache[key] = data;
+            T resourceData = Resources.Load<T>(key);
+            if (resourceData != null)
+            {
+                cache[key] = resourceData;
+                return resourceData;
+            }
 
-            return data;
+            Debug.LogWarning($"Failed to load resource: {key}");
+            return null;
         }
         catch (System.Exception e)
         {
@@ -70,51 +85,37 @@ public static class ResourceIO<T> where T : UnityEngine.Object
     {
         try
         {
-            string fullPath = Path.Combine(Application.dataPath, "Resources", "Items", "Icons", key);
-            if (File.Exists(fullPath))
-            {
-                File.Delete(fullPath);
-                cache.Remove(key);
 #if UNITY_EDITOR
+            string assetPath = $"Assets/Resources/{key}.{GetExtensionForType()}";
+            if (File.Exists(assetPath))
+            {
+                AssetDatabase.DeleteAsset(assetPath);
+                cache.Remove(key);
                 AssetDatabase.Refresh();
-#endif
                 return true;
             }
+#endif
+            cache.Remove(key);
+            return true;
         }
         catch (System.Exception e)
         {
             Debug.LogError($"Error deleting resource: {e.Message}");
+            return false;
         }
-        return false;
     }
 
-    public static void ClearAll()
+    public static void ClearCache()
     {
-        try
-        {
-            string directory = Path.Combine(Application.dataPath, "Resources", "Items", "Icons");
-            if (Directory.Exists(directory))
-            {
-                Directory.Delete(directory, true);
-                Directory.CreateDirectory(directory);
-            }
-            cache.Clear();
-#if UNITY_EDITOR
-            AssetDatabase.Refresh();
-#endif
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"Error clearing resources: {e.Message}");
-        }
+        cache.Clear();
+        Resources.UnloadUnusedAssets();
     }
+
 #if UNITY_EDITOR
     private static void SaveSprite(string path, Sprite sprite)
     {
         try
         {
-            Debug.Log($"SaveSprite called with path: {path}");
-
             string sourcePath = AssetDatabase.GetAssetPath(sprite);
             if (string.IsNullOrEmpty(sourcePath))
             {
@@ -122,27 +123,22 @@ public static class ResourceIO<T> where T : UnityEngine.Object
                 return;
             }
 
-            // Resources 폴더 내 경로 구성
             string targetPath = $"Assets/Resources/{path}.png";
             string directory = Path.GetDirectoryName(targetPath);
 
-            // 디렉토리 생성
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            // 기존 파일이 있다면 삭제
             if (File.Exists(targetPath))
             {
                 AssetDatabase.DeleteAsset(targetPath);
             }
 
-            // 파일 복사
             bool success = AssetDatabase.CopyAsset(sourcePath, targetPath);
             if (success)
             {
-                // 스프라이트 설정 적용
                 TextureImporter importer = AssetImporter.GetAtPath(targetPath) as TextureImporter;
                 if (importer != null)
                 {
@@ -150,15 +146,12 @@ public static class ResourceIO<T> where T : UnityEngine.Object
                     importer.spriteImportMode = SpriteImportMode.Single;
                     importer.SaveAndReimport();
                 }
-
                 Debug.Log($"Successfully saved sprite to: {targetPath}");
             }
             else
             {
                 Debug.LogError($"Failed to copy sprite from {sourcePath} to {targetPath}");
             }
-
-            AssetDatabase.Refresh();
         }
         catch (System.Exception e)
         {
@@ -170,37 +163,45 @@ public static class ResourceIO<T> where T : UnityEngine.Object
     {
         try
         {
-            string directory = Path.GetDirectoryName(path);
+            string targetPath = $"Assets/Resources/{path}.prefab";
+            string directory = Path.GetDirectoryName(targetPath);
+
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            // 기존 파일이 있으면 삭제
-            if (File.Exists(path))
+            if (File.Exists(targetPath))
             {
-                AssetDatabase.DeleteAsset(path);
+                AssetDatabase.DeleteAsset(targetPath);
             }
 
-            // 프리팹 인스턴스 생성
             GameObject prefabInstance = Object.Instantiate(prefab);
-            bool success = PrefabUtility.SaveAsPrefabAsset(prefabInstance, path, out bool prefabSuccess);
+            bool success = PrefabUtility.SaveAsPrefabAsset(prefabInstance, targetPath, out bool prefabSuccess);
             Object.DestroyImmediate(prefabInstance);
 
             if (success)
             {
-                Debug.Log($"Saved prefab to: {path}");
-                AssetDatabase.Refresh();
+                Debug.Log($"Saved prefab to: {targetPath}");
             }
             else
             {
-                Debug.LogError($"Failed to save prefab to: {path}");
+                Debug.LogError($"Failed to save prefab to: {targetPath}");
             }
         }
         catch (System.Exception e)
         {
             Debug.LogError($"Error saving prefab: {e.Message}");
         }
+    }
+
+    private static string GetExtensionForType()
+    {
+        if (typeof(T) == typeof(Sprite) || typeof(T) == typeof(Texture2D))
+            return "png";
+        if (typeof(T) == typeof(GameObject))
+            return "prefab";
+        return "";
     }
 #endif
 }

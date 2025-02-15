@@ -75,7 +75,7 @@ public static class JSONIO<T> where T : class
                 return data;
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error loading JSON data: {e.Message}");
         }
@@ -98,7 +98,7 @@ public static class JSONIO<T> where T : class
                 return true;
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error deleting JSON data: {e.Message}");
         }
@@ -123,46 +123,9 @@ public static class JSONIO<T> where T : class
             AssetDatabase.Refresh();
 #endif
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error clearing JSON data: {e.Message}");
         }
     }
-
-#if UNITY_EDITOR
-    public static void SaveBulkData(string key, IEnumerable<T> dataList)
-    {
-        try
-        {
-            var wrapper = new ListWrapper<T> { Items = dataList.ToList() };
-            string jsonData = JsonConvert.SerializeObject(wrapper);
-            string fullPath = Path.Combine(Application.dataPath, "Resources", defaultPath, $"{key}.json");
-            File.WriteAllText(fullPath, jsonData);
-            AssetDatabase.Refresh();
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"Error saving bulk JSON data: {e.Message}");
-        }
-    }
-#endif
-    public static IEnumerable<T> LoadBulkData(string key)
-    {
-        try
-        {
-            var wrapper = LoadData(key) as ListWrapper<T>;
-            return wrapper?.Items ?? Enumerable.Empty<T>();
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"Error loading bulk JSON data: {e.Message}");
-            return Enumerable.Empty<T>();
-        }
-    }
-}
-
-[Serializable]
-public class ListWrapper<T>
-{
-    public List<T> Items = new List<T>();
 }

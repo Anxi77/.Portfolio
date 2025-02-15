@@ -1,0 +1,23 @@
+{
+  "ID": 100002,
+  "Name": "New Projectile Skill",
+  "Description": "New Projectile skill description",
+  "Type": 1,
+  "Element": 1,
+  "Tier": 0,
+  "Tags": [],
+  "PrefabPath": "SkillData/Prefabs/EarthRift_Prefab",
+  "IconPath": "SkillData/Icons/EarthRift_Icon",
+  "ProjectilePath": "",
+  "PrefabsByLevelPaths": [
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "ResourceReferences": {
+    "Keys": [],
+    "Values": []
+  }
+}
