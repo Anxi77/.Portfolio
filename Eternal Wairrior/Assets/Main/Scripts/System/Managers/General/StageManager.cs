@@ -4,7 +4,6 @@ using UnityEngine.SceneManagement;
 
 public class StageManager : SingletonManager<StageManager>
 {
-
     public enum SceneType
     {
         MainMenu,
@@ -12,7 +11,6 @@ public class StageManager : SingletonManager<StageManager>
         Game,
         Test
     }
-
 
     [Header("Portal Settings")]
     [SerializeField] private GameObject portalPrefab;
@@ -49,7 +47,6 @@ public class StageManager : SingletonManager<StageManager>
         UIManager.Instance.UpdateLoadingProgress(0f);
         Time.timeScale = 0f;
 
-        // 초기 로딩 (0% - 10%)
         float progress = 0f;
         while (progress < 10f)
         {
@@ -60,10 +57,8 @@ public class StageManager : SingletonManager<StageManager>
 
         CleanupCurrentScene();
 
-        // TestScene인 경우와 일반 씬 로딩을 구분
         if (sceneName.Contains("Test"))
         {
-            // TestScene은 비동기 로딩 없이 바로 초기화 (10% - 70%)
             progress = 10f;
             while (progress < 70f)
             {
@@ -72,15 +67,12 @@ public class StageManager : SingletonManager<StageManager>
                 yield return null;
             }
 
-            // 씬 전환
             SceneManager.LoadScene(sceneName);
 
-            // 씬 로드 후 초기화가 완료될 때까지 잠시 대기
             yield return new WaitForSeconds(0.5f);
         }
         else
         {
-            // 일반 씬 비동기 로딩 (10% - 70%)
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
             asyncLoad.allowSceneActivation = false;
 
@@ -98,7 +90,6 @@ public class StageManager : SingletonManager<StageManager>
             }
         }
 
-        // UI 초기화 (70% - 80%)
         switch (sceneType)
         {
             case SceneType.MainMenu:
@@ -109,7 +100,6 @@ public class StageManager : SingletonManager<StageManager>
                 break;
         }
 
-        // 게임 상태 변경
         switch (sceneType)
         {
             case SceneType.MainMenu:
@@ -124,7 +114,6 @@ public class StageManager : SingletonManager<StageManager>
                 break;
         }
 
-        // 씬 초기화 완료 대기 (80% - 95%)
         while (!IsSceneReady(sceneType))
         {
             progress = Mathf.Lerp(80f, 95f, Time.unscaledDeltaTime);
@@ -132,7 +121,6 @@ public class StageManager : SingletonManager<StageManager>
             yield return null;
         }
 
-        // 최종 마무리 (95% - 100%)
         while (progress < 100f)
         {
             progress += Time.unscaledDeltaTime * 50f;

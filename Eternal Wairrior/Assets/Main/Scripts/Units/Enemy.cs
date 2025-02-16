@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
-using static GameManager;
-using Lean.Pool;
-using Unity.Mathematics;
 using System.Linq;
 
 public class Enemy : MonoBehaviour

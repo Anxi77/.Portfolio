@@ -149,7 +149,6 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
     {
         bottomLeft = cameraPosition - new Vector2(GRID_SIZE * NODE_SIZE / 2, GRID_SIZE * NODE_SIZE / 2);
 
-        //  ī޶ Ʈ
         float height = 2f * mainCamera.orthographicSize;
         float width = height * mainCamera.aspect;
 
@@ -160,7 +159,6 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
 
         HashSet<Vector2Int> currentVisibleNodes = new HashSet<Vector2Int>();
 
-        // ο  Ʈ
         for (int x = startX; x <= endX; x++)
         {
             for (int y = startY; y <= endY; y++)
@@ -179,7 +177,6 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
             }
         }
 
-        //  û
         List<Vector2Int> nodesToRemove = new List<Vector2Int>();
         foreach (var node in activeNodes)
         {
@@ -194,7 +191,6 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
             activeNodes.Remove(pos);
         }
 
-        //  ô̴
         UpdateEnemyColliders(currentVisibleNodes);
     }
 
@@ -391,7 +387,6 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
             }
         }
 
-        // θ ã 
         return new List<Vector2> { startPos, targetPos };
     }
 
@@ -537,11 +532,9 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
     {
         if (mainCamera == null) return;
 
-        // ׸ðȭ
         Gizmos.color = new Color(1, 1, 0, 0.2f);
         Gizmos.DrawWireCube(gridWorldCenter, new Vector3(GRID_SIZE * NODE_SIZE, GRID_SIZE * NODE_SIZE, 1));
 
-        //  ðȭ
         foreach (var node in activeNodes.Values)
         {
             Gizmos.color = node.walkable ?
@@ -551,7 +544,6 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
             Gizmos.DrawCube(node.worldPosition, Vector3.one * NODE_SIZE * 0.8f);
         }
 
-        //   ðȭ
         var enemies = FindObjectsOfType<Enemy>();
         foreach (var enemy in enemies)
         {
@@ -559,26 +551,21 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
             {
                 var path = enemy.currentPath;
 
-                // ġ ù Ʈ
-                Gizmos.color = new Color(1, 0, 1, 1f); // 
+                Gizmos.color = new Color(1, 0, 1, 1f);
                 Gizmos.DrawLine(enemy.transform.position, path[0]);
 
-                // ðȭ
                 for (int i = 0; i < path.Count - 1; i++)
                 {
-                    // 
-                    Gizmos.color = new Color(0, 0, 1, 1f); // Ķ
+                    Gizmos.color = new Color(0, 0, 1, 1f);
                     Gizmos.DrawLine(path[i], path[i + 1]);
 
-                    // Ʈ ǥ
-                    Gizmos.color = new Color(1, 1, 0, 1f); // 
+                    Gizmos.color = new Color(1, 1, 0, 1f);
                     Gizmos.DrawWireSphere(path[i], NODE_SIZE * 0.3f);
                 }
 
-                // Ʈ ǥ
                 if (path.Count > 0)
                 {
-                    Gizmos.color = new Color(0, 1, 0, 1f); // ϻ
+                    Gizmos.color = new Color(0, 1, 0, 1f);
                     Gizmos.DrawWireSphere(path[path.Count - 1], NODE_SIZE * 0.4f);
                 }
             }

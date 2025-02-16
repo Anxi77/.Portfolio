@@ -91,7 +91,6 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
 
     private void OnPlayerLevelUp()
     {
-        // UI 매니저에게 레벨업 UI를 표시하도록 요청
         UIManager.Instance?.ShowLevelUpPanel();
     }
 

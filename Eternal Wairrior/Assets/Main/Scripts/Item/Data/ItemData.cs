@@ -104,10 +104,6 @@ public class ItemData
     #endregion
 
     #region Cloning
-    /// <summary>
-    /// 아이템 데이터의 깊은 복사본을 생성.
-    /// JSON 직렬화/역직렬화를 사용하여 모든 중첩된 객체들의 새로운 인스턴스를 생성.
-    /// </summary>
     public ItemData Clone()
     {
         return JsonConvert.DeserializeObject<ItemData>(

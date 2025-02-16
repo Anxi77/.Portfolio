@@ -69,36 +69,29 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
         {
             Debug.Log("Starting player initialization...");
 
-            // GameManager에 먼저 플레이어 등록
             GameManager.Instance.player = player;
 
-            // PlayerStat 초기화
             PlayerStatSystem playerStat = player.GetComponent<PlayerStatSystem>();
             if (playerStat != null)
             {
-                // 체력을 최대치로 설정
                 float maxHp = playerStat.GetStat(StatType.MaxHp);
                 playerStat.SetCurrentHp(maxHp);
                 Debug.Log($"Player stats initialized - MaxHP: {maxHp}");
 
-                // 저장된 데이터가 있다면 로드
                 if (PlayerDataManager.Instance.HasSaveData("CurrentSave"))
                 {
                     LoadGameState();
                 }
             }
 
-            // 캐릭터 컨트롤 초기화
             if (player.characterControl != null)
             {
                 player.characterControl.Initialize();
                 Debug.Log("Character control initialized");
             }
 
-            // 플레이어 상태 초기화
             player.playerStatus = Player.Status.Alive;
 
-            // 전투 시스템 시작
             player.StartCombatSystems();
 
             Debug.Log("Player initialization completed successfully");
@@ -111,11 +104,10 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
 
     public Vector3 GetSpawnPosition(SceneType sceneType)
     {
-        // 씬 타입별로 적절한 스폰 위치 반환
         switch (sceneType)
         {
             case SceneType.Town:
-                return new Vector3(0, 0, 0); // 타운 스폰 위치
+                return new Vector3(0, 0, 0);
             case SceneType.Game:
             case SceneType.Test:
                 return defaultSpawnPosition;
@@ -166,18 +158,14 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
 
         var player = GameManager.Instance.player;
 
-        // 플레이어의 일시적인 효과들 제거
         if (player.playerStat != null)
         {
-            // 버프/디버프 효과 제거
             player.playerStat.RemoveStatsBySource(SourceType.Buff);
             player.playerStat.RemoveStatsBySource(SourceType.Debuff);
 
-            // 소비아이템 효과 제거
             player.playerStat.RemoveStatsBySource(SourceType.Consumable);
         }
 
-        // 패시브 효과 초기화
         player.ResetPassiveEffects();
 
         Debug.Log("Cleared all temporary effects from player");

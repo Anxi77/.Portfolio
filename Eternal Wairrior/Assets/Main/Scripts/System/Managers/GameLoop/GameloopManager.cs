@@ -39,7 +39,8 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
     private IEnumerator InitializationSequence()
     {
-        yield return StartCoroutine(InitializeDataManagers(success => {
+        yield return StartCoroutine(InitializeDataManagers(success =>
+        {
             if (!success)
             {
                 Debug.LogError("Failed to initialize Data Managers");
@@ -47,7 +48,8 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
         }));
 
         yield return new WaitForSeconds(0.1f);
-        yield return StartCoroutine(InitializeCoreManagers(success => {
+        yield return StartCoroutine(InitializeCoreManagers(success =>
+        {
             if (!success)
             {
                 Debug.LogError("Failed to initialize Core Managers");
@@ -63,11 +65,9 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             UIManager.Instance.Initialize();
         }
 
-        // 상태 핸들러 초기화
         if (CreateStateHandlers())
         {
             Debug.Log("State handlers initialized successfully");
-            // 초기 상태 설정
             ChangeState(GameState.MainMenu);
         }
         else
@@ -81,7 +81,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
         Debug.Log("Initializing Data Managers...");
         bool success = true;
 
-        // PlayerDataManager 초기화
         if (PlayerDataManager.Instance != null)
         {
             PlayerDataManager.Instance.Initialize();
@@ -97,7 +96,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             Debug.Log("PlayerDataManager initialized");
         }
 
-        // ItemDataManager 초기화
         if (success && ItemDataManager.Instance != null)
         {
             ItemDataManager.Instance.Initialize();
@@ -113,7 +111,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             Debug.Log("ItemDataManager initialized");
         }
 
-        // SkillDataManager 초기화
         if (success && SkillDataManager.Instance != null)
         {
             SkillDataManager.Instance.Initialize();

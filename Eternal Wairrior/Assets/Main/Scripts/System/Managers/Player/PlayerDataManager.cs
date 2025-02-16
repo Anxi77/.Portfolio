@@ -1,8 +1,6 @@
 using UnityEngine;
 using System.IO;
-using System;
-
-
+using Newtonsoft.Json;
 
 public class PlayerDataManager : DataManager<PlayerDataManager>
 {
@@ -118,10 +116,8 @@ public class PlayerDataManager : DataManager<PlayerDataManager>
         try
         {
             EnsureDirectoryExists();
-            string json = JsonUtility.ToJson(data);
-            string path = Path.Combine(Application.persistentDataPath, SAVE_PATH, "inventory.json");
-            File.WriteAllText(path, json);
-            Debug.Log($"Successfully saved inventory data to: {path}");
+            JSONIO<InventoryData>.SaveData(DEFAULT_SAVE_SLOT, currentInventoryData);
+            Debug.Log($"Successfully saved inventory data to: {DEFAULT_SAVE_SLOT}");
         }
         catch (System.Exception e)
         {

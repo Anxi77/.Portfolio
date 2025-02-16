@@ -36,7 +36,6 @@ public class CameraManager : SingletonManager<CameraManager>, IInitializable
     {
         Debug.Log("Setting up camera...");
 
-        // 메인 카메라 찾기
         var mainCamera = Camera.main;
         if (mainCamera == null)
         {
@@ -49,7 +48,6 @@ public class CameraManager : SingletonManager<CameraManager>, IInitializable
             }
         }
 
-        // CinemachineBrain 확인 및 추가
         var brain = mainCamera.GetComponent<Cinemachine.CinemachineBrain>();
         if (brain == null)
         {
@@ -64,13 +62,11 @@ public class CameraManager : SingletonManager<CameraManager>, IInitializable
 
         try
         {
-            // 기존 가상 카메라 제거
             if (virtualCamera != null)
             {
                 Destroy(virtualCamera.gameObject);
             }
 
-            // 새 카메라 생성 (메인 카메라의 자식으로)
             GameObject camObj = Instantiate(virtualCameraPrefab, mainCamera.transform);
             camObj.transform.localPosition = Vector3.zero;
             virtualCamera = camObj.GetComponent<Cinemachine.CinemachineVirtualCamera>();
@@ -81,7 +77,6 @@ public class CameraManager : SingletonManager<CameraManager>, IInitializable
                 return;
             }
 
-            // 씬 타입에 따른 카메라 설정
             switch (sceneType)
             {
                 case SceneType.Town:
@@ -92,7 +87,6 @@ public class CameraManager : SingletonManager<CameraManager>, IInitializable
                     break;
             }
 
-            // 플레이어 추적 설정
             if (GameManager.Instance?.player != null)
             {
                 virtualCamera.Follow = GameManager.Instance.player.transform;

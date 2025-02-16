@@ -1416,7 +1416,6 @@ GameObject:
   - component: {fileID: 3940259359589790905}
   - component: {fileID: 7232877391745312580}
   - component: {fileID: 6118771307960794126}
-  - component: {fileID: 7413249033475729895}
   - component: {fileID: 165434191694404430}
   m_Layer: 9
   m_Name: Player
@@ -1520,19 +1519,6 @@ MonoBehaviour:
   playerStat: {fileID: 0}
   characterControl: {fileID: 8435831049125883825}
   skills: []
---- !u!114 &7413249033475729895
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2396327424899577091}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8be2415df463d00469a36a0365884a8a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  baseData: {fileID: 11400000, guid: 3fb1e843b33f77a408e6d33abcc7e40c, type: 2}
 --- !u!114 &165434191694404430
 MonoBehaviour:
   m_ObjectHideFlags: 0

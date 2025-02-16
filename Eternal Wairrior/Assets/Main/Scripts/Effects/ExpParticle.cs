@@ -1,5 +1,4 @@
 using UnityEngine;
-using Lean.Pool;
 
 public class ExpParticle : MonoBehaviour, IContactable
 {

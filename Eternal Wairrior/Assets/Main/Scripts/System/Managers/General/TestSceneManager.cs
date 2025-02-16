@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using static InitializationManager;
 
 public class TestSceneManager : MonoBehaviour
@@ -8,10 +7,8 @@ public class TestSceneManager : MonoBehaviour
     [SerializeField] private bool autoStartGameLoop = true;
     private void Start()
     {
-        // 현재 씬이 InitScene을 통해 로드되었는지 확인
         if (!IsInitialized())
         {
-            // InitScene이 없다면 InitScene을 로드
             Debug.Log("Loading InitScene for proper initialization...");
             UnityEngine.SceneManagement.SceneManager.LoadScene("InitScene");
             return;
@@ -27,7 +24,6 @@ public class TestSceneManager : MonoBehaviour
 
     private bool IsInitialized()
     {
-        // 핵심 매니저들이 존재하는지 확인
         return GameManager.Instance != null &&
                UIManager.Instance != null &&
                GameLoopManager.Instance != null;
