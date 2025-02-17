@@ -25,7 +25,7 @@ public abstract class SingletonManager<T> : MonoBehaviour where T : MonoBehaviou
         }
         else
         {
-            Destroy(this);
+            Destroy(gameObject);
         }
     }
 }

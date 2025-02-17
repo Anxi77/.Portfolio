@@ -81,6 +81,10 @@ public class Player : MonoBehaviour
     private void OnDisable()
     {
         CleanupPlayer();
+        if (Application.isPlaying && GameManager.Instance != null)
+        {
+            GameManager.Instance.player = null;
+        }
     }
 
     private void CleanupPlayer()

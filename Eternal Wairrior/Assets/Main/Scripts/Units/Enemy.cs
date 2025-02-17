@@ -101,7 +101,7 @@ public class Enemy : MonoBehaviour
         maxHp = hp;
         originalMoveSpeed = moveSpeed;
 
-        if (GameManager.Instance != null && !GameManager.Instance.enemies.Contains(this))
+        if (Application.isPlaying && GameManager.Instance != null && !GameManager.Instance.enemies.Contains(this))
         {
             GameManager.Instance.enemies.Add(this);
         }
@@ -149,7 +149,7 @@ public class Enemy : MonoBehaviour
         moveSpeed = originalMoveSpeed;
         currentDefense = baseDefense;
 
-        if (GameManager.Instance != null && GameManager.Instance.enemies != null)
+        if (Application.isPlaying && GameManager.Instance != null && GameManager.Instance.enemies != null && GameManager.Instance.enemies.Contains(this))
         {
             GameManager.Instance.enemies.Remove(this);
         }
