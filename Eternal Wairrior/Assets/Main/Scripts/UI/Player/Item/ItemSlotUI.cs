@@ -5,36 +5,52 @@ using TMPro;
 
 public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    private Image itemIcon;
-    private Image backgroundImage;
-    private TextMeshProUGUI amountText;
-    private GameObject equippedIndicator;
-    private GameObject tooltipPrefab;
+    #region Variables
+    [Header("UI Components")]
+    [SerializeField] private Image itemIcon;
+    [SerializeField] private Image backgroundImage;
+    [SerializeField] private TextMeshProUGUI amountText;
+    [SerializeField] private GameObject equippedIndicator;
+    [SerializeField] private GameObject tooltipPrefab;
 
-    private int slotIndex;
+    [Header("Slot Settings")]
+    public SlotType slotType;
+
     private Inventory inventory;
     private InventorySlot slotData;
     private ItemTooltip tooltip;
+    #endregion
 
-    public void Initialize(int index, Inventory inventory)
+    #region Initialization
+    public void Initialize(Inventory inventory)
     {
-        this.slotIndex = index;
         this.inventory = inventory;
     }
+    #endregion
 
+    #region UI Updates
     public void UpdateUI(InventorySlot slot)
     {
         slotData = slot;
 
         if (slot == null || slot.itemData == null)
         {
-            itemIcon.enabled = false;
-            amountText.enabled = false;
-            equippedIndicator.SetActive(false);
+            SetSlotEmpty();
             return;
         }
 
-        var itemData = slot.itemData;
+        UpdateSlotVisuals(slot.itemData, slot.amount, slot.isEquipped);
+    }
+
+    private void SetSlotEmpty()
+    {
+        itemIcon.enabled = false;
+        amountText.enabled = false;
+        equippedIndicator.SetActive(false);
+    }
+
+    private void UpdateSlotVisuals(ItemData itemData, int amount, bool isEquipped)
+    {
         if (itemData == null) return;
 
         itemIcon.enabled = true;
@@ -43,21 +59,103 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         amountText.enabled = itemData.MaxStack > 1;
         if (amountText.enabled)
         {
-            amountText.text = slot.amount.ToString();
+            amountText.text = amount.ToString();
         }
 
-        equippedIndicator.SetActive(slot.isEquipped);
+        equippedIndicator.SetActive(isEquipped);
         backgroundImage.color = GetRarityColor(itemData.Rarity);
     }
+    #endregion
 
+    #region Item Interactions
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (slotData?.itemData == null) return;
+
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            HandleRightClick();
+            return;
+        }
+
+        HandleLeftClick();
+    }
+
+    private void HandleRightClick()
+    {
+        if (slotType == SlotType.Inventory)
+        {
+            DropItem();
+        }
+    }
+
+    private void HandleLeftClick()
+    {
+        var itemData = slotData.itemData;
+        if (itemData == null)
+        {
+            Debug.LogError($"Failed to get item data for ID: {slotData.itemData.ID}");
+            return;
+        }
+
+        if (slotType != SlotType.Inventory)
+        {
+            UnequipItem();
+        }
+        else if (IsEquippableItem(itemData.Type))
+        {
+            EquipItem(itemData);
+        }
+
+        UIManager.Instance.UpdateInventoryUI();
+    }
+
+    private void DropItem()
+    {
+        if (slotData?.itemData == null) return;
+
+        inventory.RemoveItem(slotData.itemData.ID);
+        UIManager.Instance.UpdateInventoryUI();
+        Debug.Log($"Dropped item: {slotData.itemData.Name}");
+    }
+
+    private void UnequipItem()
+    {
+        var equipSlot = GetEquipmentSlot();
+        Debug.Log($"Unequipping from slot {equipSlot}");
+        inventory.UnequipFromSlot(equipSlot);
+    }
+
+    private void EquipItem(ItemData itemData)
+    {
+        var equipSlot = GetEquipmentSlotForItemType(itemData.Type);
+        if (equipSlot != EquipmentSlot.None)
+        {
+            Debug.Log($"Equipping {itemData.Name} to slot {equipSlot}");
+
+            var equippedItem = inventory.GetEquippedItem(equipSlot);
+            if (equippedItem != null)
+            {
+                inventory.UnequipFromSlot(equipSlot);
+            }
+
+            inventory.RemoveItem(itemData.ID);
+            inventory.EquipItem(itemData, equipSlot);
+        }
+    }
+
+    private bool IsEquippableItem(ItemType itemType)
+    {
+        return itemType == ItemType.Weapon || itemType == ItemType.Armor || itemType == ItemType.Accessory;
+    }
+    #endregion
+
+    #region Tooltip
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (slotData == null || slotData.itemData == null) return;
-
-        var itemData = slotData.itemData;
-        if (itemData != null)
+        if (slotData?.itemData != null)
         {
-            ShowTooltip(itemData);
+            ShowTooltip(slotData.itemData);
         }
     }
 
@@ -92,69 +190,9 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             tooltip = null;
         }
     }
+    #endregion
 
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if (slotData == null || slotData.itemData == null) return;
-
-        if (eventData.button == PointerEventData.InputButton.Right)
-        {
-            if (slotIndex != -1)
-            {
-                DropItem();
-            }
-            return;
-        }
-
-        var itemData = slotData.itemData;
-        if (itemData == null)
-        {
-            Debug.LogError($"Failed to get item data for ID: {slotData.itemData.ID}");
-            return;
-        }
-
-        Debug.Log($"Clicked item: {itemData.Name} of type {itemData.Type}");
-
-        if (slotIndex == -1)
-        {
-            Debug.Log($"Unequipping from slot {GetEquipmentSlot()}");
-            inventory.UnequipFromSlot(GetEquipmentSlot());
-        }
-        else if (itemData.Type == ItemType.Weapon || itemData.Type == ItemType.Armor || itemData.Type == ItemType.Accessory)
-        {
-            var equipSlot = GetEquipmentSlotForItemType(itemData.Type);
-            if (equipSlot != EquipmentSlot.None)
-            {
-                Debug.Log($"Equipping {itemData.Name} to slot {equipSlot}");
-
-                var equippedItem = inventory.GetEquippedItem(equipSlot);
-                if (equippedItem != null)
-                {
-                    inventory.UnequipFromSlot(equipSlot);
-                }
-                inventory.RemoveItem(slotData.itemData.ID);
-                inventory.EquipItem(itemData, equipSlot);
-            }
-        }
-
-        UIManager.Instance.UpdateInventoryUI();
-    }
-
-    private void DropItem()
-    {
-        if (slotData == null || slotData.itemData == null) return;
-
-        var itemData = slotData.itemData;
-        if (itemData != null)
-        {
-            inventory.RemoveItem(slotData.itemData.ID);
-
-            UIManager.Instance.UpdateInventoryUI();
-
-            Debug.Log($"Dropped item: {itemData.Name}");
-        }
-    }
-
+    #region Equipment Slot Utilities
     private EquipmentSlot GetEquipmentSlotForItemType(ItemType itemType)
     {
         return itemType switch
@@ -176,13 +214,13 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     private EquipmentSlot GetEquipmentSlot()
     {
-        return transform.GetSiblingIndex() switch
+        return slotType switch
         {
-            0 => EquipmentSlot.Weapon,
-            1 => EquipmentSlot.Armor,
-            2 => EquipmentSlot.Ring1,
-            3 => EquipmentSlot.Ring2,
-            4 => EquipmentSlot.Necklace,
+            SlotType.Weapon => EquipmentSlot.Weapon,
+            SlotType.Armor => EquipmentSlot.Armor,
+            SlotType.Ring1 => EquipmentSlot.Ring1,
+            SlotType.Ring2 => EquipmentSlot.Ring2,
+            SlotType.Necklace => EquipmentSlot.Necklace,
             _ => EquipmentSlot.None
         };
     }
@@ -199,4 +237,5 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             _ => Color.white
         };
     }
+    #endregion
 }

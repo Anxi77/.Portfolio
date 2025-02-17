@@ -4,11 +4,12 @@ using System.Collections;
 
 public class InventoryUI : MonoBehaviour, IInitializable
 {
+    #region Variables
     [Header("Settings")]
-    private GameObject inventoryPanel;
-    private Transform slotsParent;
+    [SerializeField] private GameObject inventoryPanel;
+    [SerializeField] private Transform slotsParent;
     [SerializeField] private ItemSlotUI slotPrefab;
-    private ItemSlotUI[] equipmentSlots;
+    [SerializeField] private ItemSlotUI[] equipmentSlots;
 
     private Inventory inventory;
     private List<ItemSlotUI> slotUIs = new();
@@ -16,7 +17,9 @@ public class InventoryUI : MonoBehaviour, IInitializable
     private bool isInventoryAccessible = false;
 
     public bool IsInitialized { get; private set; }
+    #endregion
 
+    #region Initialization
     public void Initialize()
     {
         if (!IsInitialized)
@@ -34,24 +37,13 @@ public class InventoryUI : MonoBehaviour, IInitializable
 
     private void InitializeDirectly()
     {
-        if (GameManager.Instance?.player != null)
-        {
-            inventory = GameManager.Instance.player.GetComponent<Inventory>();
-            if (inventory == null)
-            {
-                Debug.LogError("Inventory component not found on player!");
-                return;
-            }
-
-            InitializeUI();
-            inventoryPanel.SetActive(false);
-            IsInitialized = true;
-            Debug.Log("InventoryUI initialized successfully");
-        }
-        else
+        if (GameManager.Instance?.player == null)
         {
             Debug.LogWarning("Player not found, initialization delayed");
+            return;
         }
+
+        SetupInventory();
     }
 
     private IEnumerator WaitForPlayerAndInitialize()
@@ -61,11 +53,16 @@ public class InventoryUI : MonoBehaviour, IInitializable
             yield return new WaitForSeconds(0.1f);
         }
 
+        SetupInventory();
+    }
+
+    private void SetupInventory()
+    {
         inventory = GameManager.Instance.player.GetComponent<Inventory>();
         if (inventory == null)
         {
             Debug.LogError("Inventory component not found on player!");
-            yield break;
+            return;
         }
 
         InitializeUI();
@@ -76,48 +73,140 @@ public class InventoryUI : MonoBehaviour, IInitializable
 
     private void InitializeUI()
     {
-        if (equipmentSlots != null)
-        {
-            for (int i = 0; i < equipmentSlots.Length; i++)
-            {
-                if (equipmentSlots[i] != null)
-                {
-                    equipmentSlots[i].Initialize(-1, inventory);
-                    Debug.Log($"Initialized equipment slot {i}");
-                }
-            }
-        }
-        else
+        InitializeEquipmentSlots();
+        InitializeInventorySlots();
+    }
+
+    private void InitializeEquipmentSlots()
+    {
+        if (equipmentSlots == null)
         {
             Debug.LogError("Equipment slots array is null!");
             return;
         }
 
-        for (int i = 0; i < inventory.MaxSlots; i++)
+        foreach (var equipSlot in equipmentSlots)
         {
-            var slotUI = Instantiate(slotPrefab, slotsParent);
-            slotUI.Initialize(i, inventory);
-            slotUIs.Add(slotUI);
+            if (equipSlot != null)
+            {
+                equipSlot.Initialize(inventory);
+                Debug.Log($"Initialized equipment slot {equipSlot.slotType}");
+            }
         }
     }
 
-    private void Update()
+    private void InitializeInventorySlots()
     {
-        if (!IsInitialized)
+        for (int i = 0; i < inventory.MaxSlots; i++)
         {
-            Debug.Log("InventoryUI not initialized yet");
+            var slotUI = Instantiate(slotPrefab, slotsParent);
+            slotUI.Initialize(inventory);
+            slotUI.slotType = SlotType.Inventory;
+            slotUIs.Add(slotUI);
+        }
+    }
+    #endregion
+
+    #region UI Updates
+    public void UpdateUI()
+    {
+        if (!IsInitialized || inventory == null)
+        {
+            Debug.LogWarning("Cannot update UI: Inventory not initialized");
             return;
         }
 
-        if (!isInventoryAccessible)
+        try
         {
-            Debug.Log("Inventory not accessible");
+            UpdateInventorySlots();
+            UpdateEquipmentSlots();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error updating inventory UI: {e.Message}\n{e.StackTrace}");
+        }
+    }
+
+    private void UpdateInventorySlots()
+    {
+        var slots = inventory.GetSlots();
+        for (int i = 0; i < slotUIs.Count; i++)
+        {
+            slotUIs[i].UpdateUI(i < slots.Count ? slots[i] : null);
+        }
+    }
+
+    private void UpdateEquipmentSlots()
+    {
+        if (equipmentSlots != null)
+        {
+            foreach (var equipSlot in equipmentSlots)
+            {
+                if (equipSlot != null)
+                {
+                    UpdateEquipmentSlot(equipSlot);
+                }
+            }
+        }
+    }
+
+    private void UpdateEquipmentSlot(ItemSlotUI equipSlot)
+    {
+        try
+        {
+            if (inventory == null)
+            {
+                Debug.LogWarning("Inventory is null");
+                return;
+            }
+
+            var equipmentSlot = GetEquipmentSlotFromSlotType(equipSlot.slotType);
+            if (equipmentSlot == EquipmentSlot.None)
+            {
+                Debug.LogWarning($"Invalid slot type: {equipSlot.slotType}");
+                return;
+            }
+
+            var equippedItem = inventory.GetEquippedItem(equipmentSlot);
+            if (equippedItem != null)
+            {
+                var itemData = equippedItem.GetItemData();
+                if (itemData != null)
+                {
+                    equipSlot.UpdateUI(new InventorySlot
+                    {
+                        itemData = itemData,
+                        amount = 1,
+                        isEquipped = true
+                    });
+                }
+                else
+                {
+                    equipSlot.UpdateUI(null);
+                }
+            }
+            else
+            {
+                equipSlot.UpdateUI(null);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error updating equipment slot: {e.Message}\n{e.StackTrace}");
+        }
+    }
+    #endregion
+
+    #region Input Handling
+    private void Update()
+    {
+        if (!IsInitialized || !isInventoryAccessible)
+        {
             return;
         }
 
         if (Input.GetKeyDown(KeyCode.I))
         {
-            Debug.Log("Toggle key pressed, opening/closing inventory");
             ToggleInventory();
         }
     }
@@ -132,120 +221,35 @@ public class InventoryUI : MonoBehaviour, IInitializable
 
         isOpen = !isOpen;
         inventoryPanel.SetActive(isOpen);
-        Debug.Log($"Inventory toggled: {isOpen}");
 
         if (isOpen)
         {
             UpdateUI();
         }
     }
+    #endregion
 
-    public void UpdateUI()
+    #region Utilities
+    private EquipmentSlot GetEquipmentSlotFromSlotType(SlotType slotType)
     {
-        if (!IsInitialized || inventory == null)
+        return slotType switch
         {
-            Debug.LogWarning("Cannot update UI: Inventory not initialized");
-            return;
-        }
-
-        try
-        {
-            var slots = inventory.GetSlots();
-            for (int i = 0; i < slotUIs.Count; i++)
-            {
-                if (i < slots.Count)
-                {
-                    slotUIs[i].UpdateUI(slots[i]);
-                }
-                else
-                {
-                    slotUIs[i].UpdateUI(null);
-                }
-            }
-
-            if (equipmentSlots != null)
-            {
-                UpdateEquipmentSlot(EquipmentSlot.Weapon, 0);
-                UpdateEquipmentSlot(EquipmentSlot.Armor, 1);
-                UpdateEquipmentSlot(EquipmentSlot.Ring1, 2);
-                UpdateEquipmentSlot(EquipmentSlot.Ring2, 3);
-                UpdateEquipmentSlot(EquipmentSlot.Necklace, 4);
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"Error updating inventory UI: {e.Message}\n{e.StackTrace}");
-        }
-    }
-
-    private void UpdateEquipmentSlot(EquipmentSlot equipSlot, int slotIndex)
-    {
-        try
-        {
-            if (inventory == null)
-            {
-                Debug.LogWarning("Inventory is null");
-                return;
-            }
-
-            if (equipmentSlots == null)
-            {
-                Debug.LogWarning("Equipment slots array is null");
-                return;
-            }
-
-            if (slotIndex < 0 || slotIndex >= equipmentSlots.Length)
-            {
-                Debug.LogWarning($"Invalid slot index: {slotIndex}");
-                return;
-            }
-
-            var slot = equipmentSlots[slotIndex];
-            if (slot == null)
-            {
-                Debug.LogWarning($"Equipment slot at index {slotIndex} is null");
-                return;
-            }
-
-            var equippedItem = inventory.GetEquippedItem(equipSlot);
-            if (equippedItem != null)
-            {
-                var itemData = equippedItem.GetItemData();
-                if (itemData != null)
-                {
-                    Debug.Log($"Updating equipment slot {equipSlot} with item: {itemData.Name}");
-                    slot.UpdateUI(new InventorySlot
-                    {
-                        itemData = itemData,
-                        amount = 1,
-                        isEquipped = true
-                    });
-                }
-                else
-                {
-                    Debug.LogWarning($"ItemData is null for equipped item in slot {equipSlot}");
-                    slot.UpdateUI(null);
-                }
-            }
-            else
-            {
-                Debug.Log($"No item equipped in slot {equipSlot}");
-                slot.UpdateUI(null);
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"Error updating equipment slot {equipSlot}: {e.Message}\n{e.StackTrace}");
-        }
+            SlotType.Weapon => EquipmentSlot.Weapon,
+            SlotType.Armor => EquipmentSlot.Armor,
+            SlotType.Ring1 => EquipmentSlot.Ring1,
+            SlotType.Ring2 => EquipmentSlot.Ring2,
+            SlotType.Necklace => EquipmentSlot.Necklace,
+            _ => EquipmentSlot.None
+        };
     }
 
     public void SetInventoryAccessible(bool accessible)
     {
-        Debug.Log($"Setting inventory accessible: {accessible}");
         isInventoryAccessible = accessible;
         if (!accessible && isOpen)
         {
             ToggleInventory();
         }
     }
+    #endregion
 }

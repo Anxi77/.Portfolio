@@ -21,3 +21,13 @@ public enum EquipmentSlot
     Ring2,
     Special
 }
+
+public enum SlotType
+{
+    Inventory,
+    Weapon,
+    Armor,
+    Ring1,
+    Ring2,
+    Necklace
+}

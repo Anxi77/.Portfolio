@@ -283,6 +283,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac74133be592b7c4baaffa040dfcca61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemIcon: {fileID: 5803270067830031331}
+  backgroundImage: {fileID: 3858549806989216145}
+  amountText: {fileID: 5771309200169070522}
+  equippedIndicator: {fileID: 4983195509110789669}
+  tooltipPrefab: {fileID: 221191291035836083, guid: d3390e74a6f38e84a9333d8ceca1f2fe, type: 3}
+  slotType: 0
 --- !u!1 &7262181047323980467
 GameObject:
   m_ObjectHideFlags: 0
