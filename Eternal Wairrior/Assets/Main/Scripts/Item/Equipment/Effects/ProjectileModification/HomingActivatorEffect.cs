@@ -1,9 +1,6 @@
 using UnityEngine;
-
 using System.Collections.Generic;
 using System.Linq;
-
-
 
 public class HomingActivatorEffect : SkillInteractionEffectBase
 {
@@ -18,10 +15,10 @@ public class HomingActivatorEffect : SkillInteractionEffectBase
 
     public override void ModifySkillStats(Skill skill)
     {
-        if (!applicableSkillTypes.Contains(skill.GetSkillType())) return;
+        if (!applicableSkillTypes.Contains(skill.skillData.Type)) return;
         if (!(skill is ProjectileSkills projectileSkill)) return;
 
-        var skillData = skill.GetSkillData();
+        var skillData = skill.skillData;
         if (skillData != null)
         {
             var stats = skillData.GetCurrentTypeStat() as ProjectileSkillStat;

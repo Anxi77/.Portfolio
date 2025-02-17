@@ -102,7 +102,7 @@ public class SkillData : ICloneable
 
             Debug.Log($"Successfully set stats for level {level}");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error setting stats: {e.Message}");
         }
@@ -137,19 +137,6 @@ public class SkillData : ICloneable
             default:
                 Debug.LogWarning($"Creating default ProjectileSkillStat for unknown type: {Type}");
                 return new ProjectileSkillStat();
-        }
-    }
-
-    public int GetMaxLevel()
-    {
-        return StatsByLevel.Keys.Count > 0 ? StatsByLevel.Keys.Max() : 1;
-    }
-
-    public void RemoveLevel(int level)
-    {
-        if (StatsByLevel.ContainsKey(level))
-        {
-            StatsByLevel.Remove(level);
         }
     }
 

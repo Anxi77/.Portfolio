@@ -1,33 +1,39 @@
 ﻿using UnityEngine;
 
-using System.Collections;
-
 public abstract class AreaSkills : Skill
 {
-    protected override void Awake()
-    {
-        base.Awake();
-    }
+    [Header("Base Stats")]
+    [SerializeField] protected float _damage = 10f;
+    [SerializeField] protected float _elementalPower = 1f;
 
-    public override void Initialize()
-    {
-        InitializeAreaSkillData();
-    }
+    [Header("Area Stats")]
+    [SerializeField] protected float _radius = 5f;
+    [SerializeField] protected float _duration = 5f;
+    [SerializeField] protected float _tickRate = 0.1f;
+    [SerializeField] protected bool _isPersistent = true;
+    [SerializeField] protected float _moveSpeed = 180f;
 
-    private void InitializeAreaSkillData()
+    public float Damage => _damage;
+    public float ElementalPower => _elementalPower;
+    public float Radius => _radius;
+    public float Duration => _duration;
+    public float TickRate => _tickRate;
+    public bool IsPersistent => _isPersistent;
+    public float MoveSpeed => _moveSpeed;
+    protected override void InitializeSkillData()
     {
         if (skillData == null) return;
 
         var csvStats = SkillDataManager.Instance.GetSkillStatsForLevel(
             skillData.ID,
-            SkillLevel,
+            skillData.GetCurrentTypeStat().baseStat.skillLevel,
             SkillType.Area
         ) as AreaSkillStat;
 
         if (csvStats != null)
         {
             UpdateInspectorValues(csvStats);
-            skillData.SetStatsForLevel(SkillLevel, csvStats);
+            skillData.SetStatsForLevel(skillData.GetCurrentTypeStat().baseStat.skillLevel, csvStats);
         }
         else
         {
@@ -37,7 +43,7 @@ public abstract class AreaSkills : Skill
                 baseStat = new BaseSkillStat
                 {
                     damage = _damage,
-                    skillLevel = _skillLevel,
+                    skillLevel = currentLevel,
                     maxSkillLevel = 5,
                     element = skillData?.Element ?? ElementType.None,
                     elementalPower = _elementalPower
@@ -48,7 +54,7 @@ public abstract class AreaSkills : Skill
                 isPersistent = _isPersistent,
                 moveSpeed = _moveSpeed
             };
-            skillData.SetStatsForLevel(SkillLevel, defaultStats);
+            skillData.SetStatsForLevel(currentLevel, defaultStats);
         }
     }
 
@@ -56,7 +62,7 @@ public abstract class AreaSkills : Skill
     {
         get
         {
-            var stats = skillData?.GetStatsForLevel(SkillLevel) as AreaSkillStat;
+            var stats = skillData?.GetStatsForLevel(currentLevel) as AreaSkillStat;
             if (stats == null)
             {
                 stats = new AreaSkillStat
@@ -81,25 +87,6 @@ public abstract class AreaSkills : Skill
         }
     }
 
-    [Header("Base Stats")]
-    [SerializeField] protected float _damage = 10f;
-    [SerializeField] protected float _elementalPower = 1f;
-
-    [Header("Area Stats")]
-    [SerializeField] protected float _radius = 5f;
-    [SerializeField] protected float _duration = 5f;
-    [SerializeField] protected float _tickRate = 0.1f;
-    [SerializeField] protected bool _isPersistent = true;
-    [SerializeField] protected float _moveSpeed = 180f;
-
-    public override float Damage => _damage;
-    public float ElementalPower => _elementalPower;
-    public float Radius => _radius;
-    public float Duration => _duration;
-    public float TickRate => _tickRate;
-    public bool IsPersistent => _isPersistent;
-    public float MoveSpeed => _moveSpeed;
-
     protected override void UpdateSkillTypeStats(ISkillStat newStats)
     {
         if (newStats is AreaSkillStat areaStats)
@@ -116,9 +103,9 @@ public abstract class AreaSkills : Skill
             return;
         }
 
-        Debug.Log($"[AreaSkills] Before Update - Level: {_skillLevel}");
+        Debug.Log($"[AreaSkills] Before Update - Level: {currentLevel}");
 
-        _skillLevel = stats.baseStat.skillLevel;
+        currentLevel = stats.baseStat.skillLevel;
 
         _damage = stats.baseStat.damage;
         _elementalPower = stats.baseStat.elementalPower;
@@ -128,7 +115,7 @@ public abstract class AreaSkills : Skill
         _isPersistent = stats.isPersistent;
         _moveSpeed = stats.moveSpeed;
 
-        Debug.Log($"[AreaSkills] After Update - Level: {_skillLevel}");
+        Debug.Log($"[AreaSkills] After Update - Level: {currentLevel}");
     }
 
     public override string GetDetailedDescription()
@@ -174,7 +161,7 @@ public abstract class AreaSkills : Skill
             }
 
             currentStats.baseStat.damage = _damage;
-            currentStats.baseStat.skillLevel = _skillLevel;
+            currentStats.baseStat.skillLevel = currentLevel;
             currentStats.baseStat.elementalPower = _elementalPower;
             currentStats.radius = _radius;
             currentStats.duration = _duration;
@@ -183,7 +170,7 @@ public abstract class AreaSkills : Skill
             currentStats.moveSpeed = _moveSpeed;
 
             _damage = currentStats.baseStat.damage;
-            _skillLevel = currentStats.baseStat.skillLevel;
+            currentLevel = currentStats.baseStat.skillLevel;
             _elementalPower = currentStats.baseStat.elementalPower;
             _radius = currentStats.radius;
             _duration = currentStats.duration;
@@ -191,7 +178,7 @@ public abstract class AreaSkills : Skill
             _isPersistent = currentStats.isPersistent;
             _moveSpeed = currentStats.moveSpeed;
 
-            skillData.SetStatsForLevel(SkillLevel, currentStats);
+            skillData.SetStatsForLevel(currentLevel, currentStats);
             Debug.Log($"Updated stats for {GetType().Name} from inspector");
         }
         catch (System.Exception e)

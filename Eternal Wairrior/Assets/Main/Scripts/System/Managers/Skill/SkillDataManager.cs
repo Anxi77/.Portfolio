@@ -23,11 +23,6 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 
     public new bool IsInitialized { get; private set; }
 
-    protected override void Awake()
-    {
-        base.Awake();
-    }
-
     public override void Initialize()
     {
         if (!Application.isPlaying) return;

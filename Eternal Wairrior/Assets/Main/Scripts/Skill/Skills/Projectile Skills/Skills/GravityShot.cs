@@ -13,18 +13,10 @@ public class GravityProjectileSkill : ProjectileSkills
     [SerializeField] private GravityProjectile gravityProjectilePrefab;
     [SerializeField] private KeyCode homingTriggerKey = KeyCode.LeftShift;
 
-    protected override void Start()
+    public override void Initialize()
     {
+        base.Initialize();
         currentFireMode = FireMode.Auto;
-        base.Start();
-    }
-
-    private void OnEnable()
-    {
-        if (isInitialized)
-        {
-            currentFireMode = FireMode.Auto;
-        }
     }
 
     protected override void Update()
@@ -94,8 +86,6 @@ public class GravityProjectileSkill : ProjectileSkills
 
         foreach (var enemy in enemies)
         {
-            //if (!enemy.gameObject.activeSelf || enemy.IsDead) continue;
-
             float distance = Vector2.Distance(transform.position, enemy.transform.position);
             if (distance < nearestDistance)
             {
@@ -123,7 +113,7 @@ public class GravityProjectileSkill : ProjectileSkills
     {
         base.UpdateInspectorValues(stats);
 
-        float levelMultiplier = 1f + (SkillLevel - 1) * 0.2f;
+        float levelMultiplier = 1f + (currentLevel - 1) * 0.2f;
         _gravityForce *= levelMultiplier;
         _endSize *= levelMultiplier;
     }
@@ -152,10 +142,6 @@ public class GravityProjectileSkill : ProjectileSkills
         return baseDesc;
     }
 
-    protected override string GetDefaultSkillName() => "Gravity Shot";
-    protected override string GetDefaultDescription() => "Creates gravity wells that pull and damage enemies";
-    public override SkillType GetSkillType() => SkillType.Projectile;
-
     public override void UpdateHomingState(bool activate)
     {
         _isHoming = activate;
@@ -169,13 +155,5 @@ public class GravityProjectileSkill : ProjectileSkills
         {
             _homingRange = TypedStats.homingRange;
         }
-    }
-
-    protected override void OnDisable()
-    {
-        base.OnDisable();
-        canFire = false;
-        isInitialized = false;
-        StopAllCoroutines();
     }
 }

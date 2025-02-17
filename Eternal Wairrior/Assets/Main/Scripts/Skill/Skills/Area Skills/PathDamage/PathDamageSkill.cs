@@ -6,16 +6,13 @@ public class PathDamageSkill : AreaSkills
     [SerializeField] private float _pathWidth = 2f;
     [SerializeField] private float _minDistanceBetweenPoints = 0.5f;
     [SerializeField] private DamageZone _damageZonePrefab;
-
     private List<Vector2> _pathPoints = new List<Vector2>();
     private List<GameObject> _activeZones = new List<GameObject>();
-
     private Vector2 _lastRecordedPosition;
     private bool _isActive = true;
-
-    protected override void Awake()
+    public override void Initialize()
     {
-        base.Awake();
+        base.Initialize();
         _lastRecordedPosition = transform.position;
     }
 
@@ -100,10 +97,4 @@ public class PathDamageSkill : AreaSkills
         }
         return baseDesc;
     }
-
-    protected override string GetDefaultSkillName() => "Path Damage";
-    protected override string GetDefaultDescription() => "Creates a damaging path behind the player";
-    public override SkillType GetSkillType() => SkillType.Area;
 }
-
-

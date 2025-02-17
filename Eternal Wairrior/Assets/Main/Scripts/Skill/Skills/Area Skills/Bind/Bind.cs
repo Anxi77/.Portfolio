@@ -8,60 +8,14 @@ public class Bind : AreaSkills
     private List<BindEffect> spawnedBindEffects = new List<BindEffect>();
     private Transform playerTransform;
 
-    protected override string GetDefaultSkillName() => "Bind";
-    protected override string GetDefaultDescription() => "Creates a binding area that restricts enemy movement";
-    public override SkillType GetSkillType() => SkillType.Area;
-
-    protected override void Awake()
+    public override void Initialize()
     {
-        base.Awake();
-        if (skillData == null)
-        {
-            skillData = new SkillData
-            {
-                Name = "Bind",
-                Description = "Immobilizes enemies in range",
-                Type = SkillType.Area,
-                Element = ElementType.Dark,
-                Tier = 1
-            };
-        }
+        base.Initialize();
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
         if (playerTransform == null)
         {
             Debug.LogError("Player not found for Bind skill!");
         }
-    }
-
-    private void InitializeSkillStats()
-    {
-        if (skillData.GetStatsForLevel(1) == null)
-        {
-            var stats = new AreaSkillStat
-            {
-                baseStat = new BaseSkillStat
-                {
-                    damage = 5f,
-                    skillName = skillData.Name,
-                    skillLevel = 1,
-                    maxSkillLevel = 5,
-                    element = skillData.Element,
-                    elementalPower = 1f
-                },
-
-                radius = 3f,
-                duration = 3f,
-                tickRate = 0.5f,
-                isPersistent = true,
-                moveSpeed = 0f
-            };
-            skillData.SetStatsForLevel(1, stats);
-        }
-    }
-
-    private void Start()
-    {
-        InitializeSkillStats();
         StartCoroutine(BindingCoroutine());
     }
 

@@ -284,7 +284,7 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         {
             if (skill != null)
             {
-                Debug.Log($"Skill selected: {skill.SkillName}");
+                Debug.Log($"Skill selected: {skill.skillData.Name}");
                 skillList.skillListUpdate();
                 Time.timeScale = 1f;
                 levelupPanel.gameObject.SetActive(false);

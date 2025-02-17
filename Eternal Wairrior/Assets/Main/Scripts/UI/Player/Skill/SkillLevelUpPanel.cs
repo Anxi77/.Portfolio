@@ -64,13 +64,13 @@ public class SkillLevelUpPanel : MonoBehaviour
     {
         if (!ValidateSkillData(skillData)) return false;
 
-        var existingSkill = playerSkills.Find(s => s.SkillID == skillData.ID);
-        return existingSkill == null || existingSkill.SkillLevel < existingSkill.MaxSkillLevel;
+        var existingSkill = playerSkills.Find(s => s.skillData.ID == skillData.ID);
+        return existingSkill == null || existingSkill.skillData.GetCurrentTypeStat().baseStat.skillLevel < existingSkill.skillData.GetCurrentTypeStat().baseStat.maxSkillLevel;
     }
 
     private void CreateSkillUpgradeButton(SkillData skillData, List<Skill> playerSkills)
     {
-        var existingSkill = playerSkills.Find(s => s.SkillID == skillData.ID);
+        var existingSkill = playerSkills.Find(s => s.skillData.ID == skillData.ID);
         var button = Instantiate(buttonPrefab, list);
         var upgradeInfo = GetUpgradeInfo(existingSkill, skillData);
 
@@ -92,8 +92,8 @@ public class SkillLevelUpPanel : MonoBehaviour
         if (existingSkill != null)
         {
             return (
-                $"Lv.{existingSkill.SkillLevel} → {existingSkill.SkillLevel + 1}",
-                existingSkill.GetSkillData().GetCurrentTypeStat()
+                $"Lv.{existingSkill.skillData.GetCurrentTypeStat().baseStat.skillLevel} → {existingSkill.skillData.GetCurrentTypeStat().baseStat.skillLevel + 1}",
+                existingSkill.skillData.GetCurrentTypeStat()
             );
         }
         return ("New!", null);
@@ -106,14 +106,14 @@ public class SkillLevelUpPanel : MonoBehaviour
             if (existingSkill != null)
             {
                 GameManager.Instance.player.AddOrUpgradeSkill(skillData);
-                var updatedSkill = GameManager.Instance.player.skills.Find(s => s.SkillID == skillData.ID);
+                var updatedSkill = GameManager.Instance.player.skills.Find(s => s.skillData.ID == skillData.ID);
                 skillSelectedCallback?.Invoke(updatedSkill);
             }
             else
             {
                 if (GameManager.Instance.player.AddOrUpgradeSkill(skillData))
                 {
-                    var newSkill = GameManager.Instance.player.skills.Find(s => s.SkillID == skillData.ID);
+                    var newSkill = GameManager.Instance.player.skills.Find(s => s.skillData.ID == skillData.ID);
                     skillSelectedCallback?.Invoke(newSkill);
                 }
             }

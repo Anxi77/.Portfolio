@@ -2,10 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public abstract class PassiveSkill : Skill
+public class PassiveSkill : Skill
 {
     #region Runtime Stats
     public List<StatModifier> statModifiers;
+
     [Header("Base Stats")]
     protected float _damage = 10f;
     protected float _elementalPower = 1f;
@@ -83,14 +84,14 @@ public abstract class PassiveSkill : Skill
 
         var csvStats = SkillDataManager.Instance.GetSkillStatsForLevel(
             skillData.ID,
-            SkillLevel,
+            1,
             SkillType.Passive
         ) as PassiveSkillStat;
 
         if (csvStats != null)
         {
             UpdateInspectorValues(csvStats);
-            skillData.SetStatsForLevel(SkillLevel, csvStats);
+            skillData.SetStatsForLevel(skillData.GetCurrentTypeStat().baseStat.skillLevel, csvStats);
         }
         else
         {
@@ -101,7 +102,7 @@ public abstract class PassiveSkill : Skill
 
                 {
                     damage = _damage,
-                    skillLevel = _skillLevel,
+                    skillLevel = currentLevel,
                     maxSkillLevel = 5,
                     element = ElementType.None,
                     elementalPower = _elementalPower
@@ -117,7 +118,7 @@ public abstract class PassiveSkill : Skill
                 hpIncrease = _hpIncrease,
 
             };
-            skillData.SetStatsForLevel(SkillLevel, defaultStats);
+            skillData.SetStatsForLevel(skillData.GetCurrentTypeStat().baseStat.skillLevel, defaultStats);
         }
     }
 
@@ -265,9 +266,9 @@ public abstract class PassiveSkill : Skill
             Debug.Log($"Before UpdateInspectorValues - HP: {playerStat.GetStat(StatType.CurrentHp)}/{playerStat.GetStat(StatType.MaxHp)} ({currentHpRatio:F2})");
         }
 
-        Debug.Log($"[PassiveSkills] Before Update - Level: {_skillLevel}");
+        Debug.Log($"[PassiveSkills] Before Update - Level: {currentLevel}");
 
-        _skillLevel = stats.baseStat.skillLevel;
+        currentLevel = stats.baseStat.skillLevel;
         _damage = stats.baseStat.damage;
         _elementalPower = stats.baseStat.elementalPower;
         _effectDuration = stats.effectDuration;
@@ -283,7 +284,7 @@ public abstract class PassiveSkill : Skill
         _attackRangeIncrease = stats.attackRangeIncrease;
         _hpRegenIncrease = stats.hpRegenIncrease;
 
-        Debug.Log($"[PassiveSkills] After Update - Level: {_skillLevel}");
+        Debug.Log($"[PassiveSkills] After Update - Level: {currentLevel}");
 
         if (playerStat != null)
         {
@@ -293,20 +294,7 @@ public abstract class PassiveSkill : Skill
             Debug.Log($"After UpdateInspectorValues - HP: {newCurrentHp}/{newMaxHp} ({currentHpRatio:F2})");
         }
     }
-
-    protected virtual SkillData CreateDefaultSkillData()
-    {
-        var data = new SkillData();
-        data.Name = GetDefaultSkillName();
-        data.Description = GetDefaultDescription();
-        data.Type = GetSkillType();
-        data.Element = ElementType.None;
-        data.Tier = 1;
-
-        return data;
-    }
-
-    protected virtual void ApplyStatModifier(PlayerStatSystem playerStat, StatType statType, float percentageIncrease)
+    protected void ApplyStatModifier(PlayerStatSystem playerStat, StatType statType, float percentageIncrease)
     {
         if (percentageIncrease <= 0) return;
 

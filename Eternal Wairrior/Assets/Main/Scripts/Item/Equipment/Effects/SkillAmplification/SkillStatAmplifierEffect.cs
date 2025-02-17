@@ -47,9 +47,9 @@ public class SkillStatAmplifierEffect : SkillInteractionEffectBase
 
     public override void ModifySkillStats(Skill skill)
     {
-        if (!CanApplyTo(skill.GetSkillType(), skill.GetElementType())) return;
+        if (!CanApplyTo(skill.skillData.Type, skill.skillData.Element)) return;
 
-        var stats = skill.GetSkillData()?.GetCurrentTypeStat();
+        var stats = skill.skillData.GetCurrentTypeStat();
         if (stats == null) return;
 
         stats.baseStat.damage *= damageMultiplier;

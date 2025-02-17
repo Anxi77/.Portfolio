@@ -418,15 +418,13 @@ public class Player : MonoBehaviour
     public bool AddOrUpgradeSkill(SkillData skillData)
     {
         if (skillData == null) return false;
-
-        // SkillManager를 통해 스킬 추가/업그레이드
         SkillManager.Instance.AddOrUpgradeSkill(skillData);
         return true;
     }
 
     public void RemoveSkill(SkillID skillID)
     {
-        var skillToRemove = skills.Find(s => s.SkillID == skillID);
+        var skillToRemove = skills.Find(s => s.skillData.ID == skillID);
         if (skillToRemove != null)
         {
             skills.Remove(skillToRemove);

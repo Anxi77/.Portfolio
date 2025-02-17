@@ -1,10 +1,8 @@
-using UnityEngine;
-
 public class SingleShot : ProjectileSkills
 {
     public override string GetDetailedDescription()
     {
-        string baseDesc = "Basic projectile attack that fires single shots";
+        string baseDesc = skillData?.Description ?? "SingleShot description";
         if (skillData?.GetCurrentTypeStat() != null)
         {
             baseDesc += $"\n\nCurrent Effects:" +
@@ -20,9 +18,4 @@ public class SingleShot : ProjectileSkills
         }
         return baseDesc;
     }
-
-    protected override string GetDefaultSkillName() => "Default Gun";
-    protected override string GetDefaultDescription() => "Basic projectile attack that fires single shots";
-
-    public override SkillType GetSkillType() => SkillType.Projectile;
 }

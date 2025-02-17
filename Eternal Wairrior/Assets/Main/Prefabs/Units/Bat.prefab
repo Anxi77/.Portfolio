@@ -213,7 +213,7 @@ GameObject:
   - component: {fileID: 4718020048093053791}
   - component: {fileID: 4773887156028790776}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: HPImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -485,9 +485,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9040869322625756562}
-  - component: {fileID: 8733998583761297635}
   - component: {fileID: 3213487113762707645}
   - component: {fileID: -7447113314976174837}
+  - component: {fileID: 7463882402777868343}
   m_Layer: 7
   m_Name: Bat
   m_TagString: Enemy
@@ -512,41 +512,6 @@ Transform:
   - {fileID: 8175919987009810563}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!58 &8733998583761297635
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2974742278653649114}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -0.03, y: 0.09}
-  serializedVersion: 2
-  m_Radius: 0.31
 --- !u!50 &3213487113762707645
 Rigidbody2D:
   serializedVersion: 4
@@ -611,13 +576,48 @@ MonoBehaviour:
   hpBar: {fileID: 3306363183409375035}
   attackParticle: {fileID: 198724499637059262, guid: b0b484d1e19cd324cbe11a7349a75e67, type: 3}
   isInit: 0
-  enemyCollider: {fileID: 8733998583761297635}
+  enemyCollider: {fileID: 7463882402777868343}
   attackAnimationDuration: 0.5
   attackPrepareTime: 0.2
   attackRadius: 1.5
   attackLayer:
     serializedVersion: 2
     m_Bits: 128
+--- !u!70 &7463882402777868343
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2974742278653649114}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_Size: {x: 1.02, y: 2.04}
+  m_Direction: 0
 --- !u!1 &3867542108395319768
 GameObject:
   m_ObjectHideFlags: 0

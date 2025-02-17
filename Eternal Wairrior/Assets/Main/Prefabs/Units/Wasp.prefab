@@ -297,9 +297,8 @@ GameObject:
   - component: {fileID: 8255410239812919056}
   - component: {fileID: 4506217675120182001}
   - component: {fileID: 4942059618069855700}
-  - component: {fileID: 3264619841910729377}
   m_Layer: 7
-  m_Name: Wasp
+  m_Name: Renderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -412,41 +411,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!70 &3264619841910729377
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3993483402649033968}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -0.5, y: 3}
-  m_Size: {x: 0.59, y: 2.93}
-  m_Direction: 1
 --- !u!1 &4007488215969560241
 GameObject:
   m_ObjectHideFlags: 0
@@ -878,8 +842,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1117432310188718744}
   - component: {fileID: 7284905286687604503}
-  - component: {fileID: -8007497282005421653}
   - component: {fileID: 22607315064371206}
+  - component: {fileID: 7204644983063257725}
   m_Layer: 7
   m_Name: Wasp
   m_TagString: Enemy
@@ -932,41 +896,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!58 &-8007497282005421653
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7660035692924213893}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.5
 --- !u!114 &22607315064371206
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1004,11 +933,46 @@ MonoBehaviour:
   hpBar: {fileID: 4728234143913748386}
   attackParticle: {fileID: 2383102107888725196, guid: 20b51f01ab203404f973f4aa3e8db864, type: 3}
   isInit: 0
-  enemyCollider: {fileID: -8007497282005421653}
+  enemyCollider: {fileID: 7204644983063257725}
   projectilePrefab: {fileID: -2992784626637997659, guid: 0de273e15399f5546b4799a35424bb96, type: 3}
   minAttackDistance: 1
   maxAttackDistance: 5
   attackAnimationDuration: 0.5
+--- !u!70 &7204644983063257725
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7660035692924213893}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_Size: {x: 1, y: 2}
+  m_Direction: 0
 --- !u!1 &7997969727895871608
 GameObject:
   m_ObjectHideFlags: 0

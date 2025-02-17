@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class SkillManager : SingletonManager<SkillManager>, IInitializable
 {
-    public bool IsInitialized { get; private set; }
-
     private List<SkillData> availableSkills = new List<SkillData>();
     private List<Skill> activeSkills = new List<Skill>();
+    public bool IsInitialized { get; private set; }
 
     protected override void Awake()
     {
@@ -42,10 +41,9 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
     {
         Debug.Log("Resetting skills for new stage...");
 
-        // 기존 스킬들 제거
         foreach (var skill in activeSkills.ToList())
         {
-            RemoveSkill(skill.SkillID);
+            RemoveSkill(skill.skillData.ID);
         }
 
         activeSkills.Clear();
@@ -77,27 +75,27 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
         foreach (var skill in GameManager.Instance.player.skills)
         {
-            Debug.Log($"Checking skill: {skill.SkillName} (ID: {skill.SkillID})");
+            Debug.Log($"Checking skill: {skill.skillData.Name} (ID: {skill.skillData.ID})");
         }
 
         var foundSkill = GameManager.Instance.player.skills.Find(s =>
         {
-            Debug.Log($"Comparing {s.SkillID} with {skillId}");
-            return s.SkillID == skillId;
+            Debug.Log($"Comparing {s.skillData.ID} with {skillId}");
+            return s.skillData.ID == skillId;
         });
 
-        Debug.Log($"Found skill: {(foundSkill != null ? foundSkill.SkillName : "null")}");
+        Debug.Log($"Found skill: {(foundSkill != null ? foundSkill.skillData.Name : "null")}");
         return foundSkill;
     }
 
     private bool UpdateSkillStats(Skill skill, int targetLevel, out ISkillStat newStats)
     {
-        Debug.Log($"Updating stats for skill {skill.SkillName} to level {targetLevel}");
+        Debug.Log($"Updating stats for skill {skill.skillData.Name} to level {targetLevel}");
 
         newStats = SkillDataManager.Instance.GetSkillStatsForLevel(
-            skill.SkillID,
+            skill.skillData.ID,
             targetLevel,
-            skill.GetSkillData().Type);
+            skill.skillData.Type);
 
         if (newStats == null)
         {
@@ -110,6 +108,8 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
         bool result = skill.SkillLevelUpdate(targetLevel);
         Debug.Log($"SkillLevelUpdate result: {result}");
+
+        skill.currentLevel = targetLevel;
 
         return result;
     }
@@ -135,8 +135,8 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
             if (existingSkill != null)
             {
-                int nextLevel = existingSkill.SkillLevel + 1;
-                Debug.Log($"Current level: {existingSkill.SkillLevel}, Attempting upgrade to level: {nextLevel}");
+                int nextLevel = existingSkill.skillData.GetCurrentTypeStat().baseStat.skillLevel + 1;
+                Debug.Log($"Current level: {existingSkill.skillData.GetCurrentTypeStat().baseStat.skillLevel}, Attempting upgrade to level: {nextLevel}");
 
                 GameObject levelPrefab = SkillDataManager.Instance.GetLevelPrefab(skillData.ID, nextLevel);
                 if (levelPrefab != null)
@@ -200,7 +200,6 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         Quaternion rotation = existingSkill.transform.rotation;
         Transform parent = existingSkill.transform.parent;
 
-        // 현재 HP 비율 저장
         var playerStat = GameManager.Instance.player.GetComponent<PlayerStatSystem>();
         float currentHpRatio = 1f;
         float currentHp = 0f;
@@ -214,17 +213,14 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             Debug.Log($"[SkillManager] Before replace - HP: {currentHp}/{maxHp} ({currentHpRatio:F2})");
         }
 
-        // 기존 스킬의 효과를 먼저 제거
         if (existingSkill is PassiveSkill passiveSkill)
         {
             passiveSkill.RemoveEffectFromPlayer(GameManager.Instance.player);
         }
 
-        // 기존 스킬 제거
         GameManager.Instance.player.skills.Remove(existingSkill);
         Destroy(existingSkill.gameObject);
 
-        // 새 스킬 생성
         var newObj = Instantiate(newPrefab, position, rotation, parent);
         if (newObj.TryGetComponent<Skill>(out var newSkill))
         {
@@ -235,7 +231,6 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             skillData.GetCurrentTypeStat().baseStat.skillLevel = targetLevel;
             newSkill.SetSkillData(skillData);
 
-            // Initialize 호출 전에 현재 HP 설정
             if (playerStat != null)
             {
                 playerStat.SetCurrentHp(currentHp);
@@ -245,7 +240,6 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             GameManager.Instance.player.skills.Add(newSkill);
             Debug.Log($"Successfully replaced skill with level {targetLevel} prefab");
 
-            // 최종 HP 체크 및 조정
             if (playerStat != null)
             {
                 float finalMaxHp = playerStat.GetStat(StatType.MaxHp);
@@ -255,38 +249,12 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             }
         }
     }
-
-    private void CreateNewSkill(SkillData skillData, Transform parent)
-    {
-        GameObject prefab = SkillDataManager.Instance.GetLevelPrefab(skillData.ID, 1)
-            ?? skillData.Prefab;
-
-        if (prefab != null)
-        {
-            GameObject skillObj = Instantiate(prefab, parent);
-            if (skillObj.TryGetComponent<Skill>(out Skill newSkill))
-            {
-                InitializeNewSkill(newSkill, skillData, 1);
-            }
-        }
-    }
-
-    private void InitializeNewSkill(Skill skill, SkillData skillData, int targetLevel)
-    {
-        if (UpdateSkillStats(skill, targetLevel, out _))
-        {
-            GameManager.Instance.player.skills.Add(skill);
-            activeSkills.Add(skill);
-            Debug.Log($"Successfully initialized skill {skillData.Name} at level {targetLevel}");
-        }
-    }
-
     public void RemoveSkill(SkillID skillID)
     {
         if (GameManager.Instance.player == null) return;
 
         Player player = GameManager.Instance.player;
-        Skill skillToRemove = player.skills.Find(x => x.SkillID == skillID);
+        Skill skillToRemove = player.skills.Find(x => x.skillData.ID == skillID);
 
         if (skillToRemove != null)
         {
@@ -303,7 +271,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
     public Skill GetSkillByID(SkillID skillID)
     {
-        return activeSkills.Find(x => x.SkillID == skillID);
+        return activeSkills.Find(x => x.skillData.ID == skillID);
     }
 
     public List<SkillData> GetRandomSkills(int count = 3, ElementType? elementType = null)
@@ -397,7 +365,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
     {
         if (skillData == null) return false;
 
-        var existingSkill = playerSkills.Find(s => s.SkillID == skillData.ID);
-        return existingSkill == null || existingSkill.SkillLevel < existingSkill.MaxSkillLevel;
+        var existingSkill = playerSkills.Find(s => s.skillData.ID == skillData.ID);
+        return existingSkill == null || existingSkill.skillData.GetCurrentTypeStat().baseStat.skillLevel < existingSkill.skillData.GetCurrentTypeStat().baseStat.maxSkillLevel;
     }
 }

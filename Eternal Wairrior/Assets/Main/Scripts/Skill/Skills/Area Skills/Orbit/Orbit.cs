@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Orbit : AreaSkills
@@ -7,53 +8,15 @@ public class Orbit : AreaSkills
     [SerializeField] private int ORBS_PER_LEVEL = 2;
     [SerializeField] private int BASE_ORB_COUNT = 1;
 
-    protected override void Awake()
+    public override void Initialize()
     {
-        base.Awake();
-        if (skillData == null)
-        {
-            skillData = new SkillData
-            {
-                Name = "Orbit",
-                Description = "Rotating orbs that damage enemies",
-                Type = SkillType.Area,
-                Element = ElementType.None,
-                Tier = 1
-            };
-            InitializeSkillStats();
-
-        }
+        base.Initialize();
         orbs = GetComponentInChildren<RotatingOrb>();
     }
 
-    private void InitializeSkillStats()
+    protected override void Start()
     {
-        if (skillData.GetStatsForLevel(1) == null)
-        {
-            var stats = new AreaSkillStat
-            {
-                baseStat = new BaseSkillStat
-                {
-                    damage = 8f,
-                    skillName = skillData.Name,
-                    skillLevel = 1,
-                    maxSkillLevel = 5,
-                    element = skillData.Element,
-                    elementalPower = 1f
-
-                },
-                radius = 2f,
-                duration = 0f,
-                tickRate = 0f,
-                isPersistent = true,
-                moveSpeed = 500f
-            };
-            skillData.SetStatsForLevel(1, stats);
-        }
-    }
-
-    private void Start()
-    {
+        base.Start();
         if (orbs != null)
         {
             UpdateOrbCount();
@@ -67,7 +30,7 @@ public class Orbit : AreaSkills
 
     private void UpdateOrbCount()
     {
-        int newOrbCount = BASE_ORB_COUNT + (SkillLevel - 1) * ORBS_PER_LEVEL;
+        int newOrbCount = BASE_ORB_COUNT + (skillData.GetCurrentTypeStat().baseStat.skillLevel - 1) * ORBS_PER_LEVEL;
 
         if (currentOrbCount != newOrbCount)
         {
@@ -93,7 +56,7 @@ public class Orbit : AreaSkills
         string baseDesc = "Rotating orbs that damage enemies";
         if (skillData?.GetCurrentTypeStat() != null)
         {
-            int orbCount = BASE_ORB_COUNT + (SkillLevel - 1) * ORBS_PER_LEVEL;
+            int orbCount = BASE_ORB_COUNT + (skillData.GetCurrentTypeStat().baseStat.skillLevel - 1) * ORBS_PER_LEVEL;
             baseDesc += $"\n\nCurrent Effects:" +
                        $"\nDamage per Orb: {Damage:F1}" +
                        $"\nOrb Count: {orbCount}" +
@@ -102,9 +65,5 @@ public class Orbit : AreaSkills
         }
         return baseDesc;
     }
-
-    public override SkillType GetSkillType() => SkillType.Area;
-    protected override string GetDefaultSkillName() => "Orbit";
-    protected override string GetDefaultDescription() => "Rotating orbs that damage enemies";
 }
 

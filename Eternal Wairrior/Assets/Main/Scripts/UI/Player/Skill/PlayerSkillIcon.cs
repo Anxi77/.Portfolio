@@ -34,7 +34,7 @@ public class PlayerSkillIcon : MonoBehaviour
 
             if (levelText != null && skill != null)
             {
-                levelText.text = $"Lv.{skill.SkillLevel}";
+                levelText.text = $"Lv.{skill.currentLevel}";
                 levelText.gameObject.SetActive(true);
             }
 

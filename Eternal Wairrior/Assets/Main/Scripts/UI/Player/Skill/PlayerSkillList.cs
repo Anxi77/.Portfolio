@@ -50,7 +50,7 @@ public class PlayerSkillList : MonoBehaviour
                 var sortedSkills = player.skills
                     .Where(s => s != null)
                     .OrderBy(s => s.GetSkillData()?.Type)
-                    .ThenByDescending(s => s.SkillLevel)
+                    .ThenByDescending(s => s.currentLevel)
                     .ToList();
 
                 foreach (Skill skill in sortedSkills)

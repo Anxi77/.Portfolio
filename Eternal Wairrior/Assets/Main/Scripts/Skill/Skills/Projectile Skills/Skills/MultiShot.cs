@@ -4,28 +4,6 @@ public class MultiShot : ProjectileSkills
 {
     public Transform[] shotPoints;
 
-    protected override void Start()
-    {
-        InitializeSkillData();
-        base.Start();
-        InitializeSkillStats();
-    }
-
-    protected override void InitializeSkillData()
-    {
-        if (skillData == null)
-        {
-            skillData = new SkillData
-            {
-                Name = "Multi Shot",
-                Description = "Fires multiple projectiles",
-                Type = SkillType.Projectile,
-                Element = ElementType.None,
-                Tier = 1
-            };
-        }
-    }
-
     protected override void Fire()
     {
         foreach (var shotPoint in shotPoints)
@@ -41,35 +19,6 @@ public class MultiShot : ProjectileSkills
                 InitializeProjectile(proj);
                 proj.SetDirection(fireDir);
             }
-        }
-    }
-
-    private void InitializeSkillStats()
-    {
-        if (skillData.GetStatsForLevel(1) == null)
-        {
-            var stats = new ProjectileSkillStat
-            {
-                baseStat = new BaseSkillStat
-                {
-                    damage = _damage,
-                    skillName = skillData.Name,
-                    skillLevel = 1,
-                    maxSkillLevel = 5,
-                    element = skillData.Element,
-                    elementalPower = _elementalPower
-                },
-                projectileSpeed = _projectileSpeed,
-                projectileScale = _projectileScale,
-                shotInterval = _shotInterval,
-                pierceCount = _pierceCount,
-                attackRange = _attackRange,
-                homingRange = _homingRange,
-                isHoming = _isHoming,
-                projectileCount = _projectileCount,
-                innerInterval = _innerInterval
-            };
-            skillData.SetStatsForLevel(1, stats);
         }
     }
 
@@ -92,10 +41,5 @@ public class MultiShot : ProjectileSkills
         }
         return baseDesc;
     }
-
-    protected override string GetDefaultSkillName() => "Multi Shot";
-    protected override string GetDefaultDescription() => "Fires multiple projectiles simultaneously";
-
-    public override SkillType GetSkillType() => SkillType.Projectile;
 }
 

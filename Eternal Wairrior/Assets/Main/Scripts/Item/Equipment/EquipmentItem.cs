@@ -126,7 +126,7 @@ public abstract class EquipmentItem : Item, ISkillModifier
     {
         foreach (var effect in skillEffects)
         {
-            effect.OnSkillCast(skill, skill.GetOwner() as Player);
+            effect.OnSkillCast(skill, skill.Owner as Player);
         }
     }
 
@@ -134,7 +134,7 @@ public abstract class EquipmentItem : Item, ISkillModifier
     {
         foreach (var effect in skillEffects)
         {
-            effect.OnSkillHit(skill, skill.GetOwner() as Player, target);
+            effect.OnSkillHit(skill, skill.Owner as Player, target);
         }
     }
 

@@ -10,12 +10,11 @@ public class SlowFieldSkill : AreaSkills
     [SerializeField] private int baseFieldCount = 1;
     [SerializeField] private int additionalFieldPerLevel = 1;
     [SerializeField] private GameObject slowFieldPrefab;
-
     private List<SlowField> activeFields = new List<SlowField>();
 
-    protected override void Awake()
+    public override void Initialize()
     {
-        base.Awake();
+        base.Initialize();
         if (slowFieldPrefab == null)
         {
             Debug.LogError("SlowFieldPrefab is not assigned!");
@@ -27,7 +26,7 @@ public class SlowFieldSkill : AreaSkills
     private List<Vector3> GetRandomPositions()
     {
         List<Vector3> positions = new List<Vector3>();
-        int totalFields = baseFieldCount + (additionalFieldPerLevel * (SkillLevel - 1));
+        int totalFields = baseFieldCount + (additionalFieldPerLevel * (skillData.GetCurrentTypeStat().baseStat.skillLevel - 1));
         int attempts = 0;
         const int MAX_ATTEMPTS = 100;
         float minDistanceBetweenFields = Radius * 2;
@@ -98,7 +97,6 @@ public class SlowFieldSkill : AreaSkills
 
     public override bool SkillLevelUpdate(int newLevel)
     {
-        print("SkillLevelUpdate");
         if (base.SkillLevelUpdate(newLevel))
         {
             DestroyFields();
@@ -115,10 +113,10 @@ public class SlowFieldSkill : AreaSkills
 
     public override string GetDetailedDescription()
     {
-        string baseDesc = "Creates slowing fields that damage and slow enemies";
+        string baseDesc = skillData?.Description ?? "SlowField description";
         if (skillData?.GetCurrentTypeStat() != null)
         {
-            int totalFields = baseFieldCount + (additionalFieldPerLevel * (SkillLevel - 1));
+            int totalFields = baseFieldCount + (additionalFieldPerLevel * (skillData.GetCurrentTypeStat().baseStat.skillLevel - 1));
             baseDesc += $"\n\nCurrent Effects:" +
                        $"\nDamage: {Damage:F1}" +
                        $"\nField Count: {totalFields}" +
@@ -128,8 +126,4 @@ public class SlowFieldSkill : AreaSkills
         }
         return baseDesc;
     }
-
-    protected override string GetDefaultSkillName() => "Slow Field";
-    protected override string GetDefaultDescription() => "Creates slowing fields that damage and slow enemies";
-    public override SkillType GetSkillType() => SkillType.Area;
 }

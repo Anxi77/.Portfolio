@@ -95,9 +95,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: 1.8}
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 2.09
 --- !u!114 &3571720604893261881
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1164,7 +1164,6 @@ GameObject:
   - component: {fileID: 682607554095774389}
   - component: {fileID: 3055720063283161734}
   - component: {fileID: 7521559938539784322}
-  - component: {fileID: 3400781395297996051}
   m_Layer: 0
   m_Name: Boss
   m_TagString: Untagged
@@ -1181,7 +1180,7 @@ Transform:
   m_GameObject: {fileID: 8822073820990717818}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.75, y: 0.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1282,41 +1281,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!70 &3400781395297996051
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8822073820990717818}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -0.5, y: 2.5}
-  m_Size: {x: 6, y: 5}
-  m_Direction: 1
 --- !u!1 &8972680903145795941
 GameObject:
   m_ObjectHideFlags: 0
@@ -1353,7 +1317,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 1.62, y: 3.38}
+  m_AnchoredPosition: {x: -0.4, y: 3.32}
   m_SizeDelta: {x: 1.62, y: 0.0672}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!223 &3259626079528119549
