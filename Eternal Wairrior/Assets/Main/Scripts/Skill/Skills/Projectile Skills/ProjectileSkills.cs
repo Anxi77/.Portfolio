@@ -2,13 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum FireMode
-{
-    Manual,     // 마우스 클릭으로 발사
-    Auto,       // 자동 발사
-    AutoHoming  // 자동 호밍 발사
-}
-
 public abstract class ProjectileSkills : Skill
 {
     [Header("Base Stats")]

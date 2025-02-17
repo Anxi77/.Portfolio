@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class PassiveSkill : Skill
 {
@@ -8,23 +9,23 @@ public class PassiveSkill : Skill
     public List<StatModifier> statModifiers;
 
     [Header("Base Stats")]
-    protected float _damage = 10f;
-    protected float _elementalPower = 1f;
+    [SerializeField] protected float _damage = 10f;
+    [SerializeField] protected float _elementalPower = 1f;
 
     [Header("Passive Effect Stats")]
-    protected float _effectDuration = 5f;
-    protected float _cooldown = 10f;
-    protected float _triggerChance = 100f;
-    protected float _damageIncrease = 0f;
-    protected float _defenseIncrease = 0f;
-    protected float _expAreaIncrease = 0f;
-    protected bool _homingActivate = false;
-    protected float _hpIncrease = 0f;
-    protected float _moveSpeedIncrease = 0f;
-    protected float _attackSpeedIncrease = 0f;
-    protected float _attackRangeIncrease = 0f;
-    protected float _hpRegenIncrease = 0f;
-    public bool _isPermanent = false;
+    [SerializeField] protected float _effectDuration = 5f;
+    [SerializeField] protected float _cooldown = 10f;
+    [SerializeField] protected float _triggerChance = 100f;
+    [SerializeField] protected float _damageIncrease = 0f;
+    [SerializeField] protected float _defenseIncrease = 0f;
+    [SerializeField] protected float _expAreaIncrease = 0f;
+    [SerializeField] protected bool _homingActivate = false;
+    [SerializeField] protected float _hpIncrease = 0f;
+    [SerializeField] protected float _moveSpeedIncrease = 0f;
+    [SerializeField] protected float _attackSpeedIncrease = 0f;
+    [SerializeField] protected float _attackRangeIncrease = 0f;
+    [SerializeField] protected float _hpRegenIncrease = 0f;
+    [SerializeField] protected bool _isPermanent = false;
     #endregion
 
     protected virtual void OnDestroy()
@@ -45,6 +46,7 @@ public class PassiveSkill : Skill
 
     public override void Initialize()
     {
+        base.Initialize();
         if (skillData == null) return;
 
         var playerStat = GameManager.Instance?.player?.GetComponent<PlayerStatSystem>();
@@ -53,7 +55,7 @@ public class PassiveSkill : Skill
             float currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
             Debug.Log($"Before Initialize - HP: {playerStat.GetStat(StatType.CurrentHp)}/{playerStat.GetStat(StatType.MaxHp)} ({currentHpRatio:F2})");
 
-            InitializePassiveSkillData();
+            InitializeSkillData();
 
             float newMaxHp = playerStat.GetStat(StatType.MaxHp);
             float newCurrentHp = Mathf.Max(1f, newMaxHp * currentHpRatio);
@@ -74,17 +76,17 @@ public class PassiveSkill : Skill
         }
         else
         {
-            InitializePassiveSkillData();
+            Debug.LogError($"PlayerStatSystem not found for {skillData.Name}");
         }
     }
 
-    private void InitializePassiveSkillData()
+    protected override void InitializeSkillData()
     {
         if (skillData == null) return;
 
         var csvStats = SkillDataManager.Instance.GetSkillStatsForLevel(
             skillData.ID,
-            1,
+            currentLevel,
             SkillType.Passive
         ) as PassiveSkillStat;
 

@@ -174,7 +174,7 @@ public class PlayerUIPanel : MonoBehaviour
             float currentExp = player.CurrentExp();
             float requiredExp = player.GetExpForNextLevel();
             expText.text = $"EXP : {currentExp:F0}/{requiredExp:F0}";
-            expBarImage.value = currentExp / requiredExp;
+            expBarImage.value = player.ExpAmount;
         }
     }
 

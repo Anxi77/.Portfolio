@@ -180,22 +180,6 @@ public class StageManager : SingletonManager<StageManager>
         }
         PoolManager.Instance?.ClearAllPools();
     }
-
-    private bool IsUIReady(SceneType sceneType)
-    {
-        switch (sceneType)
-        {
-            case SceneType.MainMenu:
-                return UIManager.Instance.IsMainMenuActive();
-            case SceneType.Town:
-            case SceneType.Game:
-                return UIManager.Instance.IsGameUIReady();
-            case SceneType.Test:
-                return UIManager.Instance.IsGameUIReady();
-            default:
-                return true;
-        }
-    }
     #endregion
 
     #region Portal Management

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameOverStateHandler : IGameStateHandler
@@ -42,7 +41,6 @@ public class GameOverStateHandler : IGameStateHandler
         UIManager.Instance?.HideGameOverScreen();
         portalSpawned = false;
 
-        // GameOver 상태를 나갈 때 플레이어 정리
         if (GameManager.Instance?.player != null)
         {
             GameObject.Destroy(GameManager.Instance.player.gameObject);

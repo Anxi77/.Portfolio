@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using static StageManager;
 
 public class CameraManager : SingletonManager<CameraManager>, IInitializable
@@ -25,7 +26,7 @@ public class CameraManager : SingletonManager<CameraManager>, IInitializable
             IsInitialized = true;
             Debug.Log("CameraManager initialized successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error initializing CameraManager: {e.Message}");
             IsInitialized = false;
@@ -96,7 +97,7 @@ public class CameraManager : SingletonManager<CameraManager>, IInitializable
                 Debug.LogWarning("Player not found for camera to follow!");
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error setting up camera: {e.Message}");
         }

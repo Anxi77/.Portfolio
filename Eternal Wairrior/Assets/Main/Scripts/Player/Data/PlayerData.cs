@@ -29,8 +29,6 @@ public class PlayerStatData
         public IncreaseType increaseType;
         public float amount;
 
-        public StatModifierSaveData() { }
-
         public StatModifierSaveData(StatType statType, SourceType sourceType, IncreaseType increaseType, float amount)
         {
             this.statType = statType;

@@ -3,7 +3,6 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using System.IO;
 
 public class SkillDataEditorWindow : EditorWindow
 {
@@ -747,7 +746,7 @@ public class SkillDataEditorWindow : EditorWindow
                 scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
                 {
                     var skillDatabase = SkillDataEditorUtility.GetSkillDatabase();
-                    foreach (SkillID id in System.Enum.GetValues(typeof(SkillID)))
+                    foreach (SkillID id in Enum.GetValues(typeof(SkillID)))
                     {
                         if (id == SkillID.None) continue;
                         if (skillDatabase.ContainsKey(id)) continue;

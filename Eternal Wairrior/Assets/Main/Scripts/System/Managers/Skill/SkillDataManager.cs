@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
+using System;
 using Newtonsoft.Json;
 
 public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
@@ -25,8 +24,6 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 
     public override void Initialize()
     {
-        if (!Application.isPlaying) return;
-
         try
         {
             Debug.Log("Initializing SkillDataManager...");
@@ -34,7 +31,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
             IsInitialized = true;
             Debug.Log("SkillDataManager initialized successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error initializing SkillDataManager: {e.Message}");
             IsInitialized = false;
@@ -57,18 +54,15 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
                     string fileName = jsonAsset.name;
                     string skillIdStr = fileName.Replace("_Data", "");
 
-                    if (System.Enum.TryParse<SkillID>(skillIdStr, out SkillID skillId))
+                    if (Enum.TryParse<SkillID>(skillIdStr, out SkillID skillId))
                     {
                         var skillData = JsonConvert.DeserializeObject<SkillData>(jsonAsset.text);
                         if (skillData != null)
                         {
-                            // 기본 리소스 로드
                             LoadSkillResources(skillId, skillData);
 
-                            // 스탯 데이터 로드
                             LoadSkillStats(skillId, skillData.Type);
 
-                            // 레벨별 프리팹 로드
                             LoadLevelPrefabs(skillId, skillData);
 
                             skillDatabase[skillId] = skillData;
@@ -76,7 +70,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
                         }
                     }
                 }
-                catch (System.Exception e)
+                catch (Exception e)
                 {
                     Debug.LogError($"Error processing JSON file {jsonAsset.name}: {e.Message}");
                 }
@@ -84,7 +78,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 
             Debug.Log($"LoadAllSkillData completed. Loaded {skillDatabase.Count} skills");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error in LoadAllSkillData: {e.Message}");
         }
@@ -151,7 +145,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
                 statDatabase[skillId] = stats;
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error loading stats for skill {skillId}: {e.Message}");
         }
@@ -185,7 +179,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
                 levelPrefabDatabase[skillId] = levelPrefabs;
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error loading level prefabs for skill {skillId}: {e.Message}");
         }
@@ -208,25 +202,25 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
                 }
                 else if (property.PropertyType == typeof(SkillID))
                 {
-                    if (!System.Enum.TryParse<SkillID>(value, out var skillId))
-                        throw new System.Exception($"Failed to parse SkillID: {value}");
+                    if (!Enum.TryParse<SkillID>(value, out var skillId))
+                        throw new Exception($"Failed to parse SkillID: {value}");
                     convertedValue = skillId;
                 }
                 else if (property.PropertyType == typeof(ElementType))
                 {
-                    if (!System.Enum.TryParse<ElementType>(value, out var elementType))
-                        throw new System.Exception($"Failed to parse ElementType: {value}");
+                    if (!Enum.TryParse<ElementType>(value, out var elementType))
+                        throw new Exception($"Failed to parse ElementType: {value}");
                     convertedValue = elementType;
                 }
                 else
                 {
-                    convertedValue = System.Convert.ChangeType(value, property.PropertyType);
+                    convertedValue = Convert.ChangeType(value, property.PropertyType);
                 }
 
                 property.SetValue(statData, convertedValue);
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error in SetStatValue for field '{fieldName}': {e.Message}");
         }

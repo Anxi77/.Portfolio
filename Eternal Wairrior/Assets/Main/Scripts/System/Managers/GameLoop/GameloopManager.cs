@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 {
@@ -132,16 +133,23 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
     private bool CheckInitializationError(IInitializable manager)
     {
-        // 여기서 초기화 중 발생할 수 있는 오류 상태를 체크
-        // 예: 타임아웃, 특정 조건 실패 등
-        return false; // 오류가 없으면 false 반환
+        if (manager == null)
+        {
+            Debug.LogError($"Manager is null: {manager.GetType().Name}");
+            return true;
+        }
+        if (!manager.IsInitialized)
+        {
+            Debug.LogError($"Manager is not initialized: {manager.GetType().Name}");
+            return true;
+        }
+        return false;
     }
 
     private IEnumerator InitializeCoreManagers(System.Action<bool> onComplete)
     {
         Debug.Log("Initializing Core Managers...");
 
-        // PoolManager 초기화
         if (PoolManager.Instance != null)
         {
             PoolManager.Instance.Initialize();
@@ -157,7 +165,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             Debug.Log("PoolManager initialized");
         }
 
-        // GameManager 초기화
         if (GameManager.Instance != null)
         {
             GameManager.Instance.Initialize();
@@ -173,7 +180,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             Debug.Log("GameManager initialized");
         }
 
-        // CameraManager 초기화
         if (CameraManager.Instance != null)
         {
             CameraManager.Instance.Initialize();
@@ -189,10 +195,8 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             Debug.Log("CameraManager initialized");
         }
 
-        // UIManager는 마지막에 초기화
         if (UIManager.Instance != null)
         {
-            // GameLoopManager가 이미 초기화되어 있음을 보장
             IsInitialized = true;
 
             UIManager.Instance.Initialize();
@@ -216,13 +220,11 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
     {
         Debug.Log("Initializing Gameplay Managers...");
 
-        // ItemManager 초기화 전에 ItemDataManager가 완전히 초기화될 때까지 대기
         while (ItemDataManager.Instance == null || !ItemDataManager.Instance.IsInitialized)
         {
             yield return new WaitForSeconds(0.1f);
         }
 
-        // ItemManager 초기화
         if (ItemManager.Instance != null)
         {
             ItemManager.Instance.Initialize();
@@ -233,7 +235,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             Debug.Log("ItemManager initialized");
         }
 
-        // SkillManager 초기화
         if (SkillManager.Instance != null)
         {
             SkillManager.Instance.Initialize();
@@ -248,7 +249,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             Debug.Log("SkillManager initialized");
         }
 
-        // PlayerUnitManager 초기화
         if (PlayerUnitManager.Instance != null)
         {
             PlayerUnitManager.Instance.Initialize();
@@ -263,7 +263,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             Debug.Log("PlayerUnitManager initialized");
         }
 
-        // MonsterManager 초기화
         if (MonsterManager.Instance != null)
         {
             MonsterManager.Instance.Initialize();
@@ -278,7 +277,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             Debug.Log("MonsterManager initialized");
         }
 
-        // StageTimeManager 초기화
         if (StageTimeManager.Instance != null)
         {
             StageTimeManager.Instance.Initialize();
@@ -303,7 +301,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
         try
         {
-            // 각 StateHandler 인스턴스 생성 및 초기화
             stateHandlers[GameState.MainMenu] = new MainMenuStateHandler();
             stateHandlers[GameState.Town] = new TownStateHandler();
             stateHandlers[GameState.Stage] = new StageStateHandler();
@@ -313,7 +310,7 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             Debug.Log("All state handlers created successfully");
             return true;
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error creating state handlers: {e.Message}\n{e.StackTrace}");
             return false;
@@ -329,36 +326,30 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
         try
         {
-            // 이미 상태 전환이 진행 중인지 확인
             if (isStateTransitioning)
             {
                 Debug.Log("State transition already in progress, skipping");
                 return;
             }
 
-            // 상태 전환 시작
             isStateTransitioning = true;
 
-            // 현재 상태 종료
             if (stateHandlers.ContainsKey(currentState))
             {
                 stateHandlers[currentState].OnExit();
             }
 
-            // 새로운 상태로 전환
             currentState = newState;
 
-            // 새로운 상태 시작
             if (stateHandlers.ContainsKey(currentState))
             {
                 stateHandlers[currentState].OnEnter();
             }
 
-            // 상태 전환 완료
             isStateTransitioning = false;
             Debug.Log($"Successfully changed to state: {newState}");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error during state change: {e.Message}\n{e.StackTrace}");
             isStateTransitioning = false;
@@ -373,7 +364,7 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
         {
             stateHandlers[currentState]?.OnUpdate();
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error in state update: {e.Message}");
         }
@@ -387,7 +378,7 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
         {
             stateHandlers[currentState]?.OnFixedUpdate();
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error in state fixed update: {e.Message}");
         }
@@ -412,7 +403,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
     }
 }
 
-// 게임 상태 핸들러 인터페이스
 public interface IGameStateHandler
 {
     void OnEnter();

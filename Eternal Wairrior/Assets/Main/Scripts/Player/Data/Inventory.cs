@@ -7,6 +7,7 @@ public class Inventory : MonoBehaviour, IInitializable
 {
     private List<InventorySlot> slots = new();
     private Dictionary<EquipmentSlot, Item> equippedItems = new();
+    private Player player;
     private int gold;
     private InventoryData savedState;
     private PlayerStatSystem playerStat;
@@ -16,7 +17,7 @@ public class Inventory : MonoBehaviour, IInitializable
 
     private void Awake()
     {
-        playerStat = GetComponent<PlayerStatSystem>();
+        player = GetComponent<Player>();
     }
 
     public void Initialize()
@@ -59,7 +60,7 @@ public class Inventory : MonoBehaviour, IInitializable
                 kvp => kvp.Value.GetItemData().ID
             ),
 
-            gold = this.gold
+            gold = gold
         };
     }
 
@@ -130,23 +131,6 @@ public class Inventory : MonoBehaviour, IInitializable
         return null;
     }
 
-    public void EquipToSlot(Item item, EquipmentSlot slot)
-    {
-        if (equippedItems.ContainsKey(slot))
-        {
-            UnequipFromSlot(slot);
-        }
-
-        equippedItems[slot] = item;
-
-        var inventorySlot = slots.Find(s => s.itemData.ID == item.GetItemData().ID);
-
-        if (inventorySlot != null)
-        {
-            inventorySlot.isEquipped = true;
-        }
-    }
-
     public void UnequipFromSlot(EquipmentSlot slot)
     {
 
@@ -191,14 +175,6 @@ public class Inventory : MonoBehaviour, IInitializable
             if (inventorySlot != null)
             {
                 inventorySlot.isEquipped = true;
-            }
-
-            if (playerStat != null)
-            {
-                foreach (var stat in itemData.Stats)
-                {
-                    playerStat.AddModifier(stat);
-                }
             }
 
             Debug.Log($"Successfully equipped {itemData.Name} to slot {slot}");

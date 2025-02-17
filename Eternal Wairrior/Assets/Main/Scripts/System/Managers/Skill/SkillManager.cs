@@ -36,19 +36,6 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             IsInitialized = false;
         }
     }
-
-    public void ResetForNewStage()
-    {
-        Debug.Log("Resetting skills for new stage...");
-
-        foreach (var skill in activeSkills.ToList())
-        {
-            RemoveSkill(skill.skillData.ID);
-        }
-
-        activeSkills.Clear();
-    }
-
     private void LoadSkillData()
     {
         availableSkills = SkillDataManager.Instance.GetAllSkillData();
@@ -135,8 +122,8 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
             if (existingSkill != null)
             {
-                int nextLevel = existingSkill.skillData.GetCurrentTypeStat().baseStat.skillLevel + 1;
-                Debug.Log($"Current level: {existingSkill.skillData.GetCurrentTypeStat().baseStat.skillLevel}, Attempting upgrade to level: {nextLevel}");
+                int nextLevel = existingSkill.currentLevel + 1;
+                Debug.Log($"Current level: {existingSkill.currentLevel}, Attempting upgrade to level: {nextLevel}");
 
                 GameObject levelPrefab = SkillDataManager.Instance.GetLevelPrefab(skillData.ID, nextLevel);
                 if (levelPrefab != null)
@@ -264,16 +251,6 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         }
     }
 
-    public List<Skill> GetActiveSkills()
-    {
-        return activeSkills;
-    }
-
-    public Skill GetSkillByID(SkillID skillID)
-    {
-        return activeSkills.Find(x => x.skillData.ID == skillID);
-    }
-
     public List<SkillData> GetRandomSkills(int count = 3, ElementType? elementType = null)
     {
         if (availableSkills == null || availableSkills.Count == 0)
@@ -351,21 +328,5 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         }
 
         return selectedSkills;
-    }
-
-    public List<SkillData> GetAvailableSkillChoices(int count)
-    {
-        var playerSkills = GameManager.Instance.player?.skills ?? new List<Skill>();
-        return GetRandomSkills(count)
-            .Where(skillData => IsSkillAvailable(skillData, playerSkills))
-            .ToList();
-    }
-
-    private bool IsSkillAvailable(SkillData skillData, List<Skill> playerSkills)
-    {
-        if (skillData == null) return false;
-
-        var existingSkill = playerSkills.Find(s => s.skillData.ID == skillData.ID);
-        return existingSkill == null || existingSkill.skillData.GetCurrentTypeStat().baseStat.skillLevel < existingSkill.skillData.GetCurrentTypeStat().baseStat.maxSkillLevel;
     }
 }

@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System;
 using Newtonsoft.Json;
-using System.Runtime.CompilerServices;
 
 public static class ItemDataEditorUtility
 {
@@ -158,7 +157,7 @@ public static class ItemDataEditorUtility
             Debug.Log("Drop tables saved successfully");
             AssetDatabase.Refresh();
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error saving drop tables: {e.Message}\n{e.StackTrace}");
         }
@@ -261,7 +260,7 @@ public static class ItemDataEditorUtility
                 itemDatabase = new Dictionary<string, ItemData>();
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error loading item database: {e.Message}\n{e.StackTrace}");
             itemDatabase = new Dictionary<string, ItemData>();
@@ -284,7 +283,7 @@ public static class ItemDataEditorUtility
                 dropTables = new Dictionary<EnemyType, DropTableData>();
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error loading drop tables: {e.Message}");
             dropTables = new Dictionary<EnemyType, DropTableData>();
@@ -341,7 +340,7 @@ public static class ItemDataEditorUtility
                 Debug.Log($"Updated IconPath to: {itemData.IconPath}");
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error saving item resources for {itemData.ID}: {e.Message}\n{e.StackTrace}");
         }
@@ -382,7 +381,7 @@ public static class ItemDataEditorUtility
                     Debug.LogWarning($"No icon path specified for item {item.ID}");
                 }
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Debug.LogError($"Error loading resources for item {item.ID}: {e.Message}\n{e.StackTrace}");
             }
@@ -478,7 +477,7 @@ public static class ItemDataEditorUtility
             AssetDatabase.Refresh();
             Debug.Log("Data reset successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error resetting data: {e.Message}");
             throw;

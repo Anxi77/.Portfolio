@@ -55,7 +55,6 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
-        // 기본 컴포넌트 참조만 가져오기
         playerStat = GetComponent<PlayerStatSystem>();
         rb = GetComponent<Rigidbody2D>();
         if (rb != null)
@@ -237,16 +236,12 @@ public class Player : MonoBehaviour
     {
         level++;
 
-        // 현재 체력 비율 저장
         float currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
 
-        // 레벨업에 따른 스탯 업데이트
         playerStat.UpdateStatsForLevel(level);
 
-        // 새로운 최대 체력
         float maxHp = playerStat.GetStat(StatType.MaxHp);
 
-        // 이전 체력 비율을 유지하면서 체력 설정
         playerStat.SetCurrentHp(maxHp * currentHpRatio);
 
         Debug.Log($"Level Up! Level: {level}, New MaxHP: {maxHp}, Current HP: {playerStat.GetStat(StatType.CurrentHp)}");
@@ -307,7 +302,6 @@ public class Player : MonoBehaviour
         playerStatus = Status.Dead;
         StopAllCoroutines();
 
-        // 게임 오버 상태로 전환만 하고, 타운으로의 자동 전환은 하지 않음
         GameLoopManager.Instance.ChangeState(GameLoopManager.GameState.GameOver);
     }
 
@@ -315,26 +309,20 @@ public class Player : MonoBehaviour
 
     #region Combat
     private Coroutine autoAttackCoroutine;
-    private float attackAngle = 120f;  // 공격 각도는 상수로 유지하거나 PlayerStatData로 이동 가능
+    private float attackAngle = 120f;
 
     private IEnumerator PerformAttack(Enemy targetEnemy)
     {
-        if (characterControl == null) yield break; // 안전 체크 추가
+        if (characterControl == null) yield break;
 
         Vector2 directionToTarget = (targetEnemy.transform.position - transform.position).normalized;
 
-        // 캐릭터 방향 설정
         characterControl.transform.localScale = new Vector3(
             directionToTarget.x > 0 ? -1 : 1, 1, 1);
 
-        // 공격 상태 및 애니메이션 설정
         playerStatus = Status.Attacking;
         characterControl.PlayAnimation(PlayerState.ATTACK, 0);
 
-        // 공격 딜레이
-        //yield return new WaitForSeconds(0.2f);
-
-        // 범위 내 적 찾기  데미지 적용
         float attackRange = playerStat.GetStat(StatType.AttackRange);
         float damage = playerStat.GetStat(StatType.Damage);
 
@@ -350,7 +338,6 @@ public class Player : MonoBehaviour
             })
             .ToList();
 
-        // 데미지 적용
         foreach (Enemy enemy in enemiesInRange)
         {
             enemy.TakeDamage(damage);

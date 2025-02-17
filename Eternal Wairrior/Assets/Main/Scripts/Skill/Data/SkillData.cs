@@ -27,7 +27,7 @@ public class SkillData : ICloneable
     public GameObject ProjectilePrefab { get; set; }
     public string ProjectilePath { get; set; }
     [JsonIgnore]
-    public GameObject[] PrefabsByLevel;
+    public GameObject[] PrefabsByLevel { get; set; }
     public string[] PrefabsByLevelPaths { get; set; }
     [JsonIgnore]
     public BaseSkillStat BaseStats { get; set; }

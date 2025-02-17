@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public class StageTimeManager : SingletonManager<StageTimeManager>, IInitializable
 {
@@ -23,7 +24,7 @@ public class StageTimeManager : SingletonManager<StageTimeManager>, IInitializab
             IsInitialized = true;
             Debug.Log("StageTimeManager initialized successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error initializing StageTimeManager: {e.Message}");
             IsInitialized = false;

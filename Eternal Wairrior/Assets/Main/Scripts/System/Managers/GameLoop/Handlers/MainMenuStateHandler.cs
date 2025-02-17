@@ -13,12 +13,11 @@ public class MainMenuStateHandler : IGameStateHandler
     {
         Debug.Log("Exiting MainMenu state");
         UIManager.Instance.HideMainMenu();
-        UIManager.Instance.ClearUI(); // UI 정리
+        UIManager.Instance.ClearUI();
     }
 
     public void OnUpdate()
     {
-        // 메인 메뉴 업데이트 로직
     }
 
     public void OnFixedUpdate() { }

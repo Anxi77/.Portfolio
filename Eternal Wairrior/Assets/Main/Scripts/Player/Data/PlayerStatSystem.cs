@@ -11,7 +11,7 @@ public class PlayerStatSystem : MonoBehaviour
 
     public event Action<StatType, float> OnStatChanged;
 
-    private void Awake()
+    private void Start()
     {
         InitializeStats();
         player = GetComponent<Player>();

@@ -1,4 +1,3 @@
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,8 +8,8 @@ public class ElementalAmplifierEffect : SkillInteractionEffectBase
 
     public ElementalAmplifierEffect(ItemEffectData effectData) : base(effectData)
     {
-        this.applicableElements = effectData.applicableElements?.ToList() ?? new List<ElementType>();
-        this.elementalPowerBonus = effectData.value;
+        applicableElements = effectData.applicableElements?.ToList() ?? new List<ElementType>();
+        elementalPowerBonus = effectData.value;
     }
 
     public override void ModifySkillStats(Skill skill)

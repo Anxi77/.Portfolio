@@ -1,7 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Mathematics;
-using Unity.VisualScripting;
+using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using System.Linq;
@@ -52,7 +50,7 @@ public class MonsterManager : SingletonManager<MonsterManager>, IInitializable
             IsInitialized = true;
             Debug.Log("MonsterManager initialized successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error initializing MonsterManager: {e.Message}");
             IsInitialized = false;
@@ -115,12 +113,10 @@ public class MonsterManager : SingletonManager<MonsterManager>, IInitializable
 
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
-            // 기존 방식대로 스폰 위치 계산
             Vector2 ranPos = Random.insideUnitCircle;
             Vector2 spawnPos = (ranPos * (minMaxDist.y - minMaxDist.x)) + (ranPos.normalized * minMaxDist.x);
             Vector2 finalPos = playerPos + spawnPos;
 
-            // 해당 위치가 walkable한지 확인
             Node node = PathFindingManager.Instance.GetNodeFromWorldPosition(finalPos);
             if (node != null && node.walkable)
             {
@@ -128,7 +124,6 @@ public class MonsterManager : SingletonManager<MonsterManager>, IInitializable
             }
         }
 
-        // 모든 시도가 실패하면 플레이어 주변의 가장 가까운 walkable 위치 찾기
         return FindNearestWalkablePosition(playerPos);
     }
 
@@ -157,7 +152,6 @@ public class MonsterManager : SingletonManager<MonsterManager>, IInitializable
             searchRadius += radiusIncrement;
         }
 
-        // 최후의 수단으로 플레이어 위치 반환
         return centerPos;
     }
     #endregion

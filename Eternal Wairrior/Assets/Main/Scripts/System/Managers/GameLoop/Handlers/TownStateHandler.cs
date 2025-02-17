@@ -84,14 +84,12 @@ public class TownStateHandler : IGameStateHandler
                 PlayerDataManager.Instance.LoadPlayerData();
             }
 
-            // �κ��丮 UI �ʱ�ȭ �� Ȱ��ȭ
             UIManager.Instance.InitializeInventoryUI();
             UIManager.Instance.SetInventoryAccessible(true);
             UIManager.Instance.UpdateInventoryUI();
             Debug.Log("Inventory UI initialized and enabled");
         }
 
-        // ���� �������� ��Ż ����
         StageManager.Instance.SpawnGameStagePortal();
         Debug.Log("Game stage portal spawned");
     }
@@ -100,20 +98,18 @@ public class TownStateHandler : IGameStateHandler
     {
         Debug.Log("Exiting Town state");
 
-        // �κ��丮 ������ ����
         if (GameManager.Instance?.player != null)
         {
             var inventory = GameManager.Instance.player.GetComponent<Inventory>();
             if (inventory != null)
             {
-                var inventoryData = inventory.GetInventoryData();  // ���� �޼��� ���
+                var inventoryData = inventory.GetInventoryData();
                 PlayerDataManager.Instance.SaveInventoryData(inventoryData);
                 Debug.Log("Inventory data saved");
             }
             PlayerUnitManager.Instance.SaveGameState();
         }
 
-        // �κ��丮 UI ��Ȱ��ȭ
         if (UIManager.Instance != null)
         {
             UIManager.Instance.SetInventoryAccessible(false);

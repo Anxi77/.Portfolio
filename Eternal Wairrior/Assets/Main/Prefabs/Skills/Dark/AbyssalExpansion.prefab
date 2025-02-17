@@ -41,64 +41,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 3565315168923045082}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ad201c5a8abb2145bf1192883ccf4ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 95b305da97c56134b935163a01bb046c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   skillData:
-    metadata:
-      ID: 0
-      Name: 
-      Description: 
-      Type: 0
-      Element: 0
-      Tier: 0
-      Tags: []
-      Prefab: {fileID: 0}
-      Icon: {fileID: 0}
-    icon: {fileID: 0}
-    projectile: {fileID: 0}
-    prefabsByLevel: []
-    projectileStat:
-      projectileSpeed: 0
-      projectileScale: 0
-      shotInterval: 0
-      pierceCount: 0
-      attackRange: 0
-      homingRange: 0
-      isHoming: 0
-      explosionRad: 0
-      projectileCount: 0
-      innerInterval: 0
-    areaStat:
-      radius: 0
-      duration: 0
-      tickRate: 0
-      isPersistent: 0
-      moveSpeed: 0
-    passiveStat:
-      hpIncrease: 0
-      damageIncrease: 0
-      defenseIncrease: 0
-      expAreaIncrease: 0
-      homingActivate: 0
-      effectDuration: 0
-      cooldown: 0
-      triggerChance: 100
-      moveSpeedIncrease: 0
-      attackSpeedIncrease: 0
-      attackRangeIncrease: 0
-      hpRegenIncrease: 0
-  _damage: 10
-  _elementalPower: 1
-  _effectDuration: 5
-  _cooldown: 10
-  _triggerChance: 100
-  _damageIncrease: 0
-  _defenseIncrease: 0
-  _expAreaIncrease: 0
-  _homingActivate: 0
-  _hpIncrease: 0
-  _moveSpeedIncrease: 0
-  _attackSpeedIncrease: 0
-  _attackRangeIncrease: 0
-  _hpRegenIncrease: 0
+    PrefabsByLevel: []
+  currentLevel: 1
+  _isPermanent: 0

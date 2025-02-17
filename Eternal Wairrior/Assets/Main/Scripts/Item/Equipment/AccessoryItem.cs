@@ -36,25 +36,6 @@ public class AccessoryItem : EquipmentItem
         }
     }
 
-    public void SetAccessorySlot(EquipmentSlot slot)
-    {
-        bool isValidSlot = (accessoryType, slot) switch
-        {
-            (AccessoryType.Necklace, EquipmentSlot.Necklace) => true,
-            (AccessoryType.Ring, EquipmentSlot.Ring1) => true,
-            (AccessoryType.Ring, EquipmentSlot.Ring2) => true,
-            _ => false
-        };
-
-        if (!isValidSlot)
-        {
-            Debug.LogError($"Invalid slot {slot} for accessory type {accessoryType}");
-            return;
-        }
-
-        equipmentSlot = slot;
-    }
-
     protected override void ValidateItemType(ItemType type)
     {
         if (type != ItemType.Accessory)
@@ -62,6 +43,4 @@ public class AccessoryItem : EquipmentItem
             Debug.LogError($"잘못된 아이템 타입입니다: {type}. AccessoryItem은 ItemType.Accessory이어야 합니다.");
         }
     }
-
-    public AccessoryType GetAccessoryType() => accessoryType;
 }

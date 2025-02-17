@@ -1,12 +1,10 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 
 public class InitializationManager : MonoBehaviour
 {
-    [System.Serializable]
+    [Serializable]
     public class ManagerPrefabData
     {
         public string managerName;

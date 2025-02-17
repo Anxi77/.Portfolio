@@ -31,6 +31,13 @@ public enum SkillID
     ThermalElevation // Passive
 }
 
+public enum FireMode
+{
+    Manual,     // 마우스 클릭으로 발사
+    Auto,       // 자동 발사
+    AutoHoming  // 자동 호밍 발사
+}
+
 #endregion
 
 #region Item

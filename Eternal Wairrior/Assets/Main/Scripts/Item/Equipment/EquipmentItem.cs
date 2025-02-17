@@ -47,8 +47,6 @@ public abstract class EquipmentItem : Item, ISkillModifier
         }
     }
 
-    public IEnumerable<ISkillInteractionEffect> GetSkillEffects() => skillEffects;
-
     protected abstract void ValidateItemType(ItemType type);
 
     public virtual float ModifySkillDamage(float baseDamage, SkillType skillType, ElementType elementType)

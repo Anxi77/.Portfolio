@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class PathFindingManager : SingletonManager<PathFindingManager>, IInitializable
 {
@@ -25,11 +26,6 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
     private Queue<PathFindingInstance> instancePool = new Queue<PathFindingInstance>();
     #endregion
 
-    protected override void Awake()
-    {
-        base.Awake();
-    }
-
     public void Initialize()
     {
         try
@@ -40,7 +36,7 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
             IsInitialized = true;
             Debug.Log("PathFindingManager initialized successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error initializing PathFindingManager: {e.Message}");
             IsInitialized = false;

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 
 public abstract class AreaSkills : Skill
 {
@@ -181,7 +182,7 @@ public abstract class AreaSkills : Skill
             skillData.SetStatsForLevel(currentLevel, currentStats);
             Debug.Log($"Updated stats for {GetType().Name} from inspector");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogWarning($"Error in OnValidate for {GetType().Name}: {e.Message}");
         }

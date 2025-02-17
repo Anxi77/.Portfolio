@@ -1,4 +1,3 @@
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,8 +8,8 @@ public class HomingActivatorEffect : SkillInteractionEffectBase
 
     public HomingActivatorEffect(ItemEffectData effectData) : base(effectData)
     {
-        this.homingRange = effectData.value;
-        this.applicableSkillTypes = effectData.applicableSkills?.ToList() ?? new List<SkillType>();
+        homingRange = effectData.value;
+        applicableSkillTypes = effectData.applicableSkills?.ToList() ?? new List<SkillType>();
     }
 
     public override void ModifySkillStats(Skill skill)

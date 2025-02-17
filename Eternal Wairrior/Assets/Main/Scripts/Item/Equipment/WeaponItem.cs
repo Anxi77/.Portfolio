@@ -20,7 +20,7 @@ public class WeaponItem : EquipmentItem
     {
         if (type != ItemType.Weapon)
         {
-            Debug.LogError($"잘못된 아이템 타입입니다: {type}. WeaponItem은 ItemType.Weapon이어야 합니다.");
+            Debug.LogError($"Invalid item type: {type}. WeaponItem must be ItemType.Weapon.");
         }
     }
 }

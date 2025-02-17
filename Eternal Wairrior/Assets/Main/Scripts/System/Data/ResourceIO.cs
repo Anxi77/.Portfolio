@@ -5,7 +5,7 @@ using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
 
-public static class ResourceIO<T> where T : UnityEngine.Object
+public static class ResourceIO<T> where T : Object
 {
     private static readonly Dictionary<string, T> cache = new Dictionary<string, T>();
 

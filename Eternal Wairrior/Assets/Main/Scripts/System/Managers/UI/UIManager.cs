@@ -9,7 +9,6 @@ using UnityEngine.SceneManagement;
 public partial class UIManager : SingletonManager<UIManager>, IInitializable
 {
     public bool IsInitialized { get; private set; }
-
     [Header("UI Panels")]
     public Canvas mainCanvas;
     public GameObject pausePanel;
@@ -18,11 +17,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
 
     [Header("Player Info")]
     [SerializeField] public PlayerUIPanel playerUIPanel;
-    [SerializeField] public PlayerSkillList playerSkillList;
-
-    [Header("UI Bars")]
-    [SerializeField] private Slider hpBarImage;
-    [SerializeField] private Slider expBarImage;
 
     [Header("Boss Warning UI")]
     [SerializeField] private GameObject bossWarningPanel;
@@ -30,7 +24,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
     private Coroutine bossWarningCoroutine;
 
     private bool isPaused = false;
-    private Coroutine levelCheckCoroutine;
 
     [Header("Main Menu UI")]
     [SerializeField] private GameObject mainMenuPrefab;
@@ -48,11 +41,11 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
     [SerializeField] public StageTimeUI stageTimeUI;
 
     [Header("Inventory UI")]
-    [SerializeField] private GameObject inventoryUIPrefab;  // 프리팹만 참조
-    private InventoryUI inventoryUI;  // 런타임에 생성된 인스턴스 참조
+    [SerializeField] private GameObject inventoryUIPrefab;
+    private InventoryUI inventoryUI;
 
     [Header("Tooltips")]
-    public GameObject tooltipPrefab;  // 툴팁 프리팹 참조 추가
+    public GameObject tooltipPrefab;
 
     [Header("Input Settings")]
     [SerializeField] private KeyCode inventoryToggleKey = KeyCode.I;
@@ -225,7 +218,7 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
 
     private void SetupBossStageUI()
     {
-        // 보스 스테이지 UI 설정
+
     }
 
     private void Update()
@@ -234,7 +227,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
 
         CheckPause();
 
-        // 인벤토리 토글 처리
         if (Input.GetKeyDown(inventoryToggleKey))
         {
             if (inventoryUI != null && inventoryUI.IsInitialized)
@@ -457,36 +449,24 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
 
     public void OnExitGame()
     {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
         Application.Quit();
-#endif
     }
 
     private void CleanupUI()
     {
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-        {
-            Debug.LogWarning("Attempting to cleanup UI in edit mode - operation skipped");
-            return;
-        }
-#endif
-
         if (mainMenuPanel != null)
         {
-            DestroyImmediate(mainMenuPanel.gameObject);
+            Destroy(mainMenuPanel.gameObject);
             mainMenuPanel = null;
         }
         if (loadingScreen != null)
         {
-            DestroyImmediate(loadingScreen.gameObject);
+            Destroy(loadingScreen.gameObject);
             loadingScreen = null;
         }
         if (inventoryUI != null)
         {
-            DestroyImmediate(inventoryUI.gameObject);
+            Destroy(inventoryUI.gameObject);
             inventoryUI = null;
         }
     }
@@ -507,14 +487,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         }
     }
 
-    public void UpdateGameOverTimer(float time)
-    {
-        if (gameOverTimerText != null)
-        {
-            gameOverTimerText.text = $"타운으로 돌아가기: {time:F1}초";
-        }
-    }
-
     public void ShowPauseMenu()
     {
         if (pausePanel != null)
@@ -528,15 +500,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
-        }
-    }
-
-    public void InitializePlayerUI(Player player)
-    {
-        if (playerUIPanel != null)
-        {
-            playerUIPanel.InitializePlayerUI(player);
-            GameManager.Instance.StartLevelCheck();
         }
     }
 
@@ -567,26 +530,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         return loadingScreen != null && loadingScreen.gameObject.activeSelf;
     }
 
-    public void UpdatePlayerUI(Player player)
-    {
-        if (playerUIPanel != null)
-        {
-            playerUIPanel.InitializePlayerUI(player);
-        }
-    }
-
-    public void ClearPlayerUI()
-    {
-        playerUIPanel?.Clear();
-    }
-
-    public bool IsPlayerUIReady()
-    {
-        return playerUIPanel != null &&
-               playerUIPanel.gameObject.activeSelf &&
-               playerUIPanel.IsUIReady;
-    }
-
     public void SetInventoryAccessible(bool accessible)
     {
         inventoryUI?.SetInventoryAccessible(accessible);
@@ -614,32 +557,14 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         inventoryUI?.UpdateUI();
     }
 
-    public ItemTooltip CreateTooltip(Vector2 position)
-    {
-        if (tooltipPrefab == null)
-        {
-            Debug.LogError("Tooltip prefab not assigned in UIManager!");
-            return null;
-        }
-
-        var tooltip = PoolManager.Instance.Spawn<ItemTooltip>(tooltipPrefab, position, Quaternion.identity);
-        if (tooltip != null)
-        {
-            tooltip.transform.SetParent(mainCanvas.transform, false);
-        }
-        return tooltip;
-    }
-
     public void InitializeInventoryUI()
     {
-        // 이미 존재하는 인벤토리 UI가 있다면 제거
         if (inventoryUI != null)
         {
             Destroy(inventoryUI.gameObject);
             inventoryUI = null;
         }
 
-        // 프리팹으로부터 새로운 인스턴스 생성
         if (inventoryUIPrefab != null)
         {
             var inventoryObj = Instantiate(inventoryUIPrefab, mainCanvas.transform);

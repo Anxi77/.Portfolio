@@ -15,11 +15,6 @@ public class StatModifier
         Value = value;
     }
 
-    public PlayerStatData.StatModifierSaveData ToSaveData()
-    {
-        return new PlayerStatData.StatModifierSaveData(Type, Source, IncreaseType, Value);
-    }
-
     public override bool Equals(object obj)
     {
         if (obj is StatModifier other)

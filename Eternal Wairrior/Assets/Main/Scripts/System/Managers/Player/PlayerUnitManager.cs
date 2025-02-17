@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Collections;
-using System.Threading.Tasks;
+using System;
 using static StageManager;
 
 public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializable
@@ -19,7 +17,7 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
             IsInitialized = true;
             Debug.Log("PlayerUnitManager initialized successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error initializing PlayerUnitManager: {e.Message}");
             IsInitialized = false;
@@ -51,7 +49,7 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
                 Debug.LogError("Player component not found on spawned object");
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error spawning player: {e.Message}");
         }
@@ -96,7 +94,7 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
 
             Debug.Log("Player initialization completed successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error initializing player: {e.Message}");
         }

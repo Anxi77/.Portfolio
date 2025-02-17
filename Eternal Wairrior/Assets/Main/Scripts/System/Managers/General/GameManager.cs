@@ -1,7 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : SingletonManager<GameManager>, IInitializable
 {
@@ -9,18 +9,10 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
 
     internal List<Enemy> enemies = new List<Enemy>();
     internal Player player;
-
-    private string lastSavedScene = "TownScene";
-    private Vector3 lastSavedPosition = Vector3.zero;
     private bool hasInitializedGame = false;
 
     private int lastPlayerLevel = 1;
     private Coroutine levelCheckCoroutine;
-
-    protected override void Awake()
-    {
-        base.Awake();
-    }
 
     public void Initialize()
     {
@@ -36,7 +28,7 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
             IsInitialized = true;
             Debug.Log("GameManager initialized successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error initializing GameManager: {e.Message}");
             IsInitialized = false;
@@ -94,43 +86,6 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
         UIManager.Instance?.ShowLevelUpPanel();
     }
 
-    public void StopLevelCheck()
-    {
-        if (levelCheckCoroutine != null)
-        {
-            StopCoroutine(levelCheckCoroutine);
-            levelCheckCoroutine = null;
-        }
-    }
-
-    #region Player Management
-    public void InitializePlayer(Player newPlayer)
-    {
-        player = newPlayer;
-        if (player != null)
-        {
-            if (PlayerUnitManager.Instance.IsInitialized)
-            {
-                PlayerUnitManager.Instance.InitializePlayer(player);
-
-                var savedData = PlayerDataManager.Instance.LoadPlayerData();
-                if (savedData != null)
-                {
-                    PlayerUnitManager.Instance.LoadGameState();
-                }
-                else
-                {
-                    PlayerUnitManager.Instance.InitializePlayer(player);
-                }
-            }
-            else
-            {
-                Debug.LogError("PlayerUnitManager is not initialized!");
-            }
-        }
-    }
-    #endregion
-
     #region Game State Management
     public void InitializeNewGame()
     {
@@ -167,32 +122,12 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
     public void ClearGameData()
     {
         PlayerDataManager.Instance.ClearAllRuntimeData();
-        lastSavedScene = "TownScene";
-        lastSavedPosition = Vector3.zero;
     }
 
     public bool HasSaveData()
     {
         return PlayerDataManager.Instance != null &&
                PlayerDataManager.Instance.HasSaveData();
-    }
-    #endregion
-
-    #region Scene Management
-    public void SaveCurrentSceneAndPosition(string sceneName, Vector3 position)
-    {
-        lastSavedScene = sceneName;
-        lastSavedPosition = position;
-    }
-
-    public string GetLastSavedScene()
-    {
-        return lastSavedScene;
-    }
-
-    public Vector3 GetLastSavedPosition()
-    {
-        return lastSavedPosition;
     }
     #endregion
 
@@ -203,7 +138,7 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
             SaveGameData();
             CleanupTemporaryResources();
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error during application quit: {e.Message}");
         }

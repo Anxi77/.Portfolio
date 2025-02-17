@@ -24,7 +24,7 @@ public class ItemDataManager : DataManager<ItemDataManager>
             LoadItemDatabase();
             LoadDropTables();
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error loading data: {e.Message}");
         }
@@ -73,7 +73,7 @@ public class ItemDataManager : DataManager<ItemDataManager>
                 Debug.LogError("No drop tables found.");
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error loading drop tables: {e.Message}");
         }
