@@ -57,7 +57,7 @@ public class Inventory : MonoBehaviour, IInitializable
             equippedItems = equippedItems.ToDictionary
             (
                 kvp => kvp.Key,
-                kvp => kvp.Value.GetItemData().ID
+                kvp => kvp.Value.GetItemData()
             ),
 
             gold = gold
@@ -72,10 +72,9 @@ public class Inventory : MonoBehaviour, IInitializable
 
         foreach (var kvp in data.equippedItems)
         {
-            var itemData = ItemManager.Instance.GetItem(kvp.Value);
-            if (itemData != null)
+            if (kvp.Value != null)
             {
-                EquipItem(itemData, kvp.Key);
+                EquipItem(kvp.Value, kvp.Key);
             }
         }
     }
@@ -236,11 +235,9 @@ public class Inventory : MonoBehaviour, IInitializable
 
         foreach (var kvp in savedState.equippedItems)
         {
-            var itemData = ItemManager.Instance.GetItem(kvp.Value);
-
-            if (itemData != null)
+            if (kvp.Value != null)
             {
-                EquipItem(itemData, kvp.Key);
+                EquipItem(kvp.Value, kvp.Key);
             }
         }
     }

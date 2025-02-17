@@ -47,6 +47,3 @@ MonoBehaviour:
   portalPrefab: {fileID: 6173559816255352275, guid: 00118592ea2713f4392ba2e807e53165, type: 3}
   townPortalPosition: {x: 10, y: 0, z: 0}
   gameStagePortalPosition: {x: -10, y: 0, z: 0}
-  virtualCameraPrefab: {fileID: 598619210199089297, guid: 6288908b75fd785499984dba9db1556b, type: 3}
-  townCameraSize: 8
-  gameCameraSize: 9

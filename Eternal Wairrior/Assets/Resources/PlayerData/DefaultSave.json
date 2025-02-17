@@ -1,13 +1,22 @@
 {
-    "stats": {
-        "instanceID": -267448
+  "stats": {
+    "baseStats": {
+      "MaxHp": 100.0,
+      "Damage": 5.0,
+      "Defense": 2.0,
+      "MoveSpeed": 5.0,
+      "AttackSpeed": 1.0,
+      "AttackRange": 2.0,
+      "ExpCollectionRadius": 3.0,
+      "HpRegenRate": 1.0,
+      "CurrentHp": 6.0
     },
-    "inventory": {
-        "slots": [],
-        "gold": 0
-    },
-    "levelData": {
-        "level": 1,
-        "exp": 0.0
-    }
+    "permanentModifiers": []
+  },
+  "inventory": {
+    "slots": [],
+    "gold": 0,
+    "equippedItems": {}
+  },
+  "levelData": null
 }

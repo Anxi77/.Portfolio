@@ -1,20 +1,10 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public class InitializationManager : MonoBehaviour
 {
-    [Serializable]
-    public class ManagerPrefabData
-    {
-        public string managerName;
-        public GameObject prefab;
-    }
-
-    [SerializeField] private ManagerPrefabData[] managerPrefabs;
-    [SerializeField] private GameObject eventSystemPrefab;
-    [SerializeField] private bool loadTestScene = false;
-
     private void Start()
     {
         InitializeEventSystem();
@@ -33,33 +23,19 @@ public class InitializationManager : MonoBehaviour
             yield return null;
         }
 
-        if (loadTestScene)
-        {
-            Debug.Log("Loading test scene...");
-            StageManager.Instance?.LoadTestScene();
-        }
-
-        else
-        {
-            Debug.Log("Loading main menu...");
-            StageManager.Instance?.LoadMainMenu();
-        }
+        Debug.Log("Loading main menu...");
+        StageManager.Instance?.LoadMainMenu();
     }
 
     private void CreateManagerObjects()
     {
-        foreach (var managerData in managerPrefabs)
+        GameObject[] managers = Resources.LoadAll<GameObject>("Prefabs/Managers");
+        foreach (GameObject manager in managers)
         {
-            if (managerData.prefab != null)
+            Instantiate(manager);
+            if (manager.name == "PathFindingManager")
             {
-                var manager = Instantiate(managerData.prefab);
-                manager.name = managerData.managerName;
-                DontDestroyOnLoad(manager);
-
-                if (managerData.managerName == "PathFindingManager")
-                {
-                    manager.SetActive(false);
-                }
+                manager.SetActive(false);
             }
         }
     }
@@ -67,10 +43,10 @@ public class InitializationManager : MonoBehaviour
     private void InitializeEventSystem()
     {
         var existingEventSystem = FindObjectOfType<UnityEngine.EventSystems.EventSystem>();
-        if (existingEventSystem == null && eventSystemPrefab != null)
+        if (existingEventSystem == null)
         {
+            var eventSystemPrefab = Resources.Load<GameObject>("Prefabs/System/EventSystem");
             var eventSystemObj = Instantiate(eventSystemPrefab);
-            eventSystemObj.name = "EventSystem";
             DontDestroyOnLoad(eventSystemObj);
         }
     }

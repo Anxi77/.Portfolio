@@ -1,9 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
-using System;
 using UnityEngine.SceneManagement;
 
 public partial class UIManager : SingletonManager<UIManager>, IInitializable
@@ -44,9 +41,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
     [SerializeField] private GameObject inventoryUIPrefab;
     private InventoryUI inventoryUI;
 
-    [Header("Tooltips")]
-    public GameObject tooltipPrefab;
-
     [Header("Input Settings")]
     [SerializeField] private KeyCode inventoryToggleKey = KeyCode.I;
 
@@ -79,6 +73,7 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
 
     private void InitializeUIComponents()
     {
+        mainCanvas = GetComponent<Canvas>();
         if (playerUIPanel != null)
         {
             playerUIPanel.Initialize();

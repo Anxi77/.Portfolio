@@ -61,7 +61,7 @@ public class InventoryData
 {
     public List<InventorySlot> slots = new();
     public int gold;
-    public Dictionary<EquipmentSlot, string> equippedItems = new();
+    public Dictionary<EquipmentSlot, ItemData> equippedItems = new();
 }
 
 [Serializable]

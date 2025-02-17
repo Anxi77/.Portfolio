@@ -7,7 +7,7 @@ public class InventoryUI : MonoBehaviour, IInitializable
     [Header("Settings")]
     private GameObject inventoryPanel;
     private Transform slotsParent;
-    private ItemSlotUI slotPrefab;
+    [SerializeField] private ItemSlotUI slotPrefab;
     private ItemSlotUI[] equipmentSlots;
 
     private Inventory inventory;
