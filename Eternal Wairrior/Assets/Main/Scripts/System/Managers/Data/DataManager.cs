@@ -1,7 +1,4 @@
 using UnityEngine;
-using System.IO;
-using System.Threading.Tasks;
-using UnityEditor;
 
 public abstract class DataManager<T> : SingletonManager<T>, IInitializable where T : MonoBehaviour
 {

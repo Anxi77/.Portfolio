@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Linq;
-using Unity.VisualScripting;
+using System.Text;
 
 public class ItemTooltip : MonoBehaviour
 {
@@ -36,20 +36,17 @@ public class ItemTooltip : MonoBehaviour
         Debug.Log($"Setting up tooltip for item: {itemData.Name}");
         Debug.Log($"Item stats count: {itemData.Stats?.Count ?? 0}");
 
-        // �⺻ ���� ����
         itemNameText.text = $"{GetRarityColor(itemData.Rarity)}{itemData.Name}</color>";
         itemTypeText.text = $"Type: {itemData.Type}";
         itemRarityText.text = $"Rarity: {itemData.Rarity}";
 
-        // ������ ����
         if (itemIcon != null)
         {
             itemIcon.sprite = itemData.Icon;
             itemIcon.enabled = itemData.Icon != null;
         }
 
-        // ���� ���� ����
-        var statsBuilder = new System.Text.StringBuilder("Stats:\n");
+        var statsBuilder = new StringBuilder("Stats:\n");
         if (itemData.Stats != null && itemData.Stats.Any())
         {
             foreach (var stat in itemData.Stats)
@@ -66,8 +63,7 @@ public class ItemTooltip : MonoBehaviour
         }
         itemStatsText.text = statsBuilder.ToString();
 
-        // ȿ�� ���� ����
-        var effectsBuilder = new System.Text.StringBuilder("Effects:\n");
+        var effectsBuilder = new StringBuilder("Effects:\n");
         if (itemData.Effects != null && itemData.Effects.Any())
         {
             foreach (var effect in itemData.Effects)
@@ -91,10 +87,10 @@ public class ItemTooltip : MonoBehaviour
         return rarity switch
         {
             ItemRarity.Common => "<color=white>",
-            ItemRarity.Uncommon => "<color=#00FF00>",  // �ʷϻ�
-            ItemRarity.Rare => "<color=#0080FF>",      // �Ķ���
-            ItemRarity.Epic => "<color=#CC33FF>",      // �����
-            ItemRarity.Legendary => "<color=#FFD700>",  // �ݻ�
+            ItemRarity.Uncommon => "<color=#00FF00>",
+            ItemRarity.Rare => "<color=#0080FF>",
+            ItemRarity.Epic => "<color=#CC33FF>",
+            ItemRarity.Legendary => "<color=#FFD700>",
             _ => "<color=white>"
         };
     }

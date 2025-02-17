@@ -5,11 +5,11 @@ using TMPro;
 
 public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    [SerializeField] private Image itemIcon;
-    [SerializeField] private Image backgroundImage;
-    [SerializeField] private TextMeshProUGUI amountText;
-    [SerializeField] private GameObject equippedIndicator;
-    [SerializeField] private GameObject tooltipPrefab;
+    private Image itemIcon;
+    private Image backgroundImage;
+    private TextMeshProUGUI amountText;
+    private GameObject equippedIndicator;
+    private GameObject tooltipPrefab;
 
     private int slotIndex;
     private Inventory inventory;
@@ -26,7 +26,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         slotData = slot;
 
-        if (slot == null || string.IsNullOrEmpty(slot.itemId))
+        if (slot == null || slot.itemData == null)
         {
             itemIcon.enabled = false;
             amountText.enabled = false;
@@ -34,7 +34,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             return;
         }
 
-        var itemData = ItemManager.Instance.GetItem(slot.itemId);
+        var itemData = slot.itemData;
         if (itemData == null) return;
 
         itemIcon.enabled = true;
@@ -52,9 +52,9 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (slotData == null || string.IsNullOrEmpty(slotData.itemId)) return;
+        if (slotData == null || slotData.itemData == null) return;
 
-        var itemData = ItemManager.Instance.GetItem(slotData.itemId);
+        var itemData = slotData.itemData;
         if (itemData != null)
         {
             ShowTooltip(itemData);
@@ -95,35 +95,31 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (slotData == null || string.IsNullOrEmpty(slotData.itemId)) return;
+        if (slotData == null || slotData.itemData == null) return;
 
-        // 우클릭 처리
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            if (slotIndex != -1)  // 장비 슬롯이 아닌 경우에만 버리기 가능
+            if (slotIndex != -1)
             {
                 DropItem();
             }
             return;
         }
 
-        // 좌클릭 처리 (기존 코드)
-        var itemData = ItemManager.Instance.GetItem(slotData.itemId);
+        var itemData = slotData.itemData;
         if (itemData == null)
         {
-            Debug.LogError($"Failed to get item data for ID: {slotData.itemId}");
+            Debug.LogError($"Failed to get item data for ID: {slotData.itemData.ID}");
             return;
         }
 
         Debug.Log($"Clicked item: {itemData.Name} of type {itemData.Type}");
 
-        // 장비 슬롯인 경우 - 장비 해제
         if (slotIndex == -1)
         {
             Debug.Log($"Unequipping from slot {GetEquipmentSlot()}");
             inventory.UnequipFromSlot(GetEquipmentSlot());
         }
-        // 일반 슬롯인 경우 - 장비 장착
         else if (itemData.Type == ItemType.Weapon || itemData.Type == ItemType.Armor || itemData.Type == ItemType.Accessory)
         {
             var equipSlot = GetEquipmentSlotForItemType(itemData.Type);
@@ -131,15 +127,12 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             {
                 Debug.Log($"Equipping {itemData.Name} to slot {equipSlot}");
 
-                // 기존에 장착된 아이템이 있다면 인벤토리로 되돌림
                 var equippedItem = inventory.GetEquippedItem(equipSlot);
                 if (equippedItem != null)
                 {
                     inventory.UnequipFromSlot(equipSlot);
                 }
-
-                // 인벤토리에서 아이템 제거 후 장비 슬롯으로 이동
-                inventory.RemoveItem(slotData.itemId);
+                inventory.RemoveItem(slotData.itemData.ID);
                 inventory.EquipItem(itemData, equipSlot);
             }
         }
@@ -149,15 +142,13 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     private void DropItem()
     {
-        if (slotData == null || string.IsNullOrEmpty(slotData.itemId)) return;
+        if (slotData == null || slotData.itemData == null) return;
 
-        var itemData = ItemManager.Instance.GetItem(slotData.itemId);
+        var itemData = slotData.itemData;
         if (itemData != null)
         {
-            // 인벤토리에서 아이템 제거
-            inventory.RemoveItem(slotData.itemId);
+            inventory.RemoveItem(slotData.itemData.ID);
 
-            // UI 업데이트
             UIManager.Instance.UpdateInventoryUI();
 
             Debug.Log($"Dropped item: {itemData.Name}");
@@ -180,7 +171,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         if (inventory.GetEquippedItem(EquipmentSlot.Ring1) == null) return EquipmentSlot.Ring1;
         if (inventory.GetEquippedItem(EquipmentSlot.Ring2) == null) return EquipmentSlot.Ring2;
         if (inventory.GetEquippedItem(EquipmentSlot.Necklace) == null) return EquipmentSlot.Necklace;
-        return EquipmentSlot.Ring1; // 모든 슬롯이 찼다면 Ring1에 덮어씌우기
+        return EquipmentSlot.None;
     }
 
     private EquipmentSlot GetEquipmentSlot()

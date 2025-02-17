@@ -5,11 +5,10 @@ using System.Collections;
 public class InventoryUI : MonoBehaviour, IInitializable
 {
     [Header("Settings")]
-    [SerializeField] private GameObject inventoryPanel;
-    [SerializeField] private Transform slotsParent;
-    [SerializeField] private ItemSlotUI slotPrefab;
-    [SerializeField] private Transform equipmentSlotsParent;
-    [SerializeField] private ItemSlotUI[] equipmentSlots;
+    private GameObject inventoryPanel;
+    private Transform slotsParent;
+    private ItemSlotUI slotPrefab;
+    private ItemSlotUI[] equipmentSlots;
 
     private Inventory inventory;
     private List<ItemSlotUI> slotUIs = new();
@@ -77,7 +76,6 @@ public class InventoryUI : MonoBehaviour, IInitializable
 
     private void InitializeUI()
     {
-        // 장비 슬롯 초기화 (먼저 초기화)
         if (equipmentSlots != null)
         {
             for (int i = 0; i < equipmentSlots.Length; i++)
@@ -92,9 +90,9 @@ public class InventoryUI : MonoBehaviour, IInitializable
         else
         {
             Debug.LogError("Equipment slots array is null!");
+            return;
         }
 
-        // 일반 슬롯 초기화
         for (int i = 0; i < inventory.MaxSlots; i++)
         {
             var slotUI = Instantiate(slotPrefab, slotsParent);
@@ -152,7 +150,6 @@ public class InventoryUI : MonoBehaviour, IInitializable
 
         try
         {
-            // 일반 슬롯 업데이트
             var slots = inventory.GetSlots();
             for (int i = 0; i < slotUIs.Count; i++)
             {
@@ -166,10 +163,8 @@ public class InventoryUI : MonoBehaviour, IInitializable
                 }
             }
 
-            // 장비 슬롯 업데이트
             if (equipmentSlots != null)
             {
-                // 각 장비 슬롯 타입에 대해 명시적으로 처리
                 UpdateEquipmentSlot(EquipmentSlot.Weapon, 0);
                 UpdateEquipmentSlot(EquipmentSlot.Armor, 1);
                 UpdateEquipmentSlot(EquipmentSlot.Ring1, 2);
@@ -187,7 +182,6 @@ public class InventoryUI : MonoBehaviour, IInitializable
     {
         try
         {
-            // 기본 유효성 검사
             if (inventory == null)
             {
                 Debug.LogWarning("Inventory is null");
@@ -213,7 +207,6 @@ public class InventoryUI : MonoBehaviour, IInitializable
                 return;
             }
 
-            // 장착된 아이템 가져오기
             var equippedItem = inventory.GetEquippedItem(equipSlot);
             if (equippedItem != null)
             {
@@ -223,7 +216,7 @@ public class InventoryUI : MonoBehaviour, IInitializable
                     Debug.Log($"Updating equipment slot {equipSlot} with item: {itemData.Name}");
                     slot.UpdateUI(new InventorySlot
                     {
-                        itemId = itemData.ID,
+                        itemData = itemData,
                         amount = 1,
                         isEquipped = true
                     });
@@ -236,7 +229,6 @@ public class InventoryUI : MonoBehaviour, IInitializable
             }
             else
             {
-                // 장착된 아이템이 없는 경우
                 Debug.Log($"No item equipped in slot {equipSlot}");
                 slot.UpdateUI(null);
             }
@@ -245,20 +237,6 @@ public class InventoryUI : MonoBehaviour, IInitializable
         {
             Debug.LogError($"Error updating equipment slot {equipSlot}: {e.Message}\n{e.StackTrace}");
         }
-    }
-
-    private EquipmentSlot GetEquipmentSlotForUI(ItemSlotUI slotUI)
-    {
-        if (equipmentSlots == null) return EquipmentSlot.None;
-
-        int index = System.Array.IndexOf(equipmentSlots, slotUI);
-        if (index >= 0 && index < System.Enum.GetValues(typeof(EquipmentSlot)).Length)
-        {
-            return (EquipmentSlot)index;
-        }
-
-        Debug.LogWarning($"Invalid equipment slot index: {index}");
-        return EquipmentSlot.None;
     }
 
     public void SetInventoryAccessible(bool accessible)

@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.IO;
-using Newtonsoft.Json;
 
 public class PlayerDataManager : DataManager<PlayerDataManager>
 {
@@ -44,20 +43,6 @@ public class PlayerDataManager : DataManager<PlayerDataManager>
         JSONIO<PlayerData>.SaveData(DEFAULT_SAVE_SLOT, new PlayerData { stats = currentPlayerStatData, inventory = currentInventoryData, levelData = currentLevelData });
     }
 
-    public virtual void SaveWithBackup()
-    {
-        try
-        {
-            if (!Directory.Exists(SAVE_PATH))
-                Directory.CreateDirectory(SAVE_PATH);
-            BackupIO.CreateBackup(SAVE_PATH);
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"Error during backup: {e.Message}");
-        }
-    }
-
     public virtual void ClearAllRuntimeData()
     {
         currentPlayerStatData = new PlayerStatData();
@@ -66,48 +51,16 @@ public class PlayerDataManager : DataManager<PlayerDataManager>
         JSONIO<PlayerData>.DeleteData(DEFAULT_SAVE_SLOT);
     }
 
-    public void LoadPlayerStatData(PlayerStatData data)
-    {
-        if (data != null)
-        {
-            currentPlayerStatData = data;
-        }
-    }
-
-    public void SaveCurrentPlayerStatData()
-    {
-        var player = FindObjectOfType<Player>();
-        if (player != null && player.TryGetComponent<PlayerStatSystem>(out var statSystem))
-        {
-            currentPlayerStatData = statSystem.CreateSaveData();
-        }
-    }
-
-    public void SavePlayerData(string saveSlot, PlayerData data)
+    public void SavePlayerData(PlayerData data)
     {
         if (!IsInitialized) Initialize();
-        JSONIO<PlayerData>.SaveData(saveSlot, data);
-        SaveWithBackup();
+        JSONIO<PlayerData>.SaveData(DEFAULT_SAVE_SLOT, data);
     }
 
-    public PlayerData LoadPlayerData(string saveSlot)
+    public PlayerData LoadPlayerData()
     {
         if (!IsInitialized) Initialize();
-        var data = JSONIO<PlayerData>.LoadData(saveSlot);
-        if (data != null)
-        {
-            LoadPlayerStatData(data.stats);
-            LoadInventoryData(data.inventory);
-        }
-        return data;
-    }
-
-    public void LoadInventoryData(InventoryData data)
-    {
-        if (data != null)
-        {
-            currentInventoryData = data;
-        }
+        return JSONIO<PlayerData>.LoadData(DEFAULT_SAVE_SLOT);
     }
 
     public void SaveInventoryData(InventoryData data)
@@ -135,11 +88,10 @@ public class PlayerDataManager : DataManager<PlayerDataManager>
         }
     }
 
-    public bool HasSaveData(string saveSlot)
+    public bool HasSaveData()
     {
         if (!IsInitialized) Initialize();
-        string savePath = Path.Combine(Application.persistentDataPath, SAVE_PATH, $"{saveSlot}.json");
-        return File.Exists(savePath);
+        return File.Exists(DEFAULT_SAVE_SLOT);
     }
 }
 

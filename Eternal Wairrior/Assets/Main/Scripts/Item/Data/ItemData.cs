@@ -1,66 +1,43 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using System;
 using Newtonsoft.Json;
 
 [Serializable]
-public enum ItemType
+public class SerializableItemList
 {
-    None,
-    Weapon,
-    Armor,
-    Accessory,
-    Consumable,
-    Material
+    public List<ItemData> items = new();
 }
 
 [Serializable]
-public enum AccessoryType
+public class DropTablesWrapper
 {
-    None,
-    Necklace,
-    Ring
-}
-
-[Serializable]
-public enum ItemRarity
-{
-    Common,
-    Uncommon,
-    Rare,
-    Epic,
-    Legendary,
+    public List<DropTableData> dropTables = new();
 }
 
 [Serializable]
 public class ItemData
 {
-    // 기본 아이템 데이터
-    [JsonProperty] public string ID { get; set; }
-    [JsonProperty] public string Name { get; set; }
-    [JsonProperty] public string Description { get; set; }
-    [JsonProperty] public ItemType Type { get; set; }
-    [JsonProperty] public ItemRarity Rarity { get; set; }
-    [JsonProperty] public ElementType Element { get; set; }
-    [JsonProperty] public int MaxStack { get; set; } = 1;
-    [JsonProperty] public float DropRate { get; set; }
-    [JsonProperty] public int MinAmount { get; set; } = 1;
-    [JsonProperty] public int MaxAmount { get; set; } = 1;
-    [JsonProperty] public string IconPath { get; set; }
-    [JsonProperty] public ItemStatRangeData StatRanges { get; set; } = new();
-    [JsonProperty] public List<StatModifier> Stats { get; set; } = new();
-    [JsonProperty] public ItemEffectRangeData EffectRanges { get; set; } = new();
-    [JsonProperty] public List<ItemEffectData> Effects { get; set; } = new();
-    [JsonProperty] public Dictionary<string, float> EffectValues { get; set; } = new();
+    public string ID { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public ItemType Type { get; set; }
+    public ItemRarity Rarity { get; set; }
+    public ElementType Element { get; set; }
+    public int MaxStack { get; set; } = 1;
+    public float DropRate { get; set; }
+    public int MinAmount { get; set; } = 1;
+    public int MaxAmount { get; set; } = 1;
+    public string IconPath { get; set; }
+    public ItemStatRangeData StatRanges { get; set; } = new();
+    public List<StatModifier> Stats { get; set; } = new();
+    public ItemEffectRangeData EffectRanges { get; set; } = new();
+    public List<ItemEffectData> Effects { get; set; } = new();
 
-    // 런타임 전용 데이터
-    [NonSerialized] private Sprite _icon;
-    [JsonIgnore]
-    public Sprite Icon => _icon ??= !string.IsNullOrEmpty(IconPath) ? Resources.Load<Sprite>(IconPath) : null;
+    [JsonIgnore] private Sprite _icon;
+    [JsonIgnore] public Sprite Icon => _icon ??= !string.IsNullOrEmpty(IconPath) ? Resources.Load<Sprite>(IconPath) : null;
 
-    // 런타임 데이터
     [JsonIgnore] public int amount = 1;
 
     #region Stats Management
@@ -113,46 +90,32 @@ public class ItemData
     #endregion
 }
 
+#region Stat & Effects
 [Serializable]
-public class ItemEffectData
+public class ItemStatRange
 {
-    public string effectId;
-    public string effectName;
-    public EffectType effectType;
-    public float value;
-    public ItemRarity minRarity;
-    public ItemType[] applicableTypes;
-    public SkillType[] applicableSkills;
-    public ElementType[] applicableElements;
+    public StatType statType;
+    public float minValue;
+    public float maxValue;
+    public float weight = 1f;
+    public IncreaseType increaseType = IncreaseType.Flat;
+}
 
-    public bool CanApplyTo(ItemData item, SkillType skillType = SkillType.None, ElementType element = ElementType.None)
+[Serializable]
+public class ItemStatRangeData
+{
+    public List<ItemStatRange> possibleStats = new();
+    public int minStatCount = 1;
+    public int maxStatCount = 4;
+
+    public Dictionary<ItemRarity, int> additionalStatsByRarity = new()
     {
-        if (item.Rarity < minRarity) return false;
-        if (applicableTypes != null && !applicableTypes.Contains(item.Type)) return false;
-        if (skillType != SkillType.None && applicableSkills != null && !applicableSkills.Contains(skillType)) return false;
-        if (element != ElementType.None && applicableElements != null && !applicableElements.Contains(element)) return false;
-        return true;
-    }
-}
-
-[Serializable]
-public enum EffectType
-{
-    None,
-    DamageBonus,
-    CooldownReduction,
-    ProjectileSpeed,
-    ProjectileRange,
-    HomingEffect,
-    AreaRadius,
-    AreaDuration,
-    ElementalPower
-}
-
-[Serializable]
-public class SerializableItemList
-{
-    public List<ItemData> items = new();
+        { ItemRarity.Common, 0 },
+        { ItemRarity.Uncommon, 1 },
+        { ItemRarity.Rare, 2 },
+        { ItemRarity.Epic, 3 },
+        { ItemRarity.Legendary, 4 }
+    };
 }
 
 [Serializable]
@@ -189,62 +152,29 @@ public class ItemEffectRangeData
 }
 
 [Serializable]
-public class ItemStatData
+public class ItemEffectData
 {
-    public float damage;
-    public float defense;
-    public float hp;
-    public float moveSpeed;
-    public float attackSpeed;
-    public float attackRange;
-    public float hpRegen;
+    public string effectId;
+    public string effectName;
+    public EffectType effectType;
+    public float value;
+    public ItemRarity minRarity;
+    public ItemType[] applicableTypes;
+    public SkillType[] applicableSkills;
+    public ElementType[] applicableElements;
 
-    public float criticalChance;
-    public float criticalDamage;
-    public float lifeSteal;
-    public float reflectDamage;
-    public float dodgeChance;
-}
-
-[Serializable]
-public class ItemStatRange
-{
-    public StatType statType;
-    public float minValue;
-    public float maxValue;
-    public float weight = 1f;
-    public IncreaseType increaseType = IncreaseType.Flat;
-}
-
-[Serializable]
-public class ItemStatRangeData
-{
-    public List<ItemStatRange> possibleStats = new();
-    public int minStatCount = 1;
-    public int maxStatCount = 4;
-
-    public Dictionary<ItemRarity, int> additionalStatsByRarity = new()
+    public bool CanApplyTo(ItemData item, SkillType skillType = SkillType.None, ElementType element = ElementType.None)
     {
-        { ItemRarity.Common, 0 },
-        { ItemRarity.Uncommon, 1 },
-        { ItemRarity.Rare, 2 },
-        { ItemRarity.Epic, 3 },
-        { ItemRarity.Legendary, 4 }
-    };
+        if (item.Rarity < minRarity) return false;
+        if (applicableTypes != null && !applicableTypes.Contains(item.Type)) return false;
+        if (skillType != SkillType.None && applicableSkills != null && !applicableSkills.Contains(skillType)) return false;
+        if (element != ElementType.None && applicableElements != null && !applicableElements.Contains(element)) return false;
+        return true;
+    }
 }
+#endregion
 
-[Serializable]
-public class DropTableData
-{
-    [SerializeField]
-    public EnemyType enemyType;
-    [SerializeField]
-    public List<DropTableEntry> dropEntries = new();
-    [SerializeField]
-    public float guaranteedDropRate = 0.1f;
-    [SerializeField]
-    public int maxDrops = 3;
-}
+#region Drop Table
 
 [Serializable]
 public class DropTableEntry
@@ -262,8 +192,16 @@ public class DropTableEntry
 }
 
 [Serializable]
-public class DropTablesWrapper
+public class DropTableData
 {
-    public List<DropTableData> dropTables = new();
+    [SerializeField]
+    public EnemyType enemyType;
+    [SerializeField]
+    public List<DropTableEntry> dropEntries = new();
+    [SerializeField]
+    public float guaranteedDropRate = 0.1f;
+    [SerializeField]
+    public int maxDrops = 3;
 }
 
+#endregion

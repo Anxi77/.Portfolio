@@ -78,7 +78,7 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
                 playerStat.SetCurrentHp(maxHp);
                 Debug.Log($"Player stats initialized - MaxHP: {maxHp}");
 
-                if (PlayerDataManager.Instance.HasSaveData("CurrentSave"))
+                if (PlayerDataManager.Instance.HasSaveData())
                 {
                     LoadGameState();
                 }
@@ -124,14 +124,12 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
         var playerStat = player.GetComponent<PlayerStatSystem>();
         var inventory = player.GetComponent<Inventory>();
 
-        if (playerStat != null)
+        if (playerStat != null && inventory != null)
         {
-            PlayerDataManager.Instance.SaveCurrentPlayerStatData();
-        }
-
-        if (inventory != null)
-        {
-            PlayerDataManager.Instance.SaveInventoryData(inventory.GetInventoryData());
+            PlayerData data = new PlayerData();
+            data.stats = playerStat.CreateSaveData();
+            data.inventory = inventory.GetInventoryData();
+            PlayerDataManager.Instance.SavePlayerData(data);
         }
     }
 
@@ -140,13 +138,15 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
         if (GameManager.Instance?.player == null) return;
 
         var player = GameManager.Instance.player;
+        var playerStat = player.GetComponent<PlayerStatSystem>();
         var inventory = player.GetComponent<Inventory>();
 
-        var savedData = PlayerDataManager.Instance.LoadPlayerData("CurrentSave");
-        if (savedData != null)
+        if (playerStat != null && inventory != null)
         {
-            if (inventory != null)
+            var savedData = PlayerDataManager.Instance.LoadPlayerData();
+            if (savedData != null)
             {
+                playerStat.LoadFromSaveData(savedData.stats);
                 inventory.LoadInventoryData(savedData.inventory);
             }
         }

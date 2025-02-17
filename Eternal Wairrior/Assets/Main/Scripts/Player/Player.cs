@@ -38,7 +38,7 @@ public class Player : MonoBehaviour
     #endregion
 
     #region References
-    public PlayerStatSystem playerStat;  // PlayerStat 참조
+    public PlayerStatSystem playerStat;
     private Rigidbody2D rb;
     private float x = 0;
     private float y = 0;
@@ -49,7 +49,6 @@ public class Player : MonoBehaviour
 
     #endregion
 
-    // 메서드 대신 프로퍼티로 변경
     public bool IsInitialized { get; private set; }
 
     #region Unity Message Methods
@@ -68,9 +67,8 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        // PlayerUnitManager를 통한 초기화 요청
         PlayerUnitManager.Instance?.InitializePlayer(this);
-        IsInitialized = true;  // 초기화 완료 시점에 설정
+        IsInitialized = true;
     }
 
     private void OnEnable()
@@ -88,10 +86,8 @@ public class Player : MonoBehaviour
 
     private void CleanupPlayer()
     {
-        // 모든 코루틴 정지
         StopAllCoroutines();
 
-        // 전투 시스템 정리
         if (autoAttackCoroutine != null)
         {
             StopCoroutine(autoAttackCoroutine);
@@ -104,7 +100,6 @@ public class Player : MonoBehaviour
             healthRegenCoroutine = null;
         }
 
-        // 스킬 정리
         if (skills != null)
         {
             foreach (var skill in skills)
@@ -117,9 +112,8 @@ public class Player : MonoBehaviour
             skills.Clear();
         }
 
-        // 상태 초기화
         playerStatus = Status.Dead;
-        IsInitialized = false;  // 정리 시점에 false로 설정
+        IsInitialized = false;
 
         Debug.Log("Player cleanup completed");
     }

@@ -1,61 +1,5 @@
 using System;
-using UnityEngine;
 using System.Collections.Generic;
-
-[Serializable]
-public enum StatType
-{
-    None,
-    MaxHp,
-    CurrentHp,
-    Damage,
-    Defense,
-    MoveSpeed,
-    AttackSpeed,
-    AttackRange,
-    AttackRadius,
-    ExpCollectionRadius,
-    HpRegenRate,
-    ExpGainRate,
-    GoldGainRate,
-    CriticalChance,
-    CriticalDamage,
-    FireResistance,
-    IceResistance,
-    LightningResistance,
-    PoisonResistance,
-    StunResistance,
-    SlowResistance,
-    Luck,
-    DodgeChance,
-    ReflectDamage,
-    LifeSteal,
-}
-
-[Serializable]
-public enum SourceType
-{
-    None,
-    Base,
-    Level,
-    Passive,
-    Active,
-    Weapon,
-    Armor,
-    Accessory,
-    Special,
-    Consumable,
-    Buff,
-    Debuff
-}
-
-[Serializable]
-public enum IncreaseType
-{
-    Flat,
-    Multiply
-}
-
 [Serializable]
 public class PlayerData
 {
@@ -125,8 +69,7 @@ public class InventoryData
 [Serializable]
 public class InventorySlot
 {
-    public SourceType sourceType;
-    public string itemId;
+    public ItemData itemData;
     public int amount;
     public bool isEquipped;
 }

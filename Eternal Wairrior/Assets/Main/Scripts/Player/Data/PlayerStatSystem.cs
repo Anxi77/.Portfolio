@@ -19,16 +19,14 @@ public class PlayerStatSystem : MonoBehaviour
 
     private void InitializeStats()
     {
-        var defaultData = new PlayerStatData();
+        var defaultData = PlayerDataManager.Instance.CurrentPlayerStatData;
         LoadFromSaveData(defaultData);
     }
 
     public void LoadFromSaveData(PlayerStatData saveData)
     {
-        // 기본 스탯 초기화
         currentStats = new Dictionary<StatType, float>(saveData.baseStats);
 
-        // 영구 수정자 적용
         activeModifiers.Clear();
         foreach (var modifierData in saveData.permanentModifiers)
         {

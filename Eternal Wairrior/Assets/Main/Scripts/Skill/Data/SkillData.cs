@@ -37,7 +37,6 @@ public class SkillData : ICloneable
     public AreaSkillStat AreaStat { get; set; }
     [JsonIgnore]
     public PassiveSkillStat PassiveStat { get; set; }
-    public ResourceReferenceData ResourceReferences { get; set; }
     #endregion
 
     public SkillData()
@@ -55,7 +54,6 @@ public class SkillData : ICloneable
         ProjectileStat = new ProjectileSkillStat { baseStat = BaseStats };
         AreaStat = new AreaSkillStat { baseStat = BaseStats };
         PassiveStat = new PassiveSkillStat { baseStat = BaseStats };
-        ResourceReferences = new ResourceReferenceData();
     }
 
     public ISkillStat GetStatsForLevel(int level)
@@ -170,55 +168,8 @@ public class SkillData : ICloneable
             PrefabPath = this.PrefabPath,
             IconPath = this.IconPath,
             ProjectilePath = this.ProjectilePath,
-            PrefabsByLevelPaths = (string[])this.PrefabsByLevelPaths?.Clone(),
-            ResourceReferences = new ResourceReferenceData
-            {
-                Keys = new List<string>(this.ResourceReferences?.Keys ?? new List<string>()),
-                Values = new List<AssetReference>(this.ResourceReferences?.Values ?? new List<AssetReference>())
-            }
+            PrefabsByLevelPaths = (string[])this.PrefabsByLevelPaths?.Clone()
         };
     }
     #endregion
-}
-
-[Serializable]
-public class ResourceReferenceData
-{
-    public List<string> Keys = new List<string>();
-    public List<AssetReference> Values = new List<AssetReference>();
-
-    public void Add(string key, AssetReference value)
-    {
-        Keys.Add(key);
-        Values.Add(value);
-    }
-
-    public void Clear()
-    {
-        Keys.Clear();
-        Values.Clear();
-    }
-
-    public bool TryGetValue(string key, out AssetReference value)
-    {
-        int index = Keys.IndexOf(key);
-        if (index != -1)
-        {
-            value = Values[index];
-            return true;
-        }
-        value = null;
-        return false;
-    }
-
-    public bool ContainsKey(string key)
-    {
-        return Keys.Contains(key);
-    }
-}
-
-[Serializable]
-public class AssetReference
-{
-    public string Path;
 }

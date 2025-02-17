@@ -9,22 +9,15 @@ public class GameOverStateHandler : IGameStateHandler
     {
         Debug.Log("Entering Game Over state");
 
-        // UI 표시
         UIManager.Instance?.ShowGameOverScreen();
 
-        // 플레이어가 없다면 다시 스폰
         if (GameManager.Instance?.player == null)
         {
-            // 죽은 위치 근처에 플레이어 리스폰;
             PlayerUnitManager.Instance.SpawnPlayer(Vector3.zero);
-
-            // 플레이어 상태 복원
             PlayerUnitManager.Instance.LoadGameState();
 
             Debug.Log("Player respawned at death location");
         }
-
-        // 포탈이 아직 생성되지 않았을 때만 생성
         if (!portalSpawned && GameManager.Instance?.player != null)
         {
             SpawnTownPortal();

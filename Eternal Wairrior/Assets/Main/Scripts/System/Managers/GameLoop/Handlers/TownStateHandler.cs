@@ -8,16 +8,13 @@ public class TownStateHandler : IGameStateHandler
     {
         Debug.Log("Entering Town state");
 
-        // UI ÃÊ±â Á¤¸®
         UIManager.Instance.ClearUI();
 
-        // ÇÃ·¹ÀÌ¾î°¡ Á×Àº »óÅÂÀÎÁö È®ÀÎ
         if (GameManager.Instance?.player?.playerStatus == Player.Status.Dead)
         {
             Debug.Log("Player is dead, respawning...");
             RespawnPlayer();
         }
-        // ÇÃ·¹ÀÌ¾î°¡ ¾ø´Â °æ¿ì
         else if (GameManager.Instance?.player == null)
         {
             Debug.Log("No player found, spawning new player");
@@ -25,25 +22,21 @@ public class TownStateHandler : IGameStateHandler
             PlayerUnitManager.Instance.SpawnPlayer(spawnPos);
         }
 
-        // ÇÃ·¹ÀÌ¾î ÃÊ±âÈ­ ¹× UI ¼³Á¤À» ÄÚ·çÆ¾À¸·Î ½ÇÇà
         MonoBehaviour coroutineRunner = GameLoopManager.Instance;
         coroutineRunner.StartCoroutine(InitializeTownAfterPlayerSpawn());
     }
 
     private void RespawnPlayer()
     {
-        // ±âÁ¸ ÇÃ·¹ÀÌ¾î Á¦°Å
         if (GameManager.Instance.player != null)
         {
             GameObject.Destroy(GameManager.Instance.player.gameObject);
             GameManager.Instance.player = null;
         }
 
-        // »õ ÇÃ·¹ÀÌ¾î ½ºÆù
         Vector3 spawnPos = PlayerUnitManager.Instance.GetSpawnPosition(SceneType.Town);
         PlayerUnitManager.Instance.SpawnPlayer(spawnPos);
 
-        // ÇÃ·¹ÀÌ¾î »óÅÂ º¹±¸
         if (GameManager.Instance.player != null)
         {
             GameManager.Instance.player.playerStatus = Player.Status.Alive;
@@ -53,7 +46,6 @@ public class TownStateHandler : IGameStateHandler
 
     private IEnumerator InitializeTownAfterPlayerSpawn()
     {
-        // ÇÃ·¹ÀÌ¾î°¡ ¿ÏÀüÈ÷ ÃÊ±âÈ­µÉ ¶§±îÁö ´ë±â
         while (GameManager.Instance?.player == null || !GameManager.Instance.player.IsInitialized)
         {
             yield return null;
@@ -70,19 +62,15 @@ public class TownStateHandler : IGameStateHandler
             return;
         }
 
-        // Ä«¸Þ¶ó ¼³Á¤
         CameraManager.Instance.SetupCamera(SceneType.Town);
 
-        // PathFinding ºñÈ°¼ºÈ­
         if (PathFindingManager.Instance != null)
         {
             PathFindingManager.Instance.gameObject.SetActive(false);
         }
 
-        // UI ÃÊ±âÈ­
         if (UIManager.Instance != null)
         {
-            // ÇÃ·¹ÀÌ¾î UI ÃÊ±âÈ­
             if (UIManager.Instance.playerUIPanel != null)
             {
                 UIManager.Instance.playerUIPanel.gameObject.SetActive(true);
@@ -90,26 +78,20 @@ public class TownStateHandler : IGameStateHandler
                 Debug.Log("Player UI initialized");
             }
 
-            // ÀÎº¥Åä¸® µ¥ÀÌÅÍ ·Îµå
             var inventory = GameManager.Instance.player.GetComponent<Inventory>();
             if (inventory != null)
             {
-                var savedData = PlayerDataManager.Instance.CurrentInventoryData;
-                if (savedData != null)
-                {
-                    inventory.LoadInventoryData(savedData);  // ±âÁ¸ ¸Þ¼­µå »ç¿ë
-                    Debug.Log("Inventory data loaded");
-                }
+                PlayerDataManager.Instance.LoadPlayerData();
             }
 
-            // ÀÎº¥Åä¸® UI ÃÊ±âÈ­ ¹× È°¼ºÈ­
+            // ï¿½Îºï¿½ï¿½ä¸® UI ï¿½Ê±ï¿½È­ ï¿½ï¿½ È°ï¿½ï¿½È­
             UIManager.Instance.InitializeInventoryUI();
             UIManager.Instance.SetInventoryAccessible(true);
             UIManager.Instance.UpdateInventoryUI();
             Debug.Log("Inventory UI initialized and enabled");
         }
 
-        // °ÔÀÓ ½ºÅ×ÀÌÁö Æ÷Å» »ý¼º
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å» ï¿½ï¿½ï¿½ï¿½
         StageManager.Instance.SpawnGameStagePortal();
         Debug.Log("Game stage portal spawned");
     }
@@ -118,20 +100,20 @@ public class TownStateHandler : IGameStateHandler
     {
         Debug.Log("Exiting Town state");
 
-        // ÀÎº¥Åä¸® µ¥ÀÌÅÍ ÀúÀå
+        // ï¿½Îºï¿½ï¿½ä¸® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (GameManager.Instance?.player != null)
         {
             var inventory = GameManager.Instance.player.GetComponent<Inventory>();
             if (inventory != null)
             {
-                var inventoryData = inventory.GetInventoryData();  // ±âÁ¸ ¸Þ¼­µå »ç¿ë
+                var inventoryData = inventory.GetInventoryData();  // ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
                 PlayerDataManager.Instance.SaveInventoryData(inventoryData);
                 Debug.Log("Inventory data saved");
             }
             PlayerUnitManager.Instance.SaveGameState();
         }
 
-        // ÀÎº¥Åä¸® UI ºñÈ°¼ºÈ­
+        // ï¿½Îºï¿½ï¿½ä¸® UI ï¿½ï¿½È°ï¿½ï¿½È­
         if (UIManager.Instance != null)
         {
             UIManager.Instance.SetInventoryAccessible(false);

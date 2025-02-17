@@ -113,7 +113,7 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
             {
                 PlayerUnitManager.Instance.InitializePlayer(player);
 
-                var savedData = PlayerDataManager.Instance.LoadPlayerData("CurrentSave");
+                var savedData = PlayerDataManager.Instance.LoadPlayerData();
                 if (savedData != null)
                 {
                     PlayerUnitManager.Instance.LoadGameState();
@@ -174,7 +174,7 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
     public bool HasSaveData()
     {
         return PlayerDataManager.Instance != null &&
-               PlayerDataManager.Instance.HasSaveData("CurrentSave");
+               PlayerDataManager.Instance.HasSaveData();
     }
     #endregion
 
@@ -201,7 +201,6 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
         try
         {
             SaveGameData();
-            PlayerDataManager.Instance.SaveWithBackup();
             CleanupTemporaryResources();
         }
         catch (System.Exception e)

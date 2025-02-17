@@ -586,11 +586,9 @@ public class SkillDataEditorWindow : EditorWindow
 
     private void DrawStatFields(SkillStatData stat)
     {
-        // 데미지와 ElementalPower는 레벨별로 설정 가능
         stat.Damage = EditorGUILayout.FloatField("Damage", stat.Damage);
         stat.ElementalPower = EditorGUILayout.FloatField("Elemental Power", stat.ElementalPower);
 
-        // 스킬 타입별 특수 스탯
         switch (CurrentSkill.Type)
         {
             case SkillType.Projectile:
@@ -703,8 +701,7 @@ public class SkillDataEditorWindow : EditorWindow
                     IconPath = "",
                     PrefabPath = "",
                     ProjectilePath = "",
-                    PrefabsByLevelPaths = new string[0],
-                    ResourceReferences = new ResourceReferenceData()
+                    PrefabsByLevelPaths = new string[0]
                 };
 
                 SkillDataEditorUtility.SaveSkillData(newSkill);
@@ -718,10 +715,10 @@ public class SkillDataEditorWindow : EditorWindow
     {
         private SkillID selectedId = SkillID.None;
         private SkillType selectedType = SkillType.None;
-        private System.Action<SkillID, SkillType> onConfirm;
+        private Action<SkillID, SkillType> onConfirm;
         private Vector2 scrollPosition;
 
-        public void Initialize(System.Action<SkillID, SkillType> callback)
+        public void Initialize(Action<SkillID, SkillType> callback)
         {
             onConfirm = callback;
             minSize = new Vector2(300, 400);
@@ -737,17 +734,15 @@ public class SkillDataEditorWindow : EditorWindow
                 EditorGUILayout.LabelField("Create New Skill", EditorStyles.boldLabel);
                 EditorGUILayout.Space(10);
 
-                // 스킬 타입 선택
                 EditorGUI.BeginChangeCheck();
                 selectedType = (SkillType)EditorGUILayout.EnumPopup("Skill Type", selectedType);
                 if (EditorGUI.EndChangeCheck())
                 {
-                    selectedId = SkillID.None; // 타입이 변경되면 ID 초기화
+                    selectedId = SkillID.None;
                 }
 
                 EditorGUILayout.Space(10);
 
-                // 사용 가능한 스킬 ID 목록 표시
                 EditorGUILayout.LabelField("Select Skill ID", EditorStyles.boldLabel);
                 scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
                 {
@@ -770,7 +765,6 @@ public class SkillDataEditorWindow : EditorWindow
 
                 EditorGUILayout.Space(10);
 
-                // 선택된 값들 표시
                 GUI.enabled = false;
                 EditorGUILayout.EnumPopup("Selected Type", selectedType);
                 EditorGUILayout.EnumPopup("Selected ID", selectedId);
@@ -778,7 +772,6 @@ public class SkillDataEditorWindow : EditorWindow
 
                 EditorGUILayout.Space(10);
 
-                // 확인 버튼
                 GUI.enabled = selectedId != SkillID.None && selectedType != SkillType.None;
                 if (GUILayout.Button("Create", GUILayout.Height(30)))
                 {
@@ -787,7 +780,6 @@ public class SkillDataEditorWindow : EditorWindow
                 }
                 GUI.enabled = true;
 
-                // 취소 버튼
                 if (GUILayout.Button("Cancel", GUILayout.Height(30)))
                 {
                     Close();

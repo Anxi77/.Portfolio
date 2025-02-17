@@ -35,11 +35,10 @@ public class Inventory : MonoBehaviour, IInitializable
 
     private void LoadSavedInventory()
     {
-        var savedData = PlayerDataManager.Instance.CurrentInventoryData;
-
+        var savedData = PlayerDataManager.Instance.LoadPlayerData();
         if (savedData != null)
         {
-            LoadInventoryData(savedData);
+            LoadInventoryData(savedData.inventory);
         }
     }
 
@@ -87,7 +86,7 @@ public class Inventory : MonoBehaviour, IInitializable
         if (itemData.MaxStack > 1)
         {
             var existingSlot = slots.Find(slot =>
-                slot.itemId == itemData.ID &&
+                slot.itemData.ID == itemData.ID &&
                 slot.amount < itemData.MaxStack);
             if (existingSlot != null)
             {
@@ -100,7 +99,7 @@ public class Inventory : MonoBehaviour, IInitializable
         {
             slots.Add(new InventorySlot
             {
-                itemId = itemData.ID,
+                itemData = itemData,
                 amount = 1,
                 isEquipped = false
             });
@@ -140,7 +139,7 @@ public class Inventory : MonoBehaviour, IInitializable
 
         equippedItems[slot] = item;
 
-        var inventorySlot = slots.Find(s => s.itemId == item.GetItemData().ID);
+        var inventorySlot = slots.Find(s => s.itemData.ID == item.GetItemData().ID);
 
         if (inventorySlot != null)
         {
@@ -153,7 +152,7 @@ public class Inventory : MonoBehaviour, IInitializable
 
         if (equippedItems.TryGetValue(slot, out var item))
         {
-            var inventorySlot = slots.Find(s => s.itemId == item.GetItemData().ID);
+            var inventorySlot = slots.Find(s => s.itemData == item.GetItemData());
 
             if (inventorySlot != null)
             {
@@ -187,7 +186,7 @@ public class Inventory : MonoBehaviour, IInitializable
             newItem.Initialize(itemData);
             equippedItems[slot] = newItem;
 
-            var inventorySlot = slots.Find(s => s.itemId == itemData.ID);
+            var inventorySlot = slots.Find(s => s.itemData.ID == itemData.ID);
 
             if (inventorySlot != null)
             {
@@ -251,16 +250,6 @@ public class Inventory : MonoBehaviour, IInitializable
         PlayerDataManager.Instance.SaveInventoryData(GetInventoryData());
     }
 
-    public void SaveEquippedItems()
-    {
-        PlayerDataManager.Instance.SaveInventoryData(GetInventoryData());
-
-        savedState.equippedItems = equippedItems.ToDictionary(
-            kvp => kvp.Key,
-            kvp => kvp.Value.GetItemData().ID
-        );
-    }
-
     public void RestoreEquippedItems()
     {
         if (savedState?.equippedItems == null) return;
@@ -296,10 +285,10 @@ public class Inventory : MonoBehaviour, IInitializable
 
     public void RemoveItem(string itemId)
     {
-        var slot = slots.Find(s => s.itemId == itemId);
+        var slot = slots.Find(s => s.itemData.ID == itemId);
         if (slot != null)
         {
-            var itemData = ItemManager.Instance.GetItem(slot.itemId);
+            var itemData = slot.itemData;
             foreach (var stat in itemData.Stats)
             {
                 playerStat.RemoveModifier(stat);
