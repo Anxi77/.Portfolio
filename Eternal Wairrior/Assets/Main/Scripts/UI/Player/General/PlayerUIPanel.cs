@@ -105,6 +105,7 @@ public class PlayerUIPanel : MonoBehaviour
         {
             StopCoroutine(updateCoroutine);
         }
+        print("[UI] Player's Maxhp when UI starts update : " + playerStat.GetStat(StatType.MaxHp));
         updateCoroutine = StartCoroutine(PlayerInfoUpdate());
     }
 

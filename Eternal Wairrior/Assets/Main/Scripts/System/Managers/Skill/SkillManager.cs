@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System;
+using Random = UnityEngine.Random;
 
 public class SkillManager : SingletonManager<SkillManager>, IInitializable
 {
@@ -18,8 +20,6 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
     {
         try
         {
-            Debug.Log("Initializing SkillManager...");
-
             if (SkillDataManager.Instance == null || !SkillDataManager.Instance.IsInitialized)
             {
                 Debug.LogWarning("Waiting for SkillDataManager to initialize...");
@@ -28,9 +28,8 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
             LoadSkillData();
             IsInitialized = true;
-            Debug.Log("SkillManager initialized successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error initializing SkillManager: {e.Message}");
             IsInitialized = false;
@@ -39,7 +38,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
     private void LoadSkillData()
     {
         availableSkills = SkillDataManager.Instance.GetAllSkillData();
-        Debug.Log($"Loaded {availableSkills.Count} skills from SkillDataManager");
+        Debug.Log($"[SkillManager] Loaded {availableSkills.Count} skills from SkillDataManager");
     }
 
     public Skill GetPlayerSkill(SkillID skillId)

@@ -68,7 +68,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
         if (CreateStateHandlers())
         {
-            Debug.Log("State handlers initialized successfully");
             ChangeState(GameState.MainMenu);
         }
         else
@@ -79,7 +78,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
     private IEnumerator InitializeDataManagers(System.Action<bool> onComplete)
     {
-        Debug.Log("Initializing Data Managers...");
         bool success = true;
 
         if (PlayerDataManager.Instance != null)
@@ -94,7 +92,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("PlayerDataManager initialized");
         }
 
         if (success && ItemDataManager.Instance != null)
@@ -109,7 +106,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("ItemDataManager initialized");
         }
 
         if (success && SkillDataManager.Instance != null)
@@ -124,10 +120,7 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("SkillDataManager initialized");
         }
-
-        Debug.Log($"Data Managers initialization {(success ? "completed" : "failed")}");
         onComplete?.Invoke(success);
     }
 
@@ -148,8 +141,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
     private IEnumerator InitializeCoreManagers(System.Action<bool> onComplete)
     {
-        Debug.Log("Initializing Core Managers...");
-
         if (PoolManager.Instance != null)
         {
             PoolManager.Instance.Initialize();
@@ -162,7 +153,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("PoolManager initialized");
         }
 
         if (GameManager.Instance != null)
@@ -177,7 +167,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("GameManager initialized");
         }
 
         if (CameraManager.Instance != null)
@@ -192,7 +181,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("CameraManager initialized");
         }
 
         if (UIManager.Instance != null)
@@ -209,17 +197,12 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("UIManager initialized");
         }
-
-        Debug.Log("All Core Managers initialized");
         onComplete?.Invoke(true);
     }
 
     private IEnumerator InitializeGameplayManagers()
     {
-        Debug.Log("Initializing Gameplay Managers...");
-
         while (ItemDataManager.Instance == null || !ItemDataManager.Instance.IsInitialized)
         {
             yield return new WaitForSeconds(0.1f);
@@ -232,7 +215,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             {
                 yield return null;
             }
-            Debug.Log("ItemManager initialized");
         }
 
         if (SkillManager.Instance != null)
@@ -246,7 +228,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("SkillManager initialized");
         }
 
         if (PlayerUnitManager.Instance != null)
@@ -260,7 +241,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("PlayerUnitManager initialized");
         }
 
         if (MonsterManager.Instance != null)
@@ -274,7 +254,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("MonsterManager initialized");
         }
 
         if (StageTimeManager.Instance != null)
@@ -288,15 +267,11 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
                 }
                 yield return null;
             }
-            Debug.Log("StageTimeManager initialized");
         }
-
-        Debug.Log("All Gameplay Managers initialized");
     }
 
     private bool CreateStateHandlers()
     {
-        Debug.Log("Creating state handlers...");
         stateHandlers = new Dictionary<GameState, IGameStateHandler>();
 
         try
@@ -307,7 +282,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             stateHandlers[GameState.Paused] = new PausedStateHandler();
             stateHandlers[GameState.GameOver] = new GameOverStateHandler();
 
-            Debug.Log("All state handlers created successfully");
             return true;
         }
         catch (Exception e)
@@ -322,13 +296,10 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
         if (currentState == newState || !IsInitialized || stateHandlers == null)
             return;
 
-        Debug.Log($"Changing state from {currentState} to {newState}");
-
         try
         {
             if (isStateTransitioning)
             {
-                Debug.Log("State transition already in progress, skipping");
                 return;
             }
 
@@ -347,7 +318,6 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             }
 
             isStateTransitioning = false;
-            Debug.Log($"Successfully changed to state: {newState}");
         }
         catch (Exception e)
         {

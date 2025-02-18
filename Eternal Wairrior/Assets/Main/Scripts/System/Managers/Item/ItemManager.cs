@@ -26,7 +26,6 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
             {
                 while (ItemDataManager.Instance == null)
                 {
-                    Debug.Log("Waiting for ItemDataManager...");
                     while (!ItemDataManager.Instance.IsInitialized)
                     {
                         Debug.Log("Waiting for ItemDataManager to Load Datas...");
@@ -36,7 +35,7 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
             }
             catch (Exception e)
             {
-                Debug.LogError($"Error initializing ItemManager: {e.Message}\n{e.StackTrace}");
+                Debug.LogError($"[ItemManager] Error initializing ItemManager: {e.Message}\n{e.StackTrace}");
                 isInitialized = false;
             }
         }
@@ -70,18 +69,18 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
     {
         if (string.IsNullOrEmpty(itemId))
         {
-            Debug.LogError("Attempted to get item with null or empty ID");
+            Debug.LogError($"[ItemManager] Attempted to get item with null or empty ID");
             return null;
         }
 
         var item = itemGenerator.GenerateItem(itemId);
         if (item == null)
         {
-            Debug.LogError($"Failed to generate item with ID: {itemId}");
+            Debug.LogError($"[ItemManager] Failed to generate item with ID: {itemId}");
             return null;
         }
 
-        Debug.Log($"Generated item: {item.Name} with {item.Stats?.Count ?? 0} stats and {item.Effects?.Count ?? 0} effects");
+        Debug.Log($"[ItemManager] Generated item: {item.Name} with {item.Stats?.Count ?? 0} stats and {item.Effects?.Count ?? 0} effects");
         return item;
     }
 

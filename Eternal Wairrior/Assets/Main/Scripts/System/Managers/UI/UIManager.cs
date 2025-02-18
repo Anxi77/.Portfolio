@@ -2,6 +2,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System;
 
 public partial class UIManager : SingletonManager<UIManager>, IInitializable
 {
@@ -59,12 +60,10 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
 
         try
         {
-            Debug.Log("Initializing UIManager...");
             InitializeUIComponents();
             IsInitialized = true;
-            Debug.Log("UIManager initialized successfully");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error initializing UIManager: {e.Message}");
             IsInitialized = false;
@@ -77,7 +76,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         if (playerUIPanel != null)
         {
             playerUIPanel.Initialize();
-            Debug.Log("PlayerUIPanel initialized");
         }
         else
         {
@@ -123,7 +121,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
 
     public void SetupMainMenuUI()
     {
-        Debug.Log("Starting SetupMainMenuUI");
 
         if (mainCanvas == null)
         {
@@ -131,44 +128,29 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
             return;
         }
 
-        // 기존 UI 정리 전에 로그
-        Debug.Log("Cleaning up existing UI");
         CleanupUI();
-
-        // UI 초기화 전에 로그
-        Debug.Log("Initializing main menu UI");
         InitializeMainMenuUI();
-
-        // UI 표시 전에 로그
-        Debug.Log("Showing main menu");
         ShowMainMenu();
 
-        // 다른 UI 비활성화
         if (pausePanel)
         {
             pausePanel.SetActive(false);
-            Debug.Log("Pause panel deactivated");
         }
         if (levelupPanel)
         {
             levelupPanel.gameObject.SetActive(false);
-            Debug.Log("Level up panel deactivated");
         }
         if (playerUIPanel)
         {
             playerUIPanel.gameObject.SetActive(false);
-            Debug.Log("Player UI deactivated");
         }
         if (bossWarningPanel)
         {
             bossWarningPanel.SetActive(false);
-            Debug.Log("Boss warning panel deactivated");
         }
 
         HideLoadingScreen();
         Time.timeScale = 1f;
-
-        Debug.Log("Main menu UI setup completed");
     }
 
     private IEnumerator SetupGameSceneUI()
@@ -234,7 +216,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
                 {
                     ShowInventory();
                 }
-                Debug.Log($"Inventory toggled: {inventoryUI.gameObject.activeSelf}");
             }
         }
     }
@@ -258,7 +239,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
     {
         if (levelupPanel != null && GameManager.Instance?.player != null)
         {
-            Debug.Log("Opening level up panel");
             levelupPanel.gameObject.SetActive(true);
             Time.timeScale = 0f;
             levelupPanel.LevelUpPanelOpen(GameManager.Instance.player.skills, OnSkillSelected);
@@ -271,7 +251,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         {
             if (skill != null)
             {
-                Debug.Log($"Skill selected: {skill.skillData.Name}");
                 skillList.skillListUpdate();
                 Time.timeScale = 1f;
                 levelupPanel.gameObject.SetActive(false);
@@ -281,7 +260,7 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
                 Debug.LogWarning("No skill selected in level up panel");
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error in OnSkillSelected: {e.Message}");
             Time.timeScale = 1f;
@@ -334,7 +313,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
                 return;
             }
 
-            Debug.Log($"Creating main menu UI from prefab: {mainMenuPrefab.name}");
             var menuObj = Instantiate(mainMenuPrefab, mainCanvas.transform);
             mainMenuPanel = menuObj.GetComponent<MainMenuPanel>();
 
@@ -342,14 +320,10 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
             {
                 Debug.LogError("Failed to get MainMenuPanel component!");
             }
-            else
-            {
-                Debug.Log("MainMenuPanel component found successfully");
-            }
         }
         else
         {
-            Debug.Log($"MainMenuPanel already exists or prefab is null. Panel: {mainMenuPanel}, Prefab: {mainMenuPrefab}");
+            Debug.LogError($"MainMenuPanel already exists or prefab is null. Panel: {mainMenuPanel}, Prefab: {mainMenuPrefab}");
         }
     }
 
@@ -378,7 +352,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
                 return;
             }
 
-            Debug.Log($"Creating loading screen from prefab: {loadingScreenPrefab.name}");
             var loadingObj = Instantiate(loadingScreenPrefab, mainCanvas.transform);
             loadingScreen = loadingObj.GetComponent<LoadingScreen>();
 
@@ -389,7 +362,6 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
             else
             {
                 loadingScreen.gameObject.SetActive(false);
-                Debug.Log("LoadingScreen component initialized successfully");
             }
         }
     }
@@ -404,8 +376,7 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         if (loadingScreen != null)
         {
             loadingScreen.gameObject.SetActive(true);
-            loadingScreen.ResetProgress();  // 진행률 초기화
-            Debug.Log("Loading screen shown");
+            loadingScreen.ResetProgress();
         }
         else
         {
@@ -564,12 +535,10 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         {
             var inventoryObj = Instantiate(inventoryUIPrefab, mainCanvas.transform);
             inventoryUI = inventoryObj.GetComponent<InventoryUI>();
-            Debug.Log("Created new InventoryUI instance");
 
             inventoryUI.gameObject.SetActive(false);
             inventoryUI.Initialize();
             SetInventoryAccessible(false);
-            Debug.Log("InventoryUI initialized");
         }
         else
         {

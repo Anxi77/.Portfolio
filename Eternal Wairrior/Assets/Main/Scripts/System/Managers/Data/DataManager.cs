@@ -17,9 +17,7 @@ public abstract class DataManager<T> : SingletonManager<T>, IInitializable where
     {
         try
         {
-            Debug.Log($"Starting to initialize default data structure for {GetType().Name}...");
             LoadRuntimeData();
-            Debug.Log($"Successfully initialized default data structure for {GetType().Name}");
             isInitialized = true;
         }
         catch (System.Exception e)

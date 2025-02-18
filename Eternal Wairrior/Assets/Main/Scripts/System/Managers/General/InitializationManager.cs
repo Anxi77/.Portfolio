@@ -1,7 +1,5 @@
 using UnityEngine;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 
 public class InitializationManager : MonoBehaviour
 {
@@ -22,8 +20,6 @@ public class InitializationManager : MonoBehaviour
         {
             yield return null;
         }
-
-        Debug.Log("Loading main menu...");
         StageManager.Instance?.LoadMainMenu();
     }
 

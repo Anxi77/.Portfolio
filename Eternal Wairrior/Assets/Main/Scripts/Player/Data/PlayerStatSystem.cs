@@ -45,13 +45,11 @@ public class PlayerStatSystem : MonoBehaviour
     {
         var saveData = new PlayerStatData();
 
-        // 기본 스탯 저장
         foreach (var stat in currentStats)
         {
             saveData.baseStats[stat.Key] = GetBaseValue(stat.Key);
         }
 
-        // 영구 수정자 저장
         foreach (var modifierList in activeModifiers.Values)
         {
             foreach (var modifier in modifierList.Where(m => IsPermanentSource(m.Source)))
@@ -187,7 +185,7 @@ public class PlayerStatSystem : MonoBehaviour
 
     public void UpdateStatsForLevel(int level)
     {
-        // 레벨에 따라 스탯 업데이트
+        // update stats for level
     }
 
     public float GetCurrentHp() => GetStat(StatType.CurrentHp);

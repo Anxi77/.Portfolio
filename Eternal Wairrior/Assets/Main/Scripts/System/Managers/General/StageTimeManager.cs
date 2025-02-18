@@ -19,10 +19,8 @@ public class StageTimeManager : SingletonManager<StageTimeManager>, IInitializab
     {
         try
         {
-            Debug.Log("Initializing StageTimeManager...");
             ResetTimer();
             IsInitialized = true;
-            Debug.Log("StageTimeManager initialized successfully");
         }
         catch (Exception e)
         {

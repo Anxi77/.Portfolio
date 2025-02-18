@@ -25,9 +25,7 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
 
         try
         {
-            Debug.Log("Initializing GameManager...");
             IsInitialized = true;
-            Debug.Log("GameManager initialized successfully");
         }
         catch (Exception e)
         {

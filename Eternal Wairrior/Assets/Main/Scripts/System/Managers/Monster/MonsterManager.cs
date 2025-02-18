@@ -43,12 +43,9 @@ public class MonsterManager : SingletonManager<MonsterManager>, IInitializable
             Debug.LogWarning("Waiting for PoolManager to initialize...");
             return;
         }
-
         try
         {
-            Debug.Log("Initializing MonsterManager...");
             IsInitialized = true;
-            Debug.Log("MonsterManager initialized successfully");
         }
         catch (Exception e)
         {

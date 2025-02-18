@@ -22,9 +22,7 @@ public class CameraManager : SingletonManager<CameraManager>, IInitializable
     {
         try
         {
-            Debug.Log("Initializing CameraManager...");
             IsInitialized = true;
-            Debug.Log("CameraManager initialized successfully");
         }
         catch (Exception e)
         {
@@ -35,8 +33,6 @@ public class CameraManager : SingletonManager<CameraManager>, IInitializable
 
     public void SetupCamera(SceneType sceneType)
     {
-        Debug.Log("Setting up camera...");
-
         var mainCamera = Camera.main;
         if (mainCamera == null)
         {

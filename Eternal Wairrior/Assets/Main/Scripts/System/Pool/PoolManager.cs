@@ -16,10 +16,8 @@ public class PoolManager : SingletonManager<PoolManager>, IInitializable
     {
         try
         {
-            Debug.Log("Initializing PoolManager...");
             InitializePool();
             IsInitialized = true;
-            Debug.Log("PoolManager initialized successfully");
         }
         catch (System.Exception e)
         {

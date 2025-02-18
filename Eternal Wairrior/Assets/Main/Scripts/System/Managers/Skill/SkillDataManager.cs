@@ -26,10 +26,8 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
     {
         try
         {
-            Debug.Log("Initializing SkillDataManager...");
             LoadAllSkillData();
             IsInitialized = true;
-            Debug.Log("SkillDataManager initialized successfully");
         }
         catch (Exception e)
         {
@@ -42,10 +40,7 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
     {
         try
         {
-            Debug.Log("Starting LoadAllSkillData...");
-
             var jsonFiles = Resources.LoadAll<TextAsset>(JSON_PATH);
-            Debug.Log($"Found {jsonFiles.Length} JSON files in Resources/{JSON_PATH}");
 
             foreach (var jsonAsset in jsonFiles)
             {
@@ -76,11 +71,11 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
                 }
             }
 
-            Debug.Log($"LoadAllSkillData completed. Loaded {skillDatabase.Count} skills");
+            Debug.Log($"[SkillDataManager] Total loaded skill data count : {skillDatabase.Count}");
         }
         catch (Exception e)
         {
-            Debug.LogError($"Error in LoadAllSkillData: {e.Message}");
+            Debug.LogError($"[SkillDataManager] Error in LoadAllSkillData: {e.Message}");
         }
     }
 

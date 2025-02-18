@@ -41,20 +41,25 @@ public class ItemDataManager : DataManager<ItemDataManager>
                 if (serializableData?.items != null)
                 {
                     itemDatabase = serializableData.items.ToDictionary(item => item.ID);
+                    foreach (var item in itemDatabase)
+                    {
+                        Debug.Log($"[ItemDataManager] Loaded item [Name : {item.Value.Name}] [ID : {item.Value.ID}]");
+                    }
                 }
                 else
                 {
-                    Debug.LogError("Failed to deserialize item data or items list is null");
+                    Debug.LogError("[ItemDataManager] Failed to deserialize item data or items list is null");
                 }
+                Debug.Log($"[ItemDataManager] Total loaded item data count : {itemDatabase.Count}");
             }
             else
             {
-                Debug.LogError($"ItemDatabase.json not found at path: Resources/{ITEM_DB_PATH}/ItemDatabase");
+                Debug.LogError($"[ItemDataManager] ItemDatabase.json not found at path: Resources/{ITEM_DB_PATH}/ItemDatabase");
             }
         }
         catch (Exception e)
         {
-            Debug.LogError($"Error loading item database: {e.Message}\n{e.StackTrace}");
+            Debug.LogError($"[ItemDataManager] Error loading item database: {e.Message}\n{e.StackTrace}");
         }
     }
 

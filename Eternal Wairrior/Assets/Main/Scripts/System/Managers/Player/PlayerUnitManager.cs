@@ -13,9 +13,7 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
     {
         try
         {
-            Debug.Log("Initializing PlayerUnitManager...");
             IsInitialized = true;
-            Debug.Log("PlayerUnitManager initialized successfully");
         }
         catch (Exception e)
         {
@@ -65,17 +63,11 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
 
         try
         {
-            Debug.Log("Starting player initialization...");
-
             GameManager.Instance.player = player;
 
             PlayerStatSystem playerStat = player.GetComponent<PlayerStatSystem>();
             if (playerStat != null)
             {
-                float maxHp = playerStat.GetStat(StatType.MaxHp);
-                playerStat.SetCurrentHp(maxHp);
-                Debug.Log($"Player stats initialized - MaxHP: {maxHp}");
-
                 if (PlayerDataManager.Instance.HasSaveData())
                 {
                     LoadGameState();
@@ -85,14 +77,11 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
             if (player.characterControl != null)
             {
                 player.characterControl.Initialize();
-                Debug.Log("Character control initialized");
             }
 
             player.playerStatus = Player.Status.Alive;
 
             player.StartCombatSystems();
-
-            Debug.Log("Player initialization completed successfully");
         }
         catch (Exception e)
         {
@@ -165,7 +154,5 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
         }
 
         player.ResetPassiveEffects();
-
-        Debug.Log("Cleared all temporary effects from player");
     }
 }

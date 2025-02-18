@@ -20,7 +20,6 @@ public class StageManager : SingletonManager<StageManager>
     #region Scene Loading
     public void LoadMainMenu()
     {
-        Debug.Log("StageManager: Starting to load main menu...");
         StartCoroutine(LoadSceneCoroutine("MainMenu", SceneType.MainMenu));
     }
 
@@ -41,8 +40,6 @@ public class StageManager : SingletonManager<StageManager>
 
     private IEnumerator LoadSceneCoroutine(string sceneName, SceneType sceneType)
     {
-        Debug.Log($"Starting to load scene: {sceneName}");
-
         UIManager.Instance.ShowLoadingScreen();
         UIManager.Instance.UpdateLoadingProgress(0f);
         Time.timeScale = 0f;
@@ -130,7 +127,6 @@ public class StageManager : SingletonManager<StageManager>
 
         UIManager.Instance.HideLoadingScreen();
         Time.timeScale = 1f;
-        Debug.Log($"Scene {sceneName} initialization complete");
     }
 
     private bool IsSceneReady(SceneType sceneType)
