@@ -1,10 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using static GameManager;
 
 public class Player : MonoBehaviour
 {
@@ -51,6 +48,8 @@ public class Player : MonoBehaviour
 
     public bool IsInitialized { get; private set; }
 
+    private bool isQuitting = false;
+
     #region Unity Message Methods
 
     private void Awake()
@@ -78,13 +77,14 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        isQuitting = true;
+    }
+
     private void OnDisable()
     {
         CleanupPlayer();
-        if (Application.isPlaying && GameManager.Instance != null)
-        {
-            GameManager.Instance.player = null;
-        }
     }
 
     private void CleanupPlayer()
@@ -117,6 +117,10 @@ public class Player : MonoBehaviour
 
         playerStatus = Status.Dead;
         IsInitialized = false;
+        if (!isQuitting)
+        {
+            GameManager.Instance.player = null;
+        }
     }
 
     public void StartCombatSystems()
@@ -302,7 +306,7 @@ public class Player : MonoBehaviour
         playerStatus = Status.Dead;
         StopAllCoroutines();
 
-        GameLoopManager.Instance.ChangeState(GameLoopManager.GameState.GameOver);
+        GameLoopManager.Instance.ChangeState(GameState.GameOver);
     }
 
     #endregion

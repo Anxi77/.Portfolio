@@ -606,7 +606,5 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
         UpdateGridCenter();
         InitializeNodes();
         previousCameraPosition = mainCamera.transform.position;
-
-        Debug.Log("PathFindingManager initialized with new camera");
     }
 }

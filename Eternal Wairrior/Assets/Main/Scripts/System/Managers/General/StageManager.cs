@@ -100,14 +100,14 @@ public class StageManager : SingletonManager<StageManager>
         switch (sceneType)
         {
             case SceneType.MainMenu:
-                GameLoopManager.Instance.ChangeState(GameLoopManager.GameState.MainMenu);
+                GameLoopManager.Instance.ChangeState(GameState.MainMenu);
                 break;
             case SceneType.Town:
-                GameLoopManager.Instance.ChangeState(GameLoopManager.GameState.Town);
+                GameLoopManager.Instance.ChangeState(GameState.Town);
                 break;
             case SceneType.Game:
             case SceneType.Test:
-                GameLoopManager.Instance.ChangeState(GameLoopManager.GameState.Stage);
+                GameLoopManager.Instance.ChangeState(GameState.Stage);
                 break;
         }
 

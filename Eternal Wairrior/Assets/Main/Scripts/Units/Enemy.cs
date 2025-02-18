@@ -90,10 +90,15 @@ public class Enemy : MonoBehaviour
     protected Coroutine dotDamageCoroutine;
     protected Coroutine defenseDebuffCoroutine;
     #endregion
+
+    private bool isQuitting = false;
     #endregion
 
     #region Unity Lifecycle
-    protected virtual void Start() => enemyCollider = GetComponent<Collider2D>();
+    protected virtual void Start()
+    {
+        enemyCollider = GetComponent<Collider2D>();
+    }
 
     private void OnEnable()
     {
@@ -149,10 +154,15 @@ public class Enemy : MonoBehaviour
         moveSpeed = originalMoveSpeed;
         currentDefense = baseDefense;
 
-        if (Application.isPlaying && GameManager.Instance != null && GameManager.Instance.enemies != null && GameManager.Instance.enemies.Contains(this))
+        if (Application.isPlaying && !isQuitting && GameManager.Instance != null && GameManager.Instance.enemies != null && GameManager.Instance.enemies.Contains(this))
         {
             GameManager.Instance.enemies.Remove(this);
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        isQuitting = true;
     }
     #endregion
 

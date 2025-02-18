@@ -10,20 +10,17 @@ public class StageStateHandler : IGameStateHandler
 
     public void OnEnter()
     {
-        Debug.Log("Entering Stage state");
         isInitialized = false;
 
         UIManager.Instance.ClearUI();
 
         UIManager.Instance.SetInventoryAccessible(false);
         UIManager.Instance.HideInventory();
-        Debug.Log("Inventory UI disabled for Stage");
 
         if (GameManager.Instance?.player == null)
         {
             Vector3 spawnPos = PlayerUnitManager.Instance.GetSpawnPosition(SceneType.Game);
             PlayerUnitManager.Instance.SpawnPlayer(spawnPos);
-            Debug.Log("Player spawned in Stage");
 
             MonoBehaviour coroutineRunner = GameLoopManager.Instance;
             coroutineRunner.StartCoroutine(InitializeStageAfterPlayerSpawn());
@@ -65,16 +62,12 @@ public class StageStateHandler : IGameStateHandler
         {
             UIManager.Instance.playerUIPanel.gameObject.SetActive(true);
             UIManager.Instance.playerUIPanel.InitializePlayerUI(GameManager.Instance.player);
-            Debug.Log("Player UI initialized");
         }
 
         GameManager.Instance.StartLevelCheck();
 
         StageTimeManager.Instance.StartStageTimer(STAGE_DURATION);
         UIManager.Instance.stageTimeUI.gameObject.SetActive(true);
-        Debug.Log("Stage timer started");
-
-        Debug.Log("Stage initialization complete");
         isInitialized = true;
 
         GameLoopManager.Instance.StartCoroutine(StartMonsterSpawningWhenReady());
@@ -87,13 +80,11 @@ public class StageStateHandler : IGameStateHandler
         if (MonsterManager.Instance != null)
         {
             MonsterManager.Instance.StartSpawning();
-            Debug.Log("Monster spawning started");
         }
     }
 
     public void OnExit()
     {
-        Debug.Log("Exiting Stage state");
         isInitialized = false;
 
         if (GameManager.Instance?.player != null)

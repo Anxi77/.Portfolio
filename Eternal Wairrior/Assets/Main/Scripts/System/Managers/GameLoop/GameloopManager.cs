@@ -5,14 +5,6 @@ using System;
 
 public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 {
-    public enum GameState
-    {
-        MainMenu,
-        Town,
-        Stage,
-        Paused,
-        GameOver
-    }
 
     private GameState currentState = GameState.MainMenu;
     public GameState CurrentState => currentState;

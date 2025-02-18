@@ -26,12 +26,15 @@ public class InitializationManager : MonoBehaviour
     private void CreateManagerObjects()
     {
         GameObject[] managers = Resources.LoadAll<GameObject>("Prefabs/Managers");
+
         foreach (GameObject manager in managers)
         {
-            Instantiate(manager);
+            GameObject instance = Instantiate(manager);
+            DontDestroyOnLoad(instance);
+
             if (manager.name == "PathFindingManager")
             {
-                manager.SetActive(false);
+                instance.SetActive(false);
             }
         }
     }

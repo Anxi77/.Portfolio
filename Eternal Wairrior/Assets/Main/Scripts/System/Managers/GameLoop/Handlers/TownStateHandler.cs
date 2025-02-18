@@ -105,7 +105,6 @@ public class TownStateHandler : IGameStateHandler
         {
             UIManager.Instance.SetInventoryAccessible(false);
             UIManager.Instance.HideInventory();
-            Debug.Log("Inventory UI disabled");
         }
     }
 

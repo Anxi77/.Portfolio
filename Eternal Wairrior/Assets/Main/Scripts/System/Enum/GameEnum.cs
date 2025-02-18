@@ -145,3 +145,15 @@ public enum IncreaseType
 
 #endregion
 
+#region System
+
+public enum GameState
+{
+    MainMenu,
+    Town,
+    Stage,
+    Paused,
+    GameOver
+}
+
+#endregion

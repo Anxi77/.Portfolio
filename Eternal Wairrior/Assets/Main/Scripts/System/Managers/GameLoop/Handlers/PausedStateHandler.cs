@@ -18,7 +18,7 @@ public class PausedStateHandler : IGameStateHandler
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            GameLoopManager.Instance.ChangeState(GameLoopManager.GameState.Stage);
+            GameLoopManager.Instance.ChangeState(GameState.Stage);
         }
     }
 

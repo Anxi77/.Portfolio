@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : SingletonManager<GameManager>, IInitializable
@@ -45,7 +44,6 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
         if (player != null && player.playerStatus != Player.Status.Dead)
         {
             levelCheckCoroutine = StartCoroutine(CheckLevelUp());
-            Debug.Log("Started level check coroutine");
         }
     }
 
@@ -63,14 +61,12 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
         {
             if (player == null || player.playerStatus == Player.Status.Dead)
             {
-                Debug.Log("Player is dead or null, stopping level check");
                 levelCheckCoroutine = null;
                 yield break;
             }
 
             if (player.level > lastPlayerLevel)
             {
-                Debug.Log($"Level Up detected: {lastPlayerLevel} -> {player.level}");
                 lastPlayerLevel = player.level;
                 OnPlayerLevelUp();
             }
@@ -132,7 +128,6 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
         try
         {
             SaveGameData();
-            CleanupTemporaryResources();
         }
         catch (Exception e)
         {
@@ -142,7 +137,7 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
 
     private void CleanupTemporaryResources()
     {
-        if (player != null)
+        if (player != null && PlayerUnitManager.Instance != null)
         {
             PlayerUnitManager.Instance.ClearTemporaryEffects();
         }

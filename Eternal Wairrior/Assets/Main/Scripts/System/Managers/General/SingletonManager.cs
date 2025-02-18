@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 public abstract class SingletonManager<T> : MonoBehaviour where T : MonoBehaviour
 {
@@ -11,6 +13,7 @@ public abstract class SingletonManager<T> : MonoBehaviour where T : MonoBehaviou
             {
                 var go = new GameObject(typeof(T).Name);
                 instance = go.AddComponent<T>();
+                DontDestroyOnLoad(go);
             }
             return instance;
         }
@@ -23,7 +26,7 @@ public abstract class SingletonManager<T> : MonoBehaviour where T : MonoBehaviou
             instance = this as T;
             DontDestroyOnLoad(gameObject);
         }
-        else
+        else if (instance != this)
         {
             Destroy(gameObject);
         }
