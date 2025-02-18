@@ -58,7 +58,6 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
         }
 
         lastPlayerLevel = player.level;
-        Debug.Log($"Starting level check at level: {lastPlayerLevel}");
 
         while (true)
         {
@@ -92,11 +91,9 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
         {
             PlayerDataManager.Instance.InitializeDefaultData();
             hasInitializedGame = true;
-            Debug.Log("Game initialized for the first time");
         }
         else
         {
-            Debug.Log("Resetting existing game");
             ClearGameData();
             PlayerDataManager.Instance.InitializeDefaultData();
         }

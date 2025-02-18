@@ -48,7 +48,7 @@ public static class JSONIO<T> where T : class
 #if UNITY_EDITOR
             AssetDatabase.Refresh();
 #endif
-            Debug.Log($"JSON saved successfully: {fullPath}");
+            Debug.Log($"[{typeof(T)}] JSON saved successfully: {fullPath}");
         }
         catch (System.Exception e)
         {

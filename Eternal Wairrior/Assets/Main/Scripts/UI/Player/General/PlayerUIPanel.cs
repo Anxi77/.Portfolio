@@ -96,7 +96,6 @@ public class PlayerUIPanel : MonoBehaviour
             return;
         }
         StartUIUpdate();
-        Debug.Log("PlayerUI initialized with player reference");
     }
 
     private void StartUIUpdate()
@@ -105,7 +104,6 @@ public class PlayerUIPanel : MonoBehaviour
         {
             StopCoroutine(updateCoroutine);
         }
-        print("[UI] Player's Maxhp when UI starts update : " + playerStat.GetStat(StatType.MaxHp));
         updateCoroutine = StartCoroutine(PlayerInfoUpdate());
     }
 

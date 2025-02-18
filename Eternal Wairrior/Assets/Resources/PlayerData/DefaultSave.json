@@ -2,14 +2,14 @@
   "stats": {
     "baseStats": {
       "MaxHp": 100.0,
+      "CurrentHp": 100.0,
       "Damage": 5.0,
       "Defense": 2.0,
       "MoveSpeed": 5.0,
       "AttackSpeed": 1.0,
       "AttackRange": 2.0,
       "ExpCollectionRadius": 3.0,
-      "HpRegenRate": 1.0,
-      "CurrentHp": 93.0
+      "HpRegenRate": 1.0
     },
     "permanentModifiers": []
   },

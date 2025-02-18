@@ -67,8 +67,6 @@ public class PlayerSkillList : MonoBehaviour
                         Debug.LogWarning($"Skill data is null for skill: {skill.name}");
                     }
                 }
-
-                Debug.Log($"Updated skill list with {currentIcons.Count} skills");
             }
             else
             {

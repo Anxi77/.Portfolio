@@ -153,7 +153,6 @@ public class ObjectPool : MonoBehaviour
             {
                 CreateNewObjectInPool(tag, poolDictionary[tag]);
             }
-            Debug.Log($"Created new pool for {tag}");
         }
 
         Queue<Component> pool = poolDictionary[tag];
@@ -163,8 +162,7 @@ public class ObjectPool : MonoBehaviour
             for (int i = 0; i < EXPAND_SIZE; i++)
             {
                 CreateNewObjectInPool(tag, pool);
-            }
-            Debug.Log($"Expanded pool {tag} by {EXPAND_SIZE}");
+            }        
         }
 
         Component obj = pool.Dequeue();

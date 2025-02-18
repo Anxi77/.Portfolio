@@ -68,7 +68,6 @@ public class InventoryUI : MonoBehaviour, IInitializable
         InitializeUI();
         inventoryPanel.SetActive(false);
         IsInitialized = true;
-        Debug.Log("InventoryUI initialized successfully");
     }
 
     private void InitializeUI()
@@ -90,7 +89,6 @@ public class InventoryUI : MonoBehaviour, IInitializable
             if (equipSlot != null)
             {
                 equipSlot.Initialize(inventory);
-                Debug.Log($"Initialized equipment slot {equipSlot.slotType}");
             }
         }
     }

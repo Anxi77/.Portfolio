@@ -24,8 +24,6 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
 
     public void SpawnPlayer(Vector3 position)
     {
-        Debug.Log($"Spawning player at position: {position}");
-
         if (GameManager.Instance.player != null)
         {
             Debug.LogWarning("Player already exists, destroying old player");
@@ -40,7 +38,6 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
             if (player != null)
             {
                 InitializePlayer(player);
-                Debug.Log("Player spawned and initialized successfully");
             }
             else
             {

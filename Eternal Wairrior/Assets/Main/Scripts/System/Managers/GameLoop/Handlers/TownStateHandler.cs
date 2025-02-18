@@ -6,18 +6,14 @@ public class TownStateHandler : IGameStateHandler
 {
     public void OnEnter()
     {
-        Debug.Log("Entering Town state");
-
         UIManager.Instance.ClearUI();
 
         if (GameManager.Instance?.player?.playerStatus == Player.Status.Dead)
         {
-            Debug.Log("Player is dead, respawning...");
             RespawnPlayer();
         }
         else if (GameManager.Instance?.player == null)
         {
-            Debug.Log("No player found, spawning new player");
             Vector3 spawnPos = PlayerUnitManager.Instance.GetSpawnPosition(SceneType.Town);
             PlayerUnitManager.Instance.SpawnPlayer(spawnPos);
         }
@@ -75,7 +71,6 @@ public class TownStateHandler : IGameStateHandler
             {
                 UIManager.Instance.playerUIPanel.gameObject.SetActive(true);
                 UIManager.Instance.playerUIPanel.InitializePlayerUI(GameManager.Instance.player);
-                Debug.Log("Player UI initialized");
             }
 
             var inventory = GameManager.Instance.player.GetComponent<Inventory>();
@@ -87,17 +82,13 @@ public class TownStateHandler : IGameStateHandler
             UIManager.Instance.InitializeInventoryUI();
             UIManager.Instance.SetInventoryAccessible(true);
             UIManager.Instance.UpdateInventoryUI();
-            Debug.Log("Inventory UI initialized and enabled");
         }
 
         StageManager.Instance.SpawnGameStagePortal();
-        Debug.Log("Game stage portal spawned");
     }
 
     public void OnExit()
     {
-        Debug.Log("Exiting Town state");
-
         if (GameManager.Instance?.player != null)
         {
             var inventory = GameManager.Instance.player.GetComponent<Inventory>();

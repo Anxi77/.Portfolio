@@ -32,7 +32,6 @@ public class MainMenuPanel : MonoBehaviour
 
     private void OnDestroy()
     {
-        // 버튼 이벤트 제거
         if (startGameButton != null)
             startGameButton.onClick.RemoveAllListeners();
         if (loadGameButton != null)

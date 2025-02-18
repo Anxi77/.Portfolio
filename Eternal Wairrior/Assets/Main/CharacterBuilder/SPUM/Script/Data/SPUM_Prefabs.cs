@@ -83,8 +83,6 @@ public class SPUM_Prefabs : MonoBehaviour
                 var stateText = state.ToString();
                 StateAnimationPairs[stateText] = GetAnimationListForState(state);
             }
-
-            Debug.Log("AnimatorOverrideController initialized successfully");
         }
         catch (System.Exception e)
         {

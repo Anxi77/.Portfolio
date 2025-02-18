@@ -25,7 +25,16 @@ public class PlayerStatSystem : MonoBehaviour
 
     public void LoadFromSaveData(PlayerStatData saveData)
     {
+        if (saveData == null)
+        {
+            Debug.LogWarning("[PlayerStatSystem] Save Data is null");
+            return;
+        }
+
         currentStats = new Dictionary<StatType, float>(saveData.baseStats);
+
+        float maxHp = currentStats.GetValueOrDefault(StatType.MaxHp);
+        currentStats[StatType.CurrentHp] = maxHp;
 
         activeModifiers.Clear();
         foreach (var modifierData in saveData.permanentModifiers)
@@ -54,7 +63,7 @@ public class PlayerStatSystem : MonoBehaviour
         {
             foreach (var modifier in modifierList.Where(m => IsPermanentSource(m.Source)))
             {
-                saveData.permanentModifiers.Add(new PlayerStatData.StatModifierSaveData(
+                saveData.permanentModifiers.Add(new StatModifierSaveData(
                     modifier.Type,
                     modifier.Source,
                     modifier.IncreaseType,

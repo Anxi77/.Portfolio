@@ -117,13 +117,10 @@ public class Player : MonoBehaviour
 
         playerStatus = Status.Dead;
         IsInitialized = false;
-
-        Debug.Log("Player cleanup completed");
     }
 
     public void StartCombatSystems()
     {
-        Debug.Log("Starting combat systems...");
         if (playerStatus != Status.Dead)
         {
             if (playerStat == null)
@@ -134,7 +131,6 @@ public class Player : MonoBehaviour
 
             StartHealthRegeneration();
             StartAutoAttack();
-            Debug.Log("Combat systems started successfully");
         }
     }
 
@@ -426,23 +422,16 @@ public class Player : MonoBehaviour
 
     private void StartAutoAttack()
     {
-        Debug.Log("Attempting to start auto attack...");
-
         if (autoAttackCoroutine != null)
         {
-            Debug.Log("Stopping existing auto attack coroutine");
             StopCoroutine(autoAttackCoroutine);
             autoAttackCoroutine = null;
         }
-
-        Debug.Log("Starting new auto attack coroutine");
         autoAttackCoroutine = StartCoroutine(AutoAttackCoroutine());
     }
 
     private IEnumerator AutoAttackCoroutine()
     {
-        Debug.Log("Auto attack coroutine started");
-
         while (true)
         {
             if (playerStatus != Status.Dead)
