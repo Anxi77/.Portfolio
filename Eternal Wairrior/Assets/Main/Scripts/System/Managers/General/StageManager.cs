@@ -2,20 +2,25 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+public enum SceneType
+{
+    MainMenu,
+    Town,
+    Game,
+    Test,
+}
+
 public class StageManager : SingletonManager<StageManager>
 {
-    public enum SceneType
-    {
-        MainMenu,
-        Town,
-        Game,
-        Test
-    }
-
     [Header("Portal Settings")]
-    [SerializeField] private GameObject portalPrefab;
-    [SerializeField] private Vector3 townPortalPosition = new Vector3(10, 0, 0);
-    [SerializeField] private Vector3 gameStagePortalPosition = new Vector3(-10, 0, 0);
+    [SerializeField]
+    private GameObject portalPrefab;
+
+    [SerializeField]
+    private Vector3 townPortalPosition = new Vector3(10, 0, 0);
+
+    [SerializeField]
+    private Vector3 gameStagePortalPosition = new Vector3(-10, 0, 0);
 
     #region Scene Loading
     public void LoadMainMenu()
@@ -134,30 +139,32 @@ public class StageManager : SingletonManager<StageManager>
         switch (sceneType)
         {
             case SceneType.MainMenu:
-                return UIManager.Instance != null &&
-                       UIManager.Instance.IsMainMenuActive();
+                return UIManager.Instance != null && UIManager.Instance.IsMainMenuActive();
 
             case SceneType.Town:
-                return GameManager.Instance?.player != null &&
-                       CameraManager.Instance?.IsInitialized == true &&
-                       UIManager.Instance?.playerUIPanel != null &&
-                       UIManager.Instance.IsGameUIReady();
+                return GameManager.Instance?.player != null
+                    && CameraManager.Instance?.IsInitialized == true
+                    && UIManager.Instance?.playerUIPanel != null
+                    && UIManager.Instance.IsGameUIReady();
 
             case SceneType.Game:
             case SceneType.Test:
-                bool isReady = GameManager.Instance?.player != null &&
-                              CameraManager.Instance?.IsInitialized == true &&
-                              UIManager.Instance?.playerUIPanel != null &&
-                              UIManager.Instance.IsGameUIReady() &&
-                              MonsterManager.Instance?.IsInitialized == true;
+                bool isReady =
+                    GameManager.Instance?.player != null
+                    && CameraManager.Instance?.IsInitialized == true
+                    && UIManager.Instance?.playerUIPanel != null
+                    && UIManager.Instance.IsGameUIReady()
+                    && MonsterManager.Instance?.IsInitialized == true;
 
                 if (!isReady)
                 {
-                    Debug.Log($"Test Scene not ready: Player={GameManager.Instance?.player != null}, " +
-                             $"Camera={CameraManager.Instance?.IsInitialized}, " +
-                             $"UI={UIManager.Instance?.playerUIPanel != null}, " +
-                             $"GameUI={UIManager.Instance?.IsGameUIReady()}, " +
-                             $"Monster={MonsterManager.Instance?.IsInitialized}");
+                    Debug.Log(
+                        $"Test Scene not ready: Player={GameManager.Instance?.player != null}, "
+                            + $"Camera={CameraManager.Instance?.IsInitialized}, "
+                            + $"UI={UIManager.Instance?.playerUIPanel != null}, "
+                            + $"GameUI={UIManager.Instance?.IsGameUIReady()}, "
+                            + $"Monster={MonsterManager.Instance?.IsInitialized}"
+                    );
                 }
 
                 return isReady;

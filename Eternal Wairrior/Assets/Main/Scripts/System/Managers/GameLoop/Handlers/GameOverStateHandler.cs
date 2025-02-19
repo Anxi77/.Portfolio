@@ -16,6 +16,7 @@ public class GameOverStateHandler : BaseStateHandler
             PlayerUnit.SpawnPlayer(Vector3.zero);
             PlayerUnit.LoadGameState();
             Debug.Log("Player respawned at death location");
+            CameraManager.Instance.SetupCamera(SceneType.Game);
 
             if (!portalSpawned)
             {

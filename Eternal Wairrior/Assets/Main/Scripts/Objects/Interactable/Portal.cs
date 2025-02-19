@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class Portal : MonoBehaviour
 {
-    private StageManager.SceneType destinationType;
+    private SceneType destinationType;
 
-    public void Initialize(StageManager.SceneType destType)
+    public void Initialize(SceneType destType)
     {
         destinationType = destType;
     }

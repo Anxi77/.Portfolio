@@ -7,35 +7,39 @@ public enum SkillType
     None = 0,
     Projectile,
     Area,
-    Passive
+    Passive,
 }
 
 public enum SkillID
 {
     None = 100000,
+
     //Earth
-    Vine,        // Area
-    EarthRift,   // Projectile
-    GaiasGrace,  // Passive
+    Vine, // Area
+    EarthRift, // Projectile
+    GaiasGrace, // Passive
+
     //Water
-    FrostTide,   // Area
-    FrostHunt,   // Projectile
-    TidalEssence,// Passive
+    FrostTide, // Area
+    FrostHunt, // Projectile
+    TidalEssence, // Passive
+
     //Dark
     ShadowWaltz, // Area
     EventHorizon, // Projectile
     AbyssalExpansion, // Passive
+
     //Fire
     Flame, // Projectile
     FireRing, // Area
-    ThermalElevation // Passive
+    ThermalElevation, // Passive
 }
 
 public enum FireMode
 {
-    Manual,     // 마우스 클릭으로 발사
-    Auto,       // 자동 발사
-    AutoHoming  // 자동 호밍 발사
+    Manual, // 마우스 클릭으로 발사
+    Auto, // 자동 발사
+    AutoHoming, // 자동 호밍 발사
 }
 
 #endregion
@@ -53,7 +57,7 @@ public enum EffectType
     HomingEffect,
     AreaRadius,
     AreaDuration,
-    ElementalPower
+    ElementalPower,
 }
 
 [Serializable]
@@ -64,7 +68,7 @@ public enum ItemType
     Armor,
     Accessory,
     Consumable,
-    Material
+    Material,
 }
 
 [Serializable]
@@ -72,7 +76,7 @@ public enum AccessoryType
 {
     None,
     Necklace,
-    Ring
+    Ring,
 }
 
 [Serializable]
@@ -133,14 +137,14 @@ public enum SourceType
     Special,
     Consumable,
     Buff,
-    Debuff
+    Debuff,
 }
 
 [Serializable]
 public enum IncreaseType
 {
     Flat,
-    Multiply
+    Multiply,
 }
 
 #endregion
@@ -153,7 +157,7 @@ public enum GameState
     Town,
     Stage,
     Paused,
-    GameOver
+    GameOver,
 }
 
 #endregion

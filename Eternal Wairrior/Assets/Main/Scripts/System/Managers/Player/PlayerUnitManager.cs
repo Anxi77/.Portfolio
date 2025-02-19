@@ -1,11 +1,14 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
+using UnityEngine;
 using static StageManager;
 
 public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializable
 {
-    [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private Vector3 defaultSpawnPosition = Vector3.zero;
+    [SerializeField]
+    private GameObject playerPrefab;
+
+    [SerializeField]
+    private Vector3 defaultSpawnPosition = Vector3.zero;
 
     public bool IsInitialized { get; private set; }
 
@@ -102,7 +105,8 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
 
     public void SaveGameState()
     {
-        if (GameManager.Instance?.player == null) return;
+        if (GameManager.Instance?.player == null)
+            return;
 
         var player = GameManager.Instance.player;
         var playerStat = player.GetComponent<PlayerStatSystem>();
@@ -119,7 +123,8 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
 
     public void LoadGameState()
     {
-        if (GameManager.Instance?.player == null) return;
+        if (GameManager.Instance?.player == null)
+            return;
 
         var player = GameManager.Instance.player;
         var playerStat = player.GetComponent<PlayerStatSystem>();
@@ -138,7 +143,8 @@ public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializ
 
     public void ClearTemporaryEffects()
     {
-        if (GameManager.Instance?.player == null) return;
+        if (GameManager.Instance?.player == null)
+            return;
 
         var player = GameManager.Instance.player;
 

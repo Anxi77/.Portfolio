@@ -1,35 +1,45 @@
-using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
 using System.Collections;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerUIPanel : MonoBehaviour
 {
     [Header("Player Info Texts")]
     [SerializeField]
     private TextMeshProUGUI playerDefText;
+
     [SerializeField]
     private TextMeshProUGUI playerAtkText;
+
     [SerializeField]
     private TextMeshProUGUI playerMSText;
+
     [SerializeField]
     private TextMeshProUGUI levelText;
+
     [SerializeField]
     private TextMeshProUGUI expText;
+
     [SerializeField]
     private TextMeshProUGUI hpText;
+
     [SerializeField]
     private TextMeshProUGUI expCollectRadText;
+
     [SerializeField]
     private TextMeshProUGUI playerHpRegenText;
+
     [SerializeField]
     private TextMeshProUGUI playerAttackRangeText;
+
     [SerializeField]
     private TextMeshProUGUI playerAttackSpeedText;
 
     [Header("UI Bars")]
     [SerializeField]
     private Slider hpBarImage;
+
     [SerializeField]
     private Slider expBarImage;
 
@@ -52,31 +62,43 @@ public class PlayerUIPanel : MonoBehaviour
 
     private bool ValidateComponents()
     {
-        return playerDefText != null &&
-               playerAtkText != null &&
-               playerMSText != null &&
-               levelText != null &&
-               expText != null &&
-               hpText != null &&
-               hpBarImage != null &&
-               expBarImage != null;
+        return playerDefText != null
+            && playerAtkText != null
+            && playerMSText != null
+            && levelText != null
+            && expText != null
+            && hpText != null
+            && hpBarImage != null
+            && expBarImage != null;
     }
 
     public void PrepareUI()
     {
-        if (playerDefText) playerDefText.text = "DEF : 0";
-        if (playerAtkText) playerAtkText.text = "ATK : 0";
-        if (playerMSText) playerMSText.text = "MoveSpeed : 0";
-        if (levelText) levelText.text = "LEVEL : 1";
-        if (expText) expText.text = "EXP : 0/0";
-        if (hpText) hpText.text = "0 / 0";
-        if (expCollectRadText) expCollectRadText.text = "ExpRad : 0";
-        if (playerHpRegenText) playerHpRegenText.text = "HPRegen : 0/s";
-        if (playerAttackRangeText) playerAttackRangeText.text = "AR : 0";
-        if (playerAttackSpeedText) playerAttackSpeedText.text = "AS : 0/s";
+        if (playerDefText)
+            playerDefText.text = "DEF : 0";
+        if (playerAtkText)
+            playerAtkText.text = "ATK : 0";
+        if (playerMSText)
+            playerMSText.text = "MoveSpeed : 0";
+        if (levelText)
+            levelText.text = "LEVEL : 1";
+        if (expText)
+            expText.text = "EXP : 0/0";
+        if (hpText)
+            hpText.text = "0 / 0";
+        if (expCollectRadText)
+            expCollectRadText.text = "ExpRad : 0";
+        if (playerHpRegenText)
+            playerHpRegenText.text = "HPRegen : 0/s";
+        if (playerAttackRangeText)
+            playerAttackRangeText.text = "AR : 0";
+        if (playerAttackSpeedText)
+            playerAttackSpeedText.text = "AS : 0/s";
 
-        if (hpBarImage) hpBarImage.value = 0;
-        if (expBarImage) expBarImage.value = 0;
+        if (hpBarImage)
+            hpBarImage.value = 0;
+        if (expBarImage)
+            expBarImage.value = 0;
     }
 
     public void InitializePlayerUI(Player player)
@@ -132,7 +154,8 @@ public class PlayerUIPanel : MonoBehaviour
     {
         try
         {
-            if (!isUIReady || player == null || playerStat == null) return;
+            if (!isUIReady || player == null || playerStat == null)
+                return;
             UpdateCombatStats();
             UpdateHealthUI();
             UpdateExpUI();

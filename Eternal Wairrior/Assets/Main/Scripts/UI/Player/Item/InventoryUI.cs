@@ -1,15 +1,23 @@
-﻿using UnityEngine;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class InventoryUI : MonoBehaviour, IInitializable
 {
     #region Variables
     [Header("Settings")]
-    [SerializeField] private GameObject inventoryPanel;
-    [SerializeField] private Transform slotsParent;
-    [SerializeField] private ItemSlotUI slotPrefab;
-    [SerializeField] private ItemSlotUI[] equipmentSlots;
+    [SerializeField]
+    private GameObject inventoryPanel;
+
+    [SerializeField]
+    private Transform slotsParent;
+
+    [SerializeField]
+    private ItemSlotUI slotPrefab;
+
+    [SerializeField]
+    private ItemSlotUI[] equipmentSlots;
 
     private Inventory inventory;
     private List<ItemSlotUI> slotUIs = new();
@@ -171,12 +179,14 @@ public class InventoryUI : MonoBehaviour, IInitializable
                 var itemData = equippedItem.GetItemData();
                 if (itemData != null)
                 {
-                    equipSlot.UpdateUI(new InventorySlot
-                    {
-                        itemData = itemData,
-                        amount = 1,
-                        isEquipped = true
-                    });
+                    equipSlot.UpdateUI(
+                        new InventorySlot
+                        {
+                            itemData = itemData,
+                            amount = 1,
+                            isEquipped = true,
+                        }
+                    );
                 }
                 else
                 {
@@ -195,38 +205,6 @@ public class InventoryUI : MonoBehaviour, IInitializable
     }
     #endregion
 
-    #region Input Handling
-    private void Update()
-    {
-        if (!IsInitialized || !isInventoryAccessible)
-        {
-            return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            ToggleInventory();
-        }
-    }
-
-    private void ToggleInventory()
-    {
-        if (!IsInitialized || inventory == null)
-        {
-            Debug.LogWarning("Cannot toggle inventory: Not initialized");
-            return;
-        }
-
-        isOpen = !isOpen;
-        inventoryPanel.SetActive(isOpen);
-
-        if (isOpen)
-        {
-            UpdateUI();
-        }
-    }
-    #endregion
-
     #region Utilities
     private EquipmentSlot GetEquipmentSlotFromSlotType(SlotType slotType)
     {
@@ -237,17 +215,9 @@ public class InventoryUI : MonoBehaviour, IInitializable
             SlotType.Ring1 => EquipmentSlot.Ring1,
             SlotType.Ring2 => EquipmentSlot.Ring2,
             SlotType.Necklace => EquipmentSlot.Necklace,
-            _ => EquipmentSlot.None
+            _ => EquipmentSlot.None,
         };
     }
 
-    public void SetInventoryAccessible(bool accessible)
-    {
-        isInventoryAccessible = accessible;
-        if (!accessible && isOpen)
-        {
-            ToggleInventory();
-        }
-    }
     #endregion
 }

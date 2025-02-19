@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
-using System.Linq;
 
 public class Enemy : MonoBehaviour
 {
@@ -16,7 +16,10 @@ public class Enemy : MonoBehaviour
     public float mobEXP = 10f;
     public float damageInterval;
     internal float originalMoveSpeed;
-    public float hpAmount { get { return hp / maxHp; } }
+    public float hpAmount
+    {
+        get { return hp / maxHp; }
+    }
     public float preDamageTime = 0;
     public float attackRange = 1.2f;
     public float preferredDistance = 1.0f;
@@ -32,12 +35,23 @@ public class Enemy : MonoBehaviour
     public bool isStunned = false;
 
     [Header("Drop Settings")]
-    [SerializeField] public ExpParticle expParticlePrefab;
-    [SerializeField] public int minExpParticles = 3;
-    [SerializeField] public int maxExpParticles = 6;
-    [SerializeField] public float dropRadiusMin = 0.5f;
-    [SerializeField] public float dropRadiusMax = 1.5f;
-    [SerializeField] public EnemyType enemyType;
+    [SerializeField]
+    public ExpParticle expParticlePrefab;
+
+    [SerializeField]
+    public int minExpParticles = 3;
+
+    [SerializeField]
+    public int maxExpParticles = 6;
+
+    [SerializeField]
+    public float dropRadiusMin = 0.5f;
+
+    [SerializeField]
+    public float dropRadiusMax = 1.5f;
+
+    [SerializeField]
+    public EnemyType enemyType;
     #endregion
 
     #region References
@@ -106,7 +120,11 @@ public class Enemy : MonoBehaviour
         maxHp = hp;
         originalMoveSpeed = moveSpeed;
 
-        if (Application.isPlaying && GameManager.Instance != null && !GameManager.Instance.enemies.Contains(this))
+        if (
+            Application.isPlaying
+            && GameManager.Instance != null
+            && !GameManager.Instance.enemies.Contains(this)
+        )
         {
             GameManager.Instance.enemies.Add(this);
         }
@@ -117,7 +135,8 @@ public class Enemy : MonoBehaviour
 
     protected virtual void Update()
     {
-        if (!isInit) Initialize();
+        if (!isInit)
+            Initialize();
         Move();
         UpdateVisuals();
     }
@@ -154,7 +173,13 @@ public class Enemy : MonoBehaviour
         moveSpeed = originalMoveSpeed;
         currentDefense = baseDefense;
 
-        if (Application.isPlaying && !isQuitting && GameManager.Instance != null && GameManager.Instance.enemies != null && GameManager.Instance.enemies.Contains(this))
+        if (
+            Application.isPlaying
+            && !isQuitting
+            && GameManager.Instance != null
+            && GameManager.Instance.enemies != null
+            && GameManager.Instance.enemies.Contains(this)
+        )
         {
             GameManager.Instance.enemies.Remove(this);
         }
@@ -186,7 +211,8 @@ public class Enemy : MonoBehaviour
 
     protected virtual void CalculateFormationOffset()
     {
-        if (GameManager.Instance == null) return;
+        if (GameManager.Instance == null)
+            return;
 
         int totalEnemies = GameManager.Instance.enemies.Count;
         if (totalEnemies == 0)
@@ -211,9 +237,12 @@ public class Enemy : MonoBehaviour
     #region Movement
     private Vector2 GetTargetPosition()
     {
-        if (target == null) return transform.position;
+        if (target == null)
+            return transform.position;
 
-        Vector2 directionToTarget = ((Vector2)target.position - (Vector2)transform.position).normalized;
+        Vector2 directionToTarget = (
+            (Vector2)target.position - (Vector2)transform.position
+        ).normalized;
         float distanceToTarget = Vector2.Distance(transform.position, target.position);
 
         if (distanceToTarget > attackRange)
@@ -226,22 +255,25 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            return (Vector2)transform.position + new Vector2(
-                Mathf.Sin(Time.time * 2f),
-                Mathf.Cos(Time.time * 2f)
-            ) * 0.5f;
+            return (Vector2)transform.position
+                + new Vector2(Mathf.Sin(Time.time * 2f), Mathf.Cos(Time.time * 2f)) * 0.5f;
         }
     }
 
     public virtual void Move()
     {
-        if (isStunned || moveSpeed <= 0) return;
+        if (isStunned || moveSpeed <= 0)
+            return;
 
         Node currentNode = PathFindingManager.Instance.GetNodeFromWorldPosition(transform.position);
         if (currentNode != null && !currentNode.walkable)
         {
             Vector2 safePosition = FindNearestSafePosition(transform.position);
-            transform.position = Vector2.MoveTowards(transform.position, safePosition, moveSpeed * 2f * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(
+                transform.position,
+                safePosition,
+                moveSpeed * 2f * Time.deltaTime
+            );
             return;
         }
 
@@ -260,7 +292,10 @@ public class Enemy : MonoBehaviour
             return;
         }
 
-        Vector2 moveToPosition = (Vector2)target.position - ((Vector2)target.position - (Vector2)transform.position).normalized * preferredDistance;
+        Vector2 moveToPosition =
+            (Vector2)target.position
+            - ((Vector2)target.position - (Vector2)transform.position).normalized
+                * preferredDistance;
         MoveToPosition(moveToPosition);
     }
 
@@ -268,7 +303,10 @@ public class Enemy : MonoBehaviour
     {
         if (ShouldUpdatePath())
         {
-            List<Vector2> newPath = PathFindingManager.Instance.FindPath(transform.position, targetPosition);
+            List<Vector2> newPath = PathFindingManager.Instance.FindPath(
+                transform.position,
+                targetPosition
+            );
             if (newPath != null && newPath.Count > 0)
             {
                 bool isValidPath = true;
@@ -291,7 +329,10 @@ public class Enemy : MonoBehaviour
                 else
                 {
                     Vector2 safePosition = FindSafePosition(targetPosition);
-                    currentPath = PathFindingManager.Instance.FindPath(transform.position, safePosition);
+                    currentPath = PathFindingManager.Instance.FindPath(
+                        transform.position,
+                        safePosition
+                    );
                 }
             }
         }
@@ -307,10 +348,9 @@ public class Enemy : MonoBehaviour
         for (float angle = 0; angle < 360; angle += angleStep)
         {
             float radian = angle * Mathf.Deg2Rad;
-            Vector2 checkPosition = targetPosition + new Vector2(
-                Mathf.Cos(radian) * checkRadius,
-                Mathf.Sin(radian) * checkRadius
-            );
+            Vector2 checkPosition =
+                targetPosition
+                + new Vector2(Mathf.Cos(radian) * checkRadius, Mathf.Sin(radian) * checkRadius);
 
             Node node = PathFindingManager.Instance.GetNodeFromWorldPosition(checkPosition);
             if (node != null && node.walkable)
@@ -336,7 +376,8 @@ public class Enemy : MonoBehaviour
 
     private void CircleAroundPlayer()
     {
-        if (target == null) return;
+        if (target == null)
+            return;
 
         UpdateCirclingParameters();
         Vector2 targetPosition = CalculateCirclingPosition();
@@ -358,10 +399,12 @@ public class Enemy : MonoBehaviour
         foreach (float angleOffset in checkAngles)
         {
             float newAngle = circlingAngle + angleOffset;
-            Vector2 checkPosition = (Vector2)target.position + new Vector2(
-                Mathf.Cos(newAngle * Mathf.Deg2Rad),
-                Mathf.Sin(newAngle * Mathf.Deg2Rad)
-            ) * circlingRadius;
+            Vector2 checkPosition =
+                (Vector2)target.position
+                + new Vector2(
+                    Mathf.Cos(newAngle * Mathf.Deg2Rad),
+                    Mathf.Sin(newAngle * Mathf.Deg2Rad)
+                ) * circlingRadius;
 
             Node node = PathFindingManager.Instance.GetNodeFromWorldPosition(checkPosition);
             if (node != null && node.walkable)
@@ -388,10 +431,11 @@ public class Enemy : MonoBehaviour
 
     private Vector2 CalculateCirclingPosition()
     {
-        Vector2 offset = new Vector2(
-            Mathf.Cos(circlingAngle * Mathf.Deg2Rad),
-            Mathf.Sin(circlingAngle * Mathf.Deg2Rad)
-        ) * circlingRadius;
+        Vector2 offset =
+            new Vector2(
+                Mathf.Cos(circlingAngle * Mathf.Deg2Rad),
+                Mathf.Sin(circlingAngle * Mathf.Deg2Rad)
+            ) * circlingRadius;
 
         return (Vector2)target.position + offset;
     }
@@ -414,7 +458,10 @@ public class Enemy : MonoBehaviour
     {
         if (ShouldUpdatePath())
         {
-            List<Vector2> newPath = PathFindingManager.Instance.FindPath(transform.position, target.position);
+            List<Vector2> newPath = PathFindingManager.Instance.FindPath(
+                transform.position,
+                target.position
+            );
             if (newPath != null && newPath.Count > 0)
             {
                 currentPath = newPath;
@@ -430,7 +477,8 @@ public class Enemy : MonoBehaviour
 
     private bool ShouldUpdatePath()
     {
-        if (currentPath == null || currentPath.Count == 0) return true;
+        if (currentPath == null || currentPath.Count == 0)
+            return true;
 
         if (Time.time >= lastPathUpdateTime + pathUpdateTime)
         {
@@ -443,7 +491,8 @@ public class Enemy : MonoBehaviour
 
     private void FollowPath()
     {
-        if (currentPath == null || currentPath.Count == 0) return;
+        if (currentPath == null || currentPath.Count == 0)
+            return;
 
         Vector2 currentPos = transform.position;
         Vector2 nextWaypoint = currentPath[0];
@@ -479,10 +528,9 @@ public class Enemy : MonoBehaviour
         {
             float angle = i * angleStep;
             float radian = angle * Mathf.Deg2Rad;
-            Vector2 checkPosition = currentPosition + new Vector2(
-                Mathf.Cos(radian) * checkRadius,
-                Mathf.Sin(radian) * checkRadius
-            );
+            Vector2 checkPosition =
+                currentPosition
+                + new Vector2(Mathf.Cos(radian) * checkRadius, Mathf.Sin(radian) * checkRadius);
 
             Node node = PathFindingManager.Instance.GetNodeFromWorldPosition(checkPosition);
             if (node != null && node.walkable)
@@ -498,7 +546,8 @@ public class Enemy : MonoBehaviour
     #region Movement Helpers
     protected virtual void MoveDirectlyTowardsTarget()
     {
-        if (target == null) return;
+        if (target == null)
+            return;
 
         Vector2 currentPos = transform.position;
         Vector2 targetPos = GetTargetPosition();
@@ -508,7 +557,9 @@ public class Enemy : MonoBehaviour
         Vector2 formationPos = (Vector2)target.position + formationOffset;
         Vector2 formationDir = (formationPos - currentPos).normalized;
 
-        Vector2 moveDir = ((targetPos - currentPos).normalized + flockingForce + formationDir).normalized;
+        Vector2 moveDir = (
+            (targetPos - currentPos).normalized + flockingForce + formationDir
+        ).normalized;
         moveDir = CalculateAvoidanceDirection(currentPos, currentPos + moveDir);
 
         Vector2 separationForce = CalculateSeparationForce(currentPos);
@@ -522,7 +573,11 @@ public class Enemy : MonoBehaviour
         Vector2 separationForce = Vector2.zero;
         float separationRadius = isCirclingPlayer ? 0.8f : 1.2f;
 
-        Collider2D[] nearbyEnemies = Physics2D.OverlapCircleAll(currentPos, separationRadius, LayerMask.GetMask("Enemy"));
+        Collider2D[] nearbyEnemies = Physics2D.OverlapCircleAll(
+            currentPos,
+            separationRadius,
+            LayerMask.GetMask("Enemy")
+        );
         foreach (Collider2D enemyCollider in nearbyEnemies)
         {
             if (enemyCollider.gameObject != gameObject)
@@ -532,7 +587,8 @@ public class Enemy : MonoBehaviour
                 if (distance < separationRadius)
                 {
                     float strength = isCirclingPlayer ? 0.5f : 1f;
-                    separationForce += diff.normalized * (1 - distance / separationRadius) * strength;
+                    separationForce +=
+                        diff.normalized * (1 - distance / separationRadius) * strength;
                 }
             }
         }
@@ -558,7 +614,10 @@ public class Enemy : MonoBehaviour
         rb.velocity = Vector2.Lerp(rb.velocity, targetVelocity, Time.deltaTime * 5f);
     }
 
-    protected virtual Vector2 CalculateAvoidanceDirection(Vector2 currentPosition, Vector2 targetPosition)
+    protected virtual Vector2 CalculateAvoidanceDirection(
+        Vector2 currentPosition,
+        Vector2 targetPosition
+    )
     {
         Vector2 moveDir = (targetPosition - currentPosition).normalized;
         Vector2 finalMoveDir = moveDir;
@@ -567,14 +626,36 @@ public class Enemy : MonoBehaviour
         bool isVerticalAligned = Mathf.Abs(dirToTarget.x) < 0.1f;
         bool isHorizontalAligned = Mathf.Abs(dirToTarget.y) < 0.1f;
 
-        if ((isVerticalAligned || isHorizontalAligned) && Physics2D.Raycast(currentPosition, moveDir, WALL_AVOIDANCE_DISTANCE, LayerMask.GetMask("Obstacle")))
+        if (
+            (isVerticalAligned || isHorizontalAligned)
+            && Physics2D.Raycast(
+                currentPosition,
+                moveDir,
+                WALL_AVOIDANCE_DISTANCE,
+                LayerMask.GetMask("Obstacle")
+            )
+        )
         {
             Vector2 alternativeDir = isVerticalAligned ? new Vector2(1f, 0f) : new Vector2(0f, 1f);
-            if (!Physics2D.Raycast(currentPosition, alternativeDir, WALL_AVOIDANCE_DISTANCE, LayerMask.GetMask("Obstacle")))
+            if (
+                !Physics2D.Raycast(
+                    currentPosition,
+                    alternativeDir,
+                    WALL_AVOIDANCE_DISTANCE,
+                    LayerMask.GetMask("Obstacle")
+                )
+            )
             {
                 return alternativeDir;
             }
-            if (!Physics2D.Raycast(currentPosition, -alternativeDir, WALL_AVOIDANCE_DISTANCE, LayerMask.GetMask("Obstacle")))
+            if (
+                !Physics2D.Raycast(
+                    currentPosition,
+                    -alternativeDir,
+                    WALL_AVOIDANCE_DISTANCE,
+                    LayerMask.GetMask("Obstacle")
+                )
+            )
             {
                 return -alternativeDir;
             }
@@ -626,26 +707,48 @@ public class Enemy : MonoBehaviour
         stuckTimer = 0f;
     }
 
-    protected virtual (RaycastHit2D front, RaycastHit2D right, RaycastHit2D left) CheckObstacles(Vector2 position, Vector2 direction)
+    protected virtual (RaycastHit2D front, RaycastHit2D right, RaycastHit2D left) CheckObstacles(
+        Vector2 position,
+        Vector2 direction
+    )
     {
         Vector2 rightCheck = Quaternion.Euler(0, 0, 30) * direction;
         Vector2 leftCheck = Quaternion.Euler(0, 0, -30) * direction;
 
         return (
-            Physics2D.Raycast(position, direction, WALL_AVOIDANCE_DISTANCE, LayerMask.GetMask("Obstacle")),
-            Physics2D.Raycast(position, rightCheck, CORNER_CHECK_DISTANCE, LayerMask.GetMask("Obstacle")),
-            Physics2D.Raycast(position, leftCheck, CORNER_CHECK_DISTANCE, LayerMask.GetMask("Obstacle"))
+            Physics2D.Raycast(
+                position,
+                direction,
+                WALL_AVOIDANCE_DISTANCE,
+                LayerMask.GetMask("Obstacle")
+            ),
+            Physics2D.Raycast(
+                position,
+                rightCheck,
+                CORNER_CHECK_DISTANCE,
+                LayerMask.GetMask("Obstacle")
+            ),
+            Physics2D.Raycast(
+                position,
+                leftCheck,
+                CORNER_CHECK_DISTANCE,
+                LayerMask.GetMask("Obstacle")
+            )
         );
     }
 
-    protected virtual bool HasObstacles((RaycastHit2D front, RaycastHit2D right, RaycastHit2D left) obstacles)
+    protected virtual bool HasObstacles(
+        (RaycastHit2D front, RaycastHit2D right, RaycastHit2D left) obstacles
+    )
     {
-        return obstacles.front.collider != null ||
-               obstacles.right.collider != null ||
-               obstacles.left.collider != null;
+        return obstacles.front.collider != null
+            || obstacles.right.collider != null
+            || obstacles.left.collider != null;
     }
 
-    protected virtual void HandleObstacleAvoidance((RaycastHit2D front, RaycastHit2D right, RaycastHit2D left) obstacles)
+    protected virtual void HandleObstacleAvoidance(
+        (RaycastHit2D front, RaycastHit2D right, RaycastHit2D left) obstacles
+    )
     {
         if (currentPath != null && Time.time >= lastObstacleAvoidanceTime + obstaclePathUpdateDelay)
         {
@@ -660,7 +763,9 @@ public class Enemy : MonoBehaviour
         lastObstacleAvoidanceTime = Time.time;
     }
 
-    protected virtual Vector2 CalculateAvoidanceVector((RaycastHit2D front, RaycastHit2D right, RaycastHit2D left) obstacles)
+    protected virtual Vector2 CalculateAvoidanceVector(
+        (RaycastHit2D front, RaycastHit2D right, RaycastHit2D left) obstacles
+    )
     {
         Vector2 avoidDir = Vector2.zero;
 
@@ -699,7 +804,8 @@ public class Enemy : MonoBehaviour
 
         foreach (Enemy enemy in GameManager.Instance.enemies)
         {
-            if (enemy == this) continue;
+            if (enemy == this)
+                continue;
 
             float distance = Vector2.Distance(currentPos, enemy.transform.position);
             if (distance < FORMATION_RADIUS)
@@ -732,7 +838,8 @@ public class Enemy : MonoBehaviour
     #region Combat
     public virtual void TakeDamage(float damage)
     {
-        if (!gameObject.activeInHierarchy) return;
+        if (!gameObject.activeInHierarchy)
+            return;
 
         float damageReduction = currentDefense / (currentDefense + 100f);
         float finalDamage = damage * (1f - damageReduction) * (1f + defenseDebuffAmount);
@@ -784,7 +891,9 @@ public class Enemy : MonoBehaviour
 
     protected virtual void DropItems()
     {
-        float playerLuck = GameManager.Instance.player.GetComponent<PlayerStatSystem>().GetStat(StatType.Luck);
+        float playerLuck = GameManager
+            .Instance.player.GetComponent<PlayerStatSystem>()
+            .GetStat(StatType.Luck);
 
         var drops = ItemManager.Instance.GetDropsForEnemy(enemyType, 1f + playerLuck);
 
@@ -803,10 +912,7 @@ public class Enemy : MonoBehaviour
         float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
         float radius = Random.Range(dropRadiusMin, dropRadiusMax);
 
-        Vector2 offset = new Vector2(
-            Mathf.Cos(angle) * radius,
-            Mathf.Sin(angle) * radius
-        );
+        Vector2 offset = new Vector2(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius);
 
         return (Vector2)transform.position + offset;
     }
@@ -850,7 +956,8 @@ public class Enemy : MonoBehaviour
 
     public virtual void ApplyDefenseDebuff(float amount, float duration)
     {
-        if (!gameObject.activeInHierarchy) return;
+        if (!gameObject.activeInHierarchy)
+            return;
 
         if (defenseDebuffCoroutine != null)
         {
@@ -862,10 +969,7 @@ public class Enemy : MonoBehaviour
 
     public virtual IEnumerator DefenseDebuffCoroutine(float amount, float duration)
     {
-        float actualReduction = Mathf.Min(
-            amount,
-            maxDefenseReduction - defenseDebuffAmount
-        );
+        float actualReduction = Mathf.Min(amount, maxDefenseReduction - defenseDebuffAmount);
 
         defenseDebuffAmount += actualReduction;
         currentDefense = baseDefense * (1f - defenseDebuffAmount);
@@ -899,7 +1003,8 @@ public class Enemy : MonoBehaviour
 
     public virtual void ApplySlowEffect(float amount, float duration)
     {
-        if (!gameObject.activeInHierarchy) return;
+        if (!gameObject.activeInHierarchy)
+            return;
 
         moveSpeedDebuffAmount = Mathf.Min(moveSpeedDebuffAmount + amount, 0.9f);
         UpdateMoveSpeed();
@@ -931,17 +1036,24 @@ public class Enemy : MonoBehaviour
 
     public virtual void ApplyDotDamage(float damagePerTick, float tickInterval, float duration)
     {
-        if (!gameObject.activeInHierarchy) return;
+        if (!gameObject.activeInHierarchy)
+            return;
 
         if (dotDamageCoroutine != null)
         {
             StopCoroutine(dotDamageCoroutine);
         }
 
-        dotDamageCoroutine = StartCoroutine(DotDamageCoroutine(damagePerTick, tickInterval, duration));
+        dotDamageCoroutine = StartCoroutine(
+            DotDamageCoroutine(damagePerTick, tickInterval, duration)
+        );
     }
 
-    protected virtual IEnumerator DotDamageCoroutine(float damagePerTick, float tickInterval, float duration)
+    protected virtual IEnumerator DotDamageCoroutine(
+        float damagePerTick,
+        float tickInterval,
+        float duration
+    )
     {
         float endTime = Time.time + duration;
 
@@ -959,7 +1071,8 @@ public class Enemy : MonoBehaviour
 
     public virtual void ApplyStun(float power, float duration)
     {
-        if (!gameObject.activeInHierarchy) return;
+        if (!gameObject.activeInHierarchy)
+            return;
 
         if (stunCoroutine != null)
         {
@@ -1033,5 +1146,4 @@ public class Enemy : MonoBehaviour
         }
     }
     #endregion
-
 }

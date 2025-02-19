@@ -1,12 +1,13 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using System;
+using System.Collections;
 using TMPro;
+using UnityEngine;
 using UnityEngine.SceneManagement;
-using System;
 
 public partial class UIManager : SingletonManager<UIManager>, IInitializable
 {
     public bool IsInitialized { get; private set; }
+
     [Header("UI Panels")]
     public Canvas mainCanvas;
     public GameObject pausePanel;
@@ -14,36 +15,51 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
     public PlayerSkillList skillList;
 
     [Header("Player Info")]
-    [SerializeField] public PlayerUIPanel playerUIPanel;
+    [SerializeField]
+    public PlayerUIPanel playerUIPanel;
 
     [Header("Boss Warning UI")]
-    [SerializeField] private GameObject bossWarningPanel;
-    [SerializeField] private float warningDuration = 3f;
+    [SerializeField]
+    private GameObject bossWarningPanel;
+
+    [SerializeField]
+    private float warningDuration = 3f;
     private Coroutine bossWarningCoroutine;
 
     private bool isPaused = false;
 
     [Header("Main Menu UI")]
-    [SerializeField] private GameObject mainMenuPrefab;
-    [SerializeField] private GameObject loadingScreenPrefab;
+    [SerializeField]
+    private GameObject mainMenuPrefab;
+
+    [SerializeField]
+    private GameObject loadingScreenPrefab;
 
     public MainMenuPanel MainMenuPanel => mainMenuPanel;
     private MainMenuPanel mainMenuPanel;
     private LoadingScreen loadingScreen;
 
     [Header("Game Over UI")]
-    [SerializeField] private GameObject gameOverPanel;
-    [SerializeField] private TextMeshProUGUI gameOverTimerText;
+    [SerializeField]
+    private GameObject gameOverPanel;
+
+    [SerializeField]
+    private TextMeshProUGUI gameOverTimerText;
 
     [Header("Stage UI")]
-    [SerializeField] public StageTimeUI stageTimeUI;
+    [SerializeField]
+    public StageTimeUI stageTimeUI;
 
     [Header("Inventory UI")]
-    [SerializeField] private GameObject inventoryUIPrefab;
+    [SerializeField]
+    private GameObject inventoryUIPrefab;
     private InventoryUI inventoryUI;
 
     [Header("Input Settings")]
-    [SerializeField] private KeyCode inventoryToggleKey = KeyCode.I;
+    [SerializeField]
+    private KeyCode inventoryToggleKey = KeyCode.I;
+
+    private bool isInventoryAccessable = true;
 
     protected override void Awake()
     {
@@ -101,11 +117,14 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         {
             case "MainMenu":
                 SetupMainMenuUI();
-                if (stageTimeUI != null) stageTimeUI.gameObject.SetActive(false);
+                if (stageTimeUI != null)
+                    stageTimeUI.gameObject.SetActive(false);
                 break;
             case "GameScene":
             case "TestScene":
-                StartCoroutine(SetupGameSceneUI()); if (stageTimeUI != null) stageTimeUI.gameObject.SetActive(true);
+                StartCoroutine(SetupGameSceneUI());
+                if (stageTimeUI != null)
+                    stageTimeUI.gameObject.SetActive(true);
                 break;
             case "BossStage":
                 SetupBossStageUI();
@@ -115,13 +134,14 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
 
     private void InitializeUI()
     {
-        if (pausePanel) pausePanel.SetActive(false);
-        if (levelupPanel) levelupPanel.gameObject.SetActive(false);
+        if (pausePanel)
+            pausePanel.SetActive(false);
+        if (levelupPanel)
+            levelupPanel.gameObject.SetActive(false);
     }
 
     public void SetupMainMenuUI()
     {
-
         if (mainCanvas == null)
         {
             Debug.LogError("Main Canvas is not assigned!");
@@ -193,20 +213,18 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         }
     }
 
-    private void SetupBossStageUI()
-    {
-
-    }
+    private void SetupBossStageUI() { }
 
     private void Update()
     {
-        if (!IsInitialized) return;
+        if (!IsInitialized)
+            return;
 
         CheckPause();
 
         if (Input.GetKeyDown(inventoryToggleKey))
         {
-            if (inventoryUI != null && inventoryUI.IsInitialized)
+            if (inventoryUI != null && inventoryUI.IsInitialized && isInventoryAccessable)
             {
                 if (inventoryUI.gameObject.activeSelf)
                 {
@@ -231,7 +249,8 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
     public void TogglePause()
     {
         isPaused = !isPaused;
-        if (pausePanel) pausePanel.SetActive(isPaused);
+        if (pausePanel)
+            pausePanel.SetActive(isPaused);
         Time.timeScale = isPaused ? 0f : 1f;
     }
 
@@ -271,9 +290,12 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
     public void ClearUI()
     {
         StopAllCoroutines();
-        if (pausePanel) pausePanel.SetActive(false);
-        if (levelupPanel) levelupPanel.gameObject.SetActive(false);
-        if (stageTimeUI) stageTimeUI.gameObject.SetActive(false);
+        if (pausePanel)
+            pausePanel.SetActive(false);
+        if (levelupPanel)
+            levelupPanel.gameObject.SetActive(false);
+        if (stageTimeUI)
+            stageTimeUI.gameObject.SetActive(false);
         if (inventoryUI)
         {
             inventoryUI.gameObject.SetActive(false);
@@ -323,7 +345,9 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
         }
         else
         {
-            Debug.LogError($"MainMenuPanel already exists or prefab is null. Panel: {mainMenuPanel}, Prefab: {mainMenuPrefab}");
+            Debug.LogError(
+                $"MainMenuPanel already exists or prefab is null. Panel: {mainMenuPanel}, Prefab: {mainMenuPrefab}"
+            );
         }
     }
 
@@ -402,7 +426,8 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
 
     public void OnLoadGame()
     {
-        if (!GameManager.Instance.HasSaveData()) return;
+        if (!GameManager.Instance.HasSaveData())
+            return;
         GameManager.Instance.LoadGameData();
         StartCoroutine(LoadTownScene());
     }
@@ -498,7 +523,7 @@ public partial class UIManager : SingletonManager<UIManager>, IInitializable
 
     public void SetInventoryAccessible(bool accessible)
     {
-        inventoryUI?.SetInventoryAccessible(accessible);
+        isInventoryAccessable = accessible;
     }
 
     public void ShowInventory()

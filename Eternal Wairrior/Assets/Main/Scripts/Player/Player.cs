@@ -12,10 +12,15 @@ public class Player : MonoBehaviour
     {
         Alive = 1,
         Dead,
-        Attacking
+        Attacking,
     }
+
     private Status _playerStatus;
-    public Status playerStatus { get { return _playerStatus; } set { _playerStatus = value; } }
+    public Status playerStatus
+    {
+        get { return _playerStatus; }
+        set { _playerStatus = value; }
+    }
     #endregion
 
     #region Level & Experience
@@ -26,12 +31,30 @@ public class Player : MonoBehaviour
 
     private List<float> expList = new List<float>
     {
-        100, 250, 450, 700, 1000, 1350, 1750, 2200, 2700, 3300
+        100,
+        250,
+        450,
+        700,
+        1000,
+        1350,
+        1750,
+        2200,
+        2700,
+        3300,
     };
-    public List<float> _expList { get { return expList; } }
+    public List<float> _expList
+    {
+        get { return expList; }
+    }
 
-    public float HpAmount { get => playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp); }
-    public float ExpAmount { get => (CurrentExp() / (GetExpForNextLevel() - expList[level - 1])); }
+    public float HpAmount
+    {
+        get => playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
+    }
+    public float ExpAmount
+    {
+        get => (CurrentExp() / (GetExpForNextLevel() - expList[level - 1]));
+    }
     #endregion
 
     #region References
@@ -155,7 +178,8 @@ public class Player : MonoBehaviour
     #region Move&Skills
     public void Move()
     {
-        if (rb == null) return;
+        if (rb == null)
+            return;
 
         Vector2 input = new Vector2(x, y).normalized;
         float moveSpeed = playerStat.GetStat(StatType.MoveSpeed);
@@ -177,7 +201,11 @@ public class Player : MonoBehaviour
         {
             if (velocity != Vector2.zero)
             {
-                characterControl.transform.localScale = new Vector3(x > 0 ? 1 : (x < 0 ? -1 : characterControl.transform.localScale.x), 1, 1);
+                characterControl.transform.localScale = new Vector3(
+                    x > 0 ? 1 : (x < 0 ? -1 : characterControl.transform.localScale.x),
+                    1,
+                    1
+                );
                 characterControl.PlayAnimation(PlayerState.MOVE, 0);
             }
             else
@@ -226,7 +254,8 @@ public class Player : MonoBehaviour
 
     public void GainExperience(float amount)
     {
-        if (level >= expList.Count) return;
+        if (level >= expList.Count)
+            return;
 
         exp += amount;
 
@@ -240,7 +269,8 @@ public class Player : MonoBehaviour
     {
         level++;
 
-        float currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
+        float currentHpRatio =
+            playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
 
         playerStat.UpdateStatsForLevel(level);
 
@@ -248,7 +278,9 @@ public class Player : MonoBehaviour
 
         playerStat.SetCurrentHp(maxHp * currentHpRatio);
 
-        Debug.Log($"Level Up! Level: {level}, New MaxHP: {maxHp}, Current HP: {playerStat.GetStat(StatType.CurrentHp)}");
+        Debug.Log(
+            $"Level Up! Level: {level}, New MaxHP: {maxHp}, Current HP: {playerStat.GetStat(StatType.CurrentHp)}"
+        );
     }
     #endregion
 
@@ -266,7 +298,6 @@ public class Player : MonoBehaviour
             rb.constraints = RigidbodyConstraints2D.FreezePosition;
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         }
-
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -317,12 +348,14 @@ public class Player : MonoBehaviour
 
     private IEnumerator PerformAttack(Enemy targetEnemy)
     {
-        if (characterControl == null) yield break;
+        if (characterControl == null)
+            yield break;
 
-        Vector2 directionToTarget = (targetEnemy.transform.position - transform.position).normalized;
+        Vector2 directionToTarget = (
+            targetEnemy.transform.position - transform.position
+        ).normalized;
 
-        characterControl.transform.localScale = new Vector3(
-            directionToTarget.x > 0 ? -1 : 1, 1, 1);
+        characterControl.transform.localScale = new Vector3(directionToTarget.x > 0 ? -1 : 1, 1, 1);
 
         playerStatus = Status.Attacking;
         characterControl.PlayAnimation(PlayerState.ATTACK, 0);
@@ -330,8 +363,8 @@ public class Player : MonoBehaviour
         float attackRange = playerStat.GetStat(StatType.AttackRange);
         float damage = playerStat.GetStat(StatType.Damage);
 
-        var enemiesInRange = GameManager.Instance.enemies
-            .Where(enemy => enemy != null)
+        var enemiesInRange = GameManager
+            .Instance.enemies.Where(enemy => enemy != null)
             .Where(enemy =>
             {
                 Vector2 directionToEnemy = enemy.transform.position - transform.position;
@@ -352,8 +385,8 @@ public class Player : MonoBehaviour
 
     private Enemy FindNearestEnemy()
     {
-        return GameManager.Instance.enemies?
-            .Where(enemy => enemy != null)
+        return GameManager
+            .Instance.enemies?.Where(enemy => enemy != null)
             .OrderBy(enemy => Vector2.Distance(transform.position, enemy.transform.position))
             .FirstOrDefault();
     }
@@ -408,7 +441,8 @@ public class Player : MonoBehaviour
     #region Skills
     public bool AddOrUpgradeSkill(SkillData skillData)
     {
-        if (skillData == null) return false;
+        if (skillData == null)
+            return false;
         SkillManager.Instance.AddOrUpgradeSkill(skillData);
         return true;
     }
@@ -443,7 +477,10 @@ public class Player : MonoBehaviour
                 Enemy nearestEnemy = FindNearestEnemy();
                 if (nearestEnemy != null)
                 {
-                    float distanceToEnemy = Vector2.Distance(transform.position, nearestEnemy.transform.position);
+                    float distanceToEnemy = Vector2.Distance(
+                        transform.position,
+                        nearestEnemy.transform.position
+                    );
                     float attackRange = playerStat.GetStat(StatType.AttackRange);
 
                     if (distanceToEnemy <= attackRange)
