@@ -1,5 +1,5 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 using static StageManager;
 
 public class CameraManager : SingletonManager<CameraManager>, IInitializable
@@ -7,9 +7,14 @@ public class CameraManager : SingletonManager<CameraManager>, IInitializable
     public bool IsInitialized { get; private set; }
 
     [Header("Camera Settings")]
-    [SerializeField] private GameObject virtualCameraPrefab;
-    [SerializeField] private float townCameraSize = 8f;
-    [SerializeField] private float gameCameraSize = 6f;
+    [SerializeField]
+    private GameObject virtualCameraPrefab;
+
+    [SerializeField]
+    private float townCameraSize = 8f;
+
+    [SerializeField]
+    private float gameCameraSize = 6f;
     private Cinemachine.CinemachineVirtualCamera virtualCamera;
 
     protected override void Awake()

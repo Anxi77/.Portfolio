@@ -1,18 +1,18 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 {
-
     private GameState currentState = GameState.MainMenu;
-    public GameState CurrentState => currentState;
     public bool IsInitialized { get; private set; }
 
     private Dictionary<GameState, IGameStateHandler> stateHandlers;
 
     private bool isStateTransitioning = false;
+
+    private readonly Queue<GameState> stateTransitionQueue = new();
 
     public void Initialize()
     {
@@ -32,22 +32,26 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
     private IEnumerator InitializationSequence()
     {
-        yield return StartCoroutine(InitializeDataManagers(success =>
-        {
-            if (!success)
+        yield return StartCoroutine(
+            InitializeDataManagers(success =>
             {
-                Debug.LogError("Failed to initialize Data Managers");
-            }
-        }));
+                if (!success)
+                {
+                    Debug.LogError("Failed to initialize Data Managers");
+                }
+            })
+        );
 
         yield return new WaitForSeconds(0.1f);
-        yield return StartCoroutine(InitializeCoreManagers(success =>
-        {
-            if (!success)
+        yield return StartCoroutine(
+            InitializeCoreManagers(success =>
             {
-                Debug.LogError("Failed to initialize Core Managers");
-            }
-        }));
+                if (!success)
+                {
+                    Debug.LogError("Failed to initialize Core Managers");
+                }
+            })
+        );
 
         yield return new WaitForSeconds(0.1f);
         yield return StartCoroutine(InitializeGameplayManagers());
@@ -285,17 +289,33 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
     public void ChangeState(GameState newState)
     {
-        if (currentState == newState || !IsInitialized || stateHandlers == null)
+        if (!IsInitialized || stateHandlers == null)
+            return;
+
+        stateTransitionQueue.Enqueue(newState);
+
+        if (!isStateTransitioning)
+        {
+            ProcessStateQueue();
+        }
+    }
+
+    private void ProcessStateQueue()
+    {
+        if (stateTransitionQueue.Count == 0)
             return;
 
         try
         {
-            if (isStateTransitioning)
+            isStateTransitioning = true;
+            GameState newState = stateTransitionQueue.Dequeue();
+
+            if (currentState == newState)
             {
+                isStateTransitioning = false;
+                ProcessStateQueue();
                 return;
             }
-
-            isStateTransitioning = true;
 
             if (stateHandlers.ContainsKey(currentState))
             {
@@ -310,6 +330,11 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
             }
 
             isStateTransitioning = false;
+
+            if (stateTransitionQueue.Count > 0)
+            {
+                ProcessStateQueue();
+            }
         }
         catch (Exception e)
         {
@@ -320,7 +345,8 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
     private void Update()
     {
-        if (!IsInitialized || stateHandlers == null) return;
+        if (!IsInitialized || stateHandlers == null)
+            return;
 
         try
         {
@@ -334,7 +360,8 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
 
     private void FixedUpdate()
     {
-        if (!IsInitialized || stateHandlers == null) return;
+        if (!IsInitialized || stateHandlers == null)
+            return;
 
         try
         {
@@ -346,9 +373,11 @@ public class GameLoopManager : SingletonManager<GameLoopManager>, IInitializable
         }
     }
 
-    public T GetCurrentHandler<T>() where T : class, IGameStateHandler
+    public T GetCurrentHandler<T>()
+        where T : class, IGameStateHandler
     {
-        if (!IsInitialized || stateHandlers == null) return null;
+        if (!IsInitialized || stateHandlers == null)
+            return null;
 
         if (stateHandlers.TryGetValue(currentState, out var handler))
         {

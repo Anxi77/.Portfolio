@@ -1,54 +1,53 @@
 using UnityEngine;
 
-public class GameOverStateHandler : IGameStateHandler
+public class GameOverStateHandler : BaseStateHandler
 {
     private bool portalSpawned = false;
 
-    public void OnEnter()
+    public override void OnEnter()
     {
+        base.OnEnter();
         Debug.Log("Entering Game Over state");
 
-        UIManager.Instance?.ShowGameOverScreen();
+        UI.ShowGameOverScreen();
 
-        if (GameManager.Instance?.player == null)
+        if (Game != null && Game.player != null)
         {
-            PlayerUnitManager.Instance.SpawnPlayer(Vector3.zero);
-            PlayerUnitManager.Instance.LoadGameState();
-
+            PlayerUnit.SpawnPlayer(Vector3.zero);
+            PlayerUnit.LoadGameState();
             Debug.Log("Player respawned at death location");
+
+            if (!portalSpawned)
+            {
+                SpawnTownPortal();
+                portalSpawned = true;
+            }
         }
-        if (!portalSpawned && GameManager.Instance?.player != null)
+    }
+
+    public override void OnExit()
+    {
+        Debug.Log("Exiting Game Over state");
+        UI.HideGameOverScreen();
+        portalSpawned = false;
+
+        if (Game != null && Game.player != null)
         {
-            SpawnTownPortal();
-            portalSpawned = true;
+            GameObject.Destroy(Game.player.gameObject);
+            Game.player = null;
         }
+
+        base.OnExit();
     }
 
     private void SpawnTownPortal()
     {
-        if (GameManager.Instance?.player != null)
+        if (Game != null && Game.player != null)
         {
-            Vector3 playerPos = GameManager.Instance.player.transform.position;
+            Vector3 playerPos = Game.player.transform.position;
             Vector3 portalPosition = playerPos + new Vector3(2f, 0f, 0f);
             StageManager.Instance.SpawnTownPortal(portalPosition);
             Debug.Log("Town portal spawned near player's death location");
         }
     }
-
-    public void OnExit()
-    {
-        Debug.Log("Exiting Game Over state");
-        UIManager.Instance?.HideGameOverScreen();
-        portalSpawned = false;
-
-        if (GameManager.Instance?.player != null)
-        {
-            GameObject.Destroy(GameManager.Instance.player.gameObject);
-            GameManager.Instance.player = null;
-        }
-    }
-
-    public void OnUpdate() { }
-
-    public void OnFixedUpdate() { }
 }

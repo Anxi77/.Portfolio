@@ -1,22 +1,17 @@
 using UnityEngine;
 
-public class MainMenuStateHandler : IGameStateHandler
+public class MainMenuStateHandler : BaseStateHandler
 {
-    public void OnEnter()
+    public override void OnEnter()
     {
-        UIManager.Instance.ShowMainMenu();
+        base.OnEnter();
+        UI.ShowMainMenu();
         Time.timeScale = 1f;
     }
 
-    public void OnExit()
+    public override void OnExit()
     {
-        UIManager.Instance.HideMainMenu();
-        UIManager.Instance.ClearUI();
+        UI.HideMainMenu();
+        base.OnExit();
     }
-
-    public void OnUpdate()
-    {
-    }
-
-    public void OnFixedUpdate() { }
 }

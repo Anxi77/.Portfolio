@@ -1,26 +1,24 @@
 using UnityEngine;
 
-public class PausedStateHandler : IGameStateHandler
+public class PausedStateHandler : BaseStateHandler
 {
-    public void OnEnter()
+    public override void OnEnter()
     {
         Time.timeScale = 0f;
-        UIManager.Instance.ShowPauseMenu();
+        UI.ShowPauseMenu();
     }
 
-    public void OnExit()
+    public override void OnExit()
     {
         Time.timeScale = 1f;
-        UIManager.Instance.HidePauseMenu();
+        UI.HidePauseMenu();
     }
 
-    public void OnUpdate()
+    public override void OnUpdate()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            GameLoopManager.Instance.ChangeState(GameState.Stage);
+            GameLoop.ChangeState(GameState.Stage);
         }
     }
-
-    public void OnFixedUpdate() { }
 }

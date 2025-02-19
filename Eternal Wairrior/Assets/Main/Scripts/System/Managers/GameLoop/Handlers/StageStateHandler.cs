@@ -1,29 +1,26 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 using static StageManager;
 
-public class StageStateHandler : IGameStateHandler
+public class StageStateHandler : BaseStateHandler
 {
     private const float STAGE_DURATION = 600f;
     private bool isBossPhase = false;
     private bool isInitialized = false;
 
-    public void OnEnter()
+    public override void OnEnter()
     {
+        base.OnEnter();
         isInitialized = false;
 
-        UIManager.Instance.ClearUI();
+        UI.SetInventoryAccessible(false);
+        UI.HideInventory();
 
-        UIManager.Instance.SetInventoryAccessible(false);
-        UIManager.Instance.HideInventory();
-
-        if (GameManager.Instance?.player == null)
+        if (Game != null && Game.player == null)
         {
-            Vector3 spawnPos = PlayerUnitManager.Instance.GetSpawnPosition(SceneType.Game);
-            PlayerUnitManager.Instance.SpawnPlayer(spawnPos);
-
-            MonoBehaviour coroutineRunner = GameLoopManager.Instance;
-            coroutineRunner.StartCoroutine(InitializeStageAfterPlayerSpawn());
+            Vector3 spawnPos = PlayerUnit.GetSpawnPosition(SceneType.Game);
+            PlayerUnit.SpawnPlayer(spawnPos);
+            StartCoroutine(InitializeStageAfterPlayerSpawn());
         }
         else
         {
@@ -33,21 +30,20 @@ public class StageStateHandler : IGameStateHandler
 
     private IEnumerator InitializeStageAfterPlayerSpawn()
     {
-        while (UIManager.Instance.IsLoadingScreenVisible())
+        while (UI.IsLoadingScreenVisible())
         {
             yield return null;
         }
 
         yield return new WaitForSeconds(0.2f);
-
         InitializeStage();
     }
 
     private void InitializeStage()
     {
-        if (GameManager.Instance.HasSaveData())
+        if (Game.HasSaveData())
         {
-            PlayerUnitManager.Instance.LoadGameState();
+            PlayerUnit.LoadGameState();
         }
 
         CameraManager.Instance.SetupCamera(SceneType.Game);
@@ -58,19 +54,19 @@ public class StageStateHandler : IGameStateHandler
             PathFindingManager.Instance.InitializeWithNewCamera();
         }
 
-        if (UIManager.Instance?.playerUIPanel != null)
+        if (UI != null && UI.playerUIPanel != null)
         {
-            UIManager.Instance.playerUIPanel.gameObject.SetActive(true);
-            UIManager.Instance.playerUIPanel.InitializePlayerUI(GameManager.Instance.player);
+            UI.playerUIPanel.gameObject.SetActive(true);
+            UI.playerUIPanel.InitializePlayerUI(Game.player);
         }
 
-        GameManager.Instance.StartLevelCheck();
+        Game.StartLevelCheck();
 
         StageTimeManager.Instance.StartStageTimer(STAGE_DURATION);
-        UIManager.Instance.stageTimeUI.gameObject.SetActive(true);
+        UI.stageTimeUI.gameObject.SetActive(true);
         isInitialized = true;
 
-        GameLoopManager.Instance.StartCoroutine(StartMonsterSpawningWhenReady());
+        StartCoroutine(StartMonsterSpawningWhenReady());
     }
 
     private IEnumerator StartMonsterSpawningWhenReady()
@@ -83,22 +79,11 @@ public class StageStateHandler : IGameStateHandler
         }
     }
 
-    public void OnExit()
+    public override void OnExit()
     {
         isInitialized = false;
 
-        if (GameManager.Instance?.player != null)
-        {
-            if (GameManager.Instance.player.GetComponent<Inventory>() != null)
-            {
-                GameManager.Instance.player.GetComponent<Inventory>().SaveInventoryState();
-            }
-
-            PlayerUnitManager.Instance?.SaveGameState();
-
-            GameObject.Destroy(GameManager.Instance.player.gameObject);
-            GameManager.Instance.player = null;
-        }
+        base.OnExit();
 
         MonsterManager.Instance?.StopSpawning();
         StageTimeManager.Instance?.PauseTimer();
@@ -111,9 +96,10 @@ public class StageStateHandler : IGameStateHandler
         }
     }
 
-    public void OnUpdate()
+    public override void OnUpdate()
     {
-        if (!isInitialized) return;
+        if (!isInitialized)
+            return;
 
         if (!isBossPhase && StageTimeManager.Instance.IsStageTimeUp())
         {
@@ -121,12 +107,10 @@ public class StageStateHandler : IGameStateHandler
         }
     }
 
-    public void OnFixedUpdate() { }
-
     private void StartBossPhase()
     {
         isBossPhase = true;
-        UIManager.Instance?.ShowBossWarning();
+        UI?.ShowBossWarning();
         MonsterManager.Instance?.SpawnStageBoss();
     }
 

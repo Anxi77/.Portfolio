@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public abstract class DataManager<T> : SingletonManager<T>, IInitializable where T : MonoBehaviour
+public abstract class DataManager<T> : SingletonManager<T>, IInitializable
+    where T : MonoBehaviour
 {
     protected bool isInitialized = false;
     public bool IsInitialized => isInitialized;
@@ -22,14 +23,19 @@ public abstract class DataManager<T> : SingletonManager<T>, IInitializable where
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"Error initializing default data for {GetType().Name}: {e.Message}\n{e.StackTrace}");
+            Debug.LogError(
+                $"Error initializing default data for {GetType().Name}: {e.Message}\n{e.StackTrace}"
+            );
             isInitialized = false;
             throw;
         }
     }
 
-    protected virtual void LoadRuntimeData() { }
-    protected virtual void SaveRuntimeData() { }
-    protected virtual void DeleteRuntimeData() { }
     protected virtual void ClearRuntimeData() { }
+
+    protected virtual void DeleteRuntimeData() { }
+
+    protected virtual void LoadRuntimeData() { }
+
+    protected virtual void SaveRuntimeData() { }
 }

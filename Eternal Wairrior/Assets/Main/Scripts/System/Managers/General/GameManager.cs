@@ -7,7 +7,7 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
 {
     public bool IsInitialized { get; private set; }
 
-    internal List<Enemy> enemies = new List<Enemy>();
+    internal List<Enemy> enemies = new();
     internal Player player;
     private bool hasInitializedGame = false;
 
@@ -77,7 +77,10 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
 
     private void OnPlayerLevelUp()
     {
-        UIManager.Instance?.ShowLevelUpPanel();
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowLevelUpPanel();
+        }
     }
 
     #region Game State Management
@@ -118,8 +121,7 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
 
     public bool HasSaveData()
     {
-        return PlayerDataManager.Instance != null &&
-               PlayerDataManager.Instance.HasSaveData();
+        return PlayerDataManager.Instance != null && PlayerDataManager.Instance.HasSaveData();
     }
     #endregion
 
@@ -133,14 +135,5 @@ public class GameManager : SingletonManager<GameManager>, IInitializable
         {
             Debug.LogError($"Error during application quit: {e.Message}");
         }
-    }
-
-    private void CleanupTemporaryResources()
-    {
-        if (player != null && PlayerUnitManager.Instance != null)
-        {
-            PlayerUnitManager.Instance.ClearTemporaryEffects();
-        }
-        Resources.UnloadUnusedAssets();
     }
 }

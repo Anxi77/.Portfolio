@@ -1,6 +1,4 @@
 using UnityEngine;
-using System.Diagnostics;
-using Debug = UnityEngine.Debug;
 
 public abstract class SingletonManager<T> : MonoBehaviour where T : MonoBehaviour
 {

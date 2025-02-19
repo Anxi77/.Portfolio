@@ -1,8 +1,8 @@
-using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 using Newtonsoft.Json;
+using UnityEngine;
 
 public class ItemDataManager : DataManager<ItemDataManager>
 {
@@ -37,29 +37,39 @@ public class ItemDataManager : DataManager<ItemDataManager>
             var jsonAsset = Resources.Load<TextAsset>($"{ITEM_DB_PATH}/ItemDatabase");
             if (jsonAsset != null)
             {
-                var serializableData = JsonConvert.DeserializeObject<SerializableItemList>(jsonAsset.text);
+                var serializableData = JsonConvert.DeserializeObject<SerializableItemList>(
+                    jsonAsset.text
+                );
                 if (serializableData?.items != null)
                 {
                     itemDatabase = serializableData.items.ToDictionary(item => item.ID);
                     foreach (var item in itemDatabase)
                     {
-                        Debug.Log($"[ItemDataManager] Loaded item [Name : {item.Value.Name}] [ID : {item.Value.ID}]");
+                        Debug.Log(
+                            $"[ItemDataManager] Loaded item [Name : {item.Value.Name}] [ID : {item.Value.ID}]"
+                        );
                     }
                 }
                 else
                 {
-                    Debug.LogError("[ItemDataManager] Failed to deserialize item data or items list is null");
+                    Debug.LogError(
+                        "[ItemDataManager] Failed to deserialize item data or items list is null"
+                    );
                 }
                 Debug.Log($"[ItemDataManager] Total loaded item data count : {itemDatabase.Count}");
             }
             else
             {
-                Debug.LogError($"[ItemDataManager] ItemDatabase.json not found at path: Resources/{ITEM_DB_PATH}/ItemDatabase");
+                Debug.LogError(
+                    $"[ItemDataManager] ItemDatabase.json not found at path: Resources/{ITEM_DB_PATH}/ItemDatabase"
+                );
             }
         }
         catch (Exception e)
         {
-            Debug.LogError($"[ItemDataManager] Error loading item database: {e.Message}\n{e.StackTrace}");
+            Debug.LogError(
+                $"[ItemDataManager] Error loading item database: {e.Message}\n{e.StackTrace}"
+            );
         }
     }
 
