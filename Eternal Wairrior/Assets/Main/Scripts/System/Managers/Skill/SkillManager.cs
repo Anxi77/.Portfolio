@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using System;
 using Random = UnityEngine.Random;
 
 public class SkillManager : SingletonManager<SkillManager>, IInitializable
@@ -35,6 +35,7 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             IsInitialized = false;
         }
     }
+
     private void LoadSkillData()
     {
         availableSkills = SkillDataManager.Instance.GetAllSkillData();
@@ -81,7 +82,8 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         newStats = SkillDataManager.Instance.GetSkillStatsForLevel(
             skill.skillData.ID,
             targetLevel,
-            skill.skillData.Type);
+            skill.skillData.Type
+        );
 
         if (newStats == null)
         {
@@ -102,7 +104,8 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
     public void AddOrUpgradeSkill(SkillData skillData)
     {
-        if (GameManager.Instance?.player == null || skillData == null) return;
+        if (GameManager.Instance?.player == null || skillData == null)
+            return;
 
         try
         {
@@ -112,8 +115,11 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             float currentHpRatio = 1f;
             if (playerStat != null)
             {
-                currentHpRatio = playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
-                Debug.Log($"Before AddOrUpgradeSkill - HP: {playerStat.GetStat(StatType.CurrentHp)}/{playerStat.GetStat(StatType.MaxHp)} ({currentHpRatio:F2})");
+                currentHpRatio =
+                    playerStat.GetStat(StatType.CurrentHp) / playerStat.GetStat(StatType.MaxHp);
+                Debug.Log(
+                    $"Before AddOrUpgradeSkill - HP: {playerStat.GetStat(StatType.CurrentHp)}/{playerStat.GetStat(StatType.MaxHp)} ({currentHpRatio:F2})"
+                );
             }
 
             var existingSkill = GetPlayerSkill(skillData.ID);
@@ -122,9 +128,14 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             if (existingSkill != null)
             {
                 int nextLevel = existingSkill.currentLevel + 1;
-                Debug.Log($"Current level: {existingSkill.currentLevel}, Attempting upgrade to level: {nextLevel}");
+                Debug.Log(
+                    $"Current level: {existingSkill.currentLevel}, Attempting upgrade to level: {nextLevel}"
+                );
 
-                GameObject levelPrefab = SkillDataManager.Instance.GetLevelPrefab(skillData.ID, nextLevel);
+                GameObject levelPrefab = SkillDataManager.Instance.GetLevelPrefab(
+                    skillData.ID,
+                    nextLevel
+                );
                 if (levelPrefab != null)
                 {
                     Debug.Log($"Found level {nextLevel} prefab, replacing skill");
@@ -141,12 +152,16 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             }
             else
             {
-                GameObject prefab = SkillDataManager.Instance.GetLevelPrefab(skillData.ID, 1)
-                    ?? skillData.Prefab;
+                GameObject prefab =
+                    SkillDataManager.Instance.GetLevelPrefab(skillData.ID, 1) ?? skillData.Prefab;
 
                 if (prefab != null)
                 {
-                    var tempObj = Instantiate(prefab, GameManager.Instance.player.transform.position, Quaternion.identity);
+                    var tempObj = Instantiate(
+                        prefab,
+                        GameManager.Instance.player.transform.position,
+                        Quaternion.identity
+                    );
                     tempObj.SetActive(false);
 
                     if (tempObj.TryGetComponent<Skill>(out var skillComponent))
@@ -161,7 +176,9 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
                         tempObj.SetActive(true);
                         GameManager.Instance.player.skills.Add(skillComponent);
-                        Debug.Log($"Successfully added new skill: {skillData.Name} at position {tempObj.transform.localPosition}");
+                        Debug.Log(
+                            $"Successfully added new skill: {skillData.Name} at position {tempObj.transform.localPosition}"
+                        );
                     }
                 }
             }
@@ -171,7 +188,9 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
                 float newMaxHp = playerStat.GetStat(StatType.MaxHp);
                 float newCurrentHp = Mathf.Max(1f, newMaxHp * currentHpRatio);
                 playerStat.SetCurrentHp(newCurrentHp);
-                Debug.Log($"After AddOrUpgradeSkill - HP: {newCurrentHp}/{newMaxHp} ({currentHpRatio:F2})");
+                Debug.Log(
+                    $"After AddOrUpgradeSkill - HP: {newCurrentHp}/{newMaxHp} ({currentHpRatio:F2})"
+                );
             }
         }
         catch (System.Exception e)
@@ -180,7 +199,12 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         }
     }
 
-    private void ReplaceSkillWithNewPrefab(Skill existingSkill, GameObject newPrefab, SkillData skillData, int targetLevel)
+    private void ReplaceSkillWithNewPrefab(
+        Skill existingSkill,
+        GameObject newPrefab,
+        SkillData skillData,
+        int targetLevel
+    )
     {
         Vector3 position = existingSkill.transform.position;
         Quaternion rotation = existingSkill.transform.rotation;
@@ -196,7 +220,9 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
             currentHp = playerStat.GetStat(StatType.CurrentHp);
             maxHp = playerStat.GetStat(StatType.MaxHp);
             currentHpRatio = currentHp / maxHp;
-            Debug.Log($"[SkillManager] Before replace - HP: {currentHp}/{maxHp} ({currentHpRatio:F2})");
+            Debug.Log(
+                $"[SkillManager] Before replace - HP: {currentHp}/{maxHp} ({currentHpRatio:F2})"
+            );
         }
 
         if (existingSkill is PassiveSkill passiveSkill)
@@ -231,13 +257,17 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
                 float finalMaxHp = playerStat.GetStat(StatType.MaxHp);
                 float finalCurrentHp = Mathf.Max(currentHp, finalMaxHp * currentHpRatio);
                 playerStat.SetCurrentHp(finalCurrentHp);
-                Debug.Log($"[SkillManager] After replace - HP: {finalCurrentHp}/{finalMaxHp} ({currentHpRatio:F2})");
+                Debug.Log(
+                    $"[SkillManager] After replace - HP: {finalCurrentHp}/{finalMaxHp} ({currentHpRatio:F2})"
+                );
             }
         }
     }
+
     public void RemoveSkill(SkillID skillID)
     {
-        if (GameManager.Instance.player == null) return;
+        if (GameManager.Instance.player == null)
+            return;
 
         Player player = GameManager.Instance.player;
         Skill skillToRemove = player.skills.Find(x => x.skillData.ID == skillID);
@@ -254,7 +284,9 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
     {
         if (availableSkills == null || availableSkills.Count == 0)
         {
-            Debug.LogError($"No skills available in SkillManager. Available skills count: {availableSkills?.Count ?? 0}");
+            Debug.LogError(
+                $"No skills available in SkillManager. Available skills count: {availableSkills?.Count ?? 0}"
+            );
             return new List<SkillData>();
         }
 
@@ -265,30 +297,32 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
         }
 
         var selectedSkills = new List<SkillData>();
-        var filteredSkills = availableSkills.Where(skill =>
-        {
-            if (skill == null)
+        var filteredSkills = availableSkills
+            .Where(skill =>
             {
-                Debug.LogError("Found null skill");
-                return false;
-            }
+                if (skill == null)
+                {
+                    Debug.LogError("Found null skill");
+                    return false;
+                }
 
-            var stats = SkillDataManager.Instance.GetSkillStats(skill.ID, 1);
-            bool hasStats = stats != null;
-            bool matchesElement = elementType == null || skill.Element == elementType;
+                var stats = SkillDataManager.Instance.GetSkillStats(skill.ID, 1);
+                bool hasStats = stats != null;
+                bool matchesElement = elementType == null || skill.Element == elementType;
 
-            Debug.Log($"Checking skill {skill.Name}:");
-            Debug.Log($"  - ID: {skill.ID}");
-            Debug.Log($"  - Element: {skill.Element}");
-            Debug.Log($"  - HasStats: {hasStats}");
-            Debug.Log($"  - MatchesElement: {matchesElement}");
-            if (!hasStats)
-            {
-                Debug.LogWarning($"  - No stats found for level 1");
-            }
+                Debug.Log($"Checking skill {skill.Name}:");
+                Debug.Log($"  - ID: {skill.ID}");
+                Debug.Log($"  - Element: {skill.Element}");
+                Debug.Log($"  - HasStats: {hasStats}");
+                Debug.Log($"  - MatchesElement: {matchesElement}");
+                if (!hasStats)
+                {
+                    Debug.LogWarning($"  - No stats found for level 1");
+                }
 
-            return hasStats && matchesElement;
-        }).ToList();
+                return hasStats && matchesElement;
+            })
+            .ToList();
 
         if (!filteredSkills.Any())
         {
@@ -300,14 +334,13 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
         if (elementType == null)
         {
-            var availableElements = filteredSkills
-                .Select(s => s.Element)
-                .Distinct()
-                .ToList();
+            var availableElements = filteredSkills.Select(s => s.Element).Distinct().ToList();
 
             elementType = availableElements[Random.Range(0, availableElements.Count)];
             filteredSkills = filteredSkills.Where(s => s.Element == elementType).ToList();
-            Debug.Log($"Selected element type: {elementType}, remaining skills: {filteredSkills.Count}");
+            Debug.Log(
+                $"Selected element type: {elementType}, remaining skills: {filteredSkills.Count}"
+            );
         }
 
         int possibleCount = Mathf.Min(count, filteredSkills.Count);
@@ -323,7 +356,9 @@ public class SkillManager : SingletonManager<SkillManager>, IInitializable
 
         if (selectedSkills.Count < count)
         {
-            Debug.Log($"Returning {selectedSkills.Count} skills instead of requested {count} due to availability");
+            Debug.Log(
+                $"Returning {selectedSkills.Count} skills instead of requested {count} due to availability"
+            );
         }
 
         return selectedSkills;

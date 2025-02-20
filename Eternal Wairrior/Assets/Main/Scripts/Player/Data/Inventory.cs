@@ -7,7 +7,6 @@ public class Inventory : MonoBehaviour, IInitializable
 {
     private List<InventorySlot> slots = new();
     private Dictionary<EquipmentSlot, Item> equippedItems = new();
-    private Player player;
     private int gold;
     private InventoryData savedState;
     private PlayerStatSystem playerStat;
@@ -17,7 +16,7 @@ public class Inventory : MonoBehaviour, IInitializable
 
     private void Awake()
     {
-        player = GetComponent<Player>();
+        playerStat = GetComponent<PlayerStatSystem>();
     }
 
     public void Initialize()

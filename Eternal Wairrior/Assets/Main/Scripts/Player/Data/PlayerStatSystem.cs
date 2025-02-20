@@ -1,7 +1,8 @@
-using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
+using System.Text;
+using UnityEngine;
 
 public class PlayerStatSystem : MonoBehaviour
 {
@@ -15,6 +16,12 @@ public class PlayerStatSystem : MonoBehaviour
     {
         InitializeStats();
         player = GetComponent<Player>();
+        StringBuilder sb = new();
+        foreach (var stat in currentStats)
+        {
+            sb.AppendLine($"{stat.Key}: {stat.Value}");
+        }
+        print(sb);
     }
 
     private void InitializeStats()
@@ -39,12 +46,14 @@ public class PlayerStatSystem : MonoBehaviour
         activeModifiers.Clear();
         foreach (var modifierData in saveData.permanentModifiers)
         {
-            AddModifier(new StatModifier(
-                modifierData.statType,
-                modifierData.sourceType,
-                modifierData.increaseType,
-                modifierData.amount
-            ));
+            AddModifier(
+                new StatModifier(
+                    modifierData.statType,
+                    modifierData.sourceType,
+                    modifierData.increaseType,
+                    modifierData.amount
+                )
+            );
         }
 
         RecalculateAllStats();
@@ -63,12 +72,14 @@ public class PlayerStatSystem : MonoBehaviour
         {
             foreach (var modifier in modifierList.Where(m => IsPermanentSource(m.Source)))
             {
-                saveData.permanentModifiers.Add(new StatModifierSaveData(
-                    modifier.Type,
-                    modifier.Source,
-                    modifier.IncreaseType,
-                    modifier.Value
-                ));
+                saveData.permanentModifiers.Add(
+                    new StatModifierSaveData(
+                        modifier.Type,
+                        modifier.Source,
+                        modifier.IncreaseType,
+                        modifier.Value
+                    )
+                );
             }
         }
 
@@ -113,7 +124,10 @@ public class PlayerStatSystem : MonoBehaviour
         }
 
         float newValue = (baseValue + addValue) * mulValue;
-        if (currentStats.ContainsKey(statType) && !Mathf.Approximately(currentStats[statType], newValue))
+        if (
+            currentStats.ContainsKey(statType)
+            && !Mathf.Approximately(currentStats[statType], newValue)
+        )
         {
             currentStats[statType] = newValue;
             OnStatChanged?.Invoke(statType, newValue);
@@ -140,10 +154,10 @@ public class PlayerStatSystem : MonoBehaviour
 
     private bool IsPermanentSource(SourceType source)
     {
-        return source == SourceType.Weapon ||
-               source == SourceType.Armor ||
-               source == SourceType.Accessory ||
-               source == SourceType.Special;
+        return source == SourceType.Weapon
+            || source == SourceType.Armor
+            || source == SourceType.Accessory
+            || source == SourceType.Special;
     }
 
     public void SetCurrentHp(float value)
@@ -151,8 +165,10 @@ public class PlayerStatSystem : MonoBehaviour
         float maxHp = GetStat(StatType.MaxHp);
         float newHp = Mathf.Clamp(value, 0, maxHp);
 
-        if (!currentStats.ContainsKey(StatType.CurrentHp) ||
-            !Mathf.Approximately(currentStats[StatType.CurrentHp], newHp))
+        if (
+            !currentStats.ContainsKey(StatType.CurrentHp)
+            || !Mathf.Approximately(currentStats[StatType.CurrentHp], newHp)
+        )
         {
             currentStats[StatType.CurrentHp] = newHp;
             OnStatChanged?.Invoke(StatType.CurrentHp, newHp);
@@ -187,7 +203,9 @@ public class PlayerStatSystem : MonoBehaviour
         {
             if (activeModifiers[source].Any(modifier => modifier.Type == statType))
             {
-                RemoveModifier(activeModifiers[source].First(modifier => modifier.Type == statType));
+                RemoveModifier(
+                    activeModifiers[source].First(modifier => modifier.Type == statType)
+                );
             }
         }
     }
@@ -198,5 +216,6 @@ public class PlayerStatSystem : MonoBehaviour
     }
 
     public float GetCurrentHp() => GetStat(StatType.CurrentHp);
+
     public float GetMaxHp() => GetStat(StatType.MaxHp);
 }

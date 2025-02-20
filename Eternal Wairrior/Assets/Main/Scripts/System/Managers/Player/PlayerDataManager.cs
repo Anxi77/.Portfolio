@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.IO;
+using UnityEngine;
 
 public class PlayerDataManager : DataManager<PlayerDataManager>
 {
@@ -40,7 +40,15 @@ public class PlayerDataManager : DataManager<PlayerDataManager>
         currentPlayerStatData = new PlayerStatData();
         currentInventoryData = new InventoryData();
         currentLevelData = new LevelData { level = 1, exp = 0f };
-        JSONIO<PlayerData>.SaveData(DEFAULT_SAVE_SLOT, new PlayerData { stats = currentPlayerStatData, inventory = currentInventoryData, levelData = currentLevelData });
+        JSONIO<PlayerData>.SaveData(
+            DEFAULT_SAVE_SLOT,
+            new PlayerData
+            {
+                stats = currentPlayerStatData,
+                inventory = currentInventoryData,
+                levelData = currentLevelData,
+            }
+        );
     }
 
     public virtual void ClearAllRuntimeData()
@@ -53,13 +61,15 @@ public class PlayerDataManager : DataManager<PlayerDataManager>
 
     public void SavePlayerData(PlayerData data)
     {
-        if (!IsInitialized) Initialize();
+        if (!IsInitialized)
+            Initialize();
         JSONIO<PlayerData>.SaveData(DEFAULT_SAVE_SLOT, data);
     }
 
     public PlayerData LoadPlayerData()
     {
-        if (!IsInitialized) Initialize();
+        if (!IsInitialized)
+            Initialize();
         return JSONIO<PlayerData>.LoadData(DEFAULT_SAVE_SLOT);
     }
 
@@ -90,8 +100,8 @@ public class PlayerDataManager : DataManager<PlayerDataManager>
 
     public bool HasSaveData()
     {
-        if (!IsInitialized) Initialize();
+        if (!IsInitialized)
+            Initialize();
         return File.Exists(DEFAULT_SAVE_SLOT);
     }
 }
-

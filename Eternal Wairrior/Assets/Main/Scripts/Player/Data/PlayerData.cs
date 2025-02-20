@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+
 [Serializable]
 public class PlayerData
 {
@@ -37,8 +38,15 @@ public class PlayerStatData
         baseStats[StatType.AttackRange] = 2f;
         baseStats[StatType.ExpCollectionRadius] = 3f;
         baseStats[StatType.HpRegenRate] = 1f;
+        baseStats[StatType.AttackRadius] = 1f;
+        baseStats[StatType.CriticalChance] = 10f;
+        baseStats[StatType.CriticalDamage] = 2f;
+        baseStats[StatType.DodgeChance] = 10f;
+        baseStats[StatType.Luck] = 5f;
+        baseStats[StatType.LifeSteal] = 5f;
     }
 }
+
 [Serializable]
 public class StatModifierSaveData
 {
@@ -47,7 +55,12 @@ public class StatModifierSaveData
     public IncreaseType increaseType;
     public float amount;
 
-    public StatModifierSaveData(StatType statType, SourceType sourceType, IncreaseType increaseType, float amount)
+    public StatModifierSaveData(
+        StatType statType,
+        SourceType sourceType,
+        IncreaseType increaseType,
+        float amount
+    )
     {
         this.statType = statType;
         this.sourceType = sourceType;

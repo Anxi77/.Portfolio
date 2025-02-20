@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using static StageManager;
 
 public class PlayerUnitManager : SingletonManager<PlayerUnitManager>, IInitializable
 {

@@ -1,12 +1,13 @@
-using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class ItemManager : SingletonManager<ItemManager>, IInitializable
 {
-    [SerializeField] private GameObject worldDropItemPrefab;
+    [SerializeField]
+    private GameObject worldDropItemPrefab;
     private ItemGenerator itemGenerator;
     private bool isInitialized;
 
@@ -35,7 +36,9 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
             }
             catch (Exception e)
             {
-                Debug.LogError($"[ItemManager] Error initializing ItemManager: {e.Message}\n{e.StackTrace}");
+                Debug.LogError(
+                    $"[ItemManager] Error initializing ItemManager: {e.Message}\n{e.StackTrace}"
+                );
                 isInitialized = false;
             }
         }
@@ -43,9 +46,14 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
 
     public void DropItem(ItemData itemData, Vector3 position)
     {
-        if (itemData == null || worldDropItemPrefab == null) return;
+        if (itemData == null || worldDropItemPrefab == null)
+            return;
 
-        var worldDropItem = PoolManager.Instance.Spawn<WorldDropItem>(worldDropItemPrefab, position, Quaternion.identity);
+        var worldDropItem = PoolManager.Instance.Spawn<WorldDropItem>(
+            worldDropItemPrefab,
+            position,
+            Quaternion.identity
+        );
         if (worldDropItem != null)
         {
             worldDropItem.Initialize(itemData);
@@ -61,7 +69,8 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
     public List<ItemData> GetDropsForEnemy(EnemyType enemyType, float luckMultiplier = 1f)
     {
         var dropTable = ItemDataManager.Instance.GetDropTables().GetValueOrDefault(enemyType);
-        if (dropTable == null) return new List<ItemData>();
+        if (dropTable == null)
+            return new List<ItemData>();
         return itemGenerator.GenerateDrops(dropTable, luckMultiplier);
     }
 
@@ -80,13 +89,16 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
             return null;
         }
 
-        Debug.Log($"[ItemManager] Generated item: {item.Name} with {item.Stats?.Count ?? 0} stats and {item.Effects?.Count ?? 0} effects");
+        Debug.Log(
+            $"[ItemManager] Generated item: {item.Name} with {item.Stats?.Count ?? 0} stats and {item.Effects?.Count ?? 0} effects"
+        );
         return item;
     }
 
     public List<ItemData> GetItemsByType(ItemType type)
     {
-        return ItemDataManager.Instance.GetAllItemData()
+        return ItemDataManager
+            .Instance.GetAllItemData()
             .Where(item => item.Type == type)
             .Select(item => item.Clone())
             .ToList();
@@ -94,7 +106,8 @@ public class ItemManager : SingletonManager<ItemManager>, IInitializable
 
     public List<ItemData> GetItemsByRarity(ItemRarity rarity)
     {
-        return ItemDataManager.Instance.GetAllItemData()
+        return ItemDataManager
+            .Instance.GetAllItemData()
             .Where(item => item.Rarity == rarity)
             .Select(item => item.Clone())
             .ToList();

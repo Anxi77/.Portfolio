@@ -17,10 +17,7 @@ public class StageManager : SingletonManager<StageManager>
     private GameObject portalPrefab;
 
     [SerializeField]
-    private Vector3 townPortalPosition = new Vector3(10, 0, 0);
-
-    [SerializeField]
-    private Vector3 gameStagePortalPosition = new Vector3(-10, 0, 0);
+    private Vector3 townPortalPosition = new(10, 0, 0);
 
     #region Scene Loading
     public void LoadMainMenu()

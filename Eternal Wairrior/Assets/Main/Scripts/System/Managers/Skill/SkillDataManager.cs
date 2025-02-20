@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 using Newtonsoft.Json;
+using UnityEngine;
 
 public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 {
@@ -16,8 +16,10 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 
     #region Fields
     private Dictionary<SkillID, SkillData> skillDatabase = new Dictionary<SkillID, SkillData>();
-    private Dictionary<SkillID, Dictionary<int, SkillStatData>> statDatabase = new Dictionary<SkillID, Dictionary<int, SkillStatData>>();
-    private Dictionary<SkillID, Dictionary<int, GameObject>> levelPrefabDatabase = new Dictionary<SkillID, Dictionary<int, GameObject>>();
+    private Dictionary<SkillID, Dictionary<int, SkillStatData>> statDatabase =
+        new Dictionary<SkillID, Dictionary<int, SkillStatData>>();
+    private Dictionary<SkillID, Dictionary<int, GameObject>> levelPrefabDatabase =
+        new Dictionary<SkillID, Dictionary<int, GameObject>>();
     #endregion
 
     public new bool IsInitialized { get; private set; }
@@ -61,7 +63,9 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
                             LoadLevelPrefabs(skillId, skillData);
 
                             skillDatabase[skillId] = skillData;
-                            Debug.Log($"Successfully loaded skill: {skillData.Name} (ID: {skillId})");
+                            Debug.Log(
+                                $"Successfully loaded skill: {skillData.Name} (ID: {skillId})"
+                            );
                         }
                     }
                 }
@@ -103,13 +107,15 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
                 SkillType.Projectile => "ProjectileSkillStats",
                 SkillType.Area => "AreaSkillStats",
                 SkillType.Passive => "PassiveSkillStats",
-                _ => null
+                _ => null,
             };
 
-            if (statsFileName == null) return;
+            if (statsFileName == null)
+                return;
 
             var textAsset = Resources.Load<TextAsset>($"{STAT_PATH}/{statsFileName}");
-            if (textAsset == null) return;
+            if (textAsset == null)
+                return;
 
             var stats = new Dictionary<int, SkillStatData>();
             var lines = textAsset.text.Split('\n');
@@ -118,10 +124,12 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
             for (int i = 1; i < lines.Length; i++)
             {
                 var line = lines[i].Trim();
-                if (string.IsNullOrEmpty(line)) continue;
+                if (string.IsNullOrEmpty(line))
+                    continue;
 
                 var values = line.Split(',');
-                if (values.Length != headers.Length) continue;
+                if (values.Length != headers.Length)
+                    continue;
 
                 var statData = new SkillStatData();
                 for (int j = 0; j < headers.Length; j++)
@@ -151,7 +159,8 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
         try
         {
             var stats = GetSkillStats(skillId, 1);
-            if (stats == null) return;
+            if (stats == null)
+                return;
 
             int maxLevel = stats.MaxSkillLevel;
             skillData.PrefabsByLevel = new GameObject[maxLevel];
@@ -236,8 +245,10 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 
     public SkillStatData GetSkillStats(SkillID id, int level)
     {
-        if (statDatabase.TryGetValue(id, out var levelStats) &&
-            levelStats.TryGetValue(level, out var statData))
+        if (
+            statDatabase.TryGetValue(id, out var levelStats)
+            && levelStats.TryGetValue(level, out var statData)
+        )
         {
             return statData;
         }
@@ -246,8 +257,10 @@ public class SkillDataManager : DataManager<SkillDataManager>, IInitializable
 
     public GameObject GetLevelPrefab(SkillID skillId, int level)
     {
-        if (levelPrefabDatabase.TryGetValue(skillId, out var levelPrefabs) &&
-            levelPrefabs.TryGetValue(level, out var prefab))
+        if (
+            levelPrefabDatabase.TryGetValue(skillId, out var levelPrefabs)
+            && levelPrefabs.TryGetValue(level, out var prefab)
+        )
         {
             return prefab;
         }

@@ -9,7 +9,13 @@
       "AttackSpeed": 1.0,
       "AttackRange": 2.0,
       "ExpCollectionRadius": 3.0,
-      "HpRegenRate": 1.0
+      "HpRegenRate": 1.0,
+      "AttackRadius": 1.0,
+      "CriticalChance": 10.0,
+      "CriticalDamage": 2.0,
+      "DodgeChance": 10.0,
+      "Luck": 5.0,
+      "LifeSteal": 5.0
     },
     "permanentModifiers": []
   },

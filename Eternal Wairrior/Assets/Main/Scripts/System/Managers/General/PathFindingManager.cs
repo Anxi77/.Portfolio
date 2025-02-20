@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using UnityEngine;
 
 public class PathFindingManager : SingletonManager<PathFindingManager>, IInitializable
 {
@@ -16,14 +16,14 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
     #endregion
 
     #region Fields
-    private Dictionary<Vector2Int, Node> activeNodes = new Dictionary<Vector2Int, Node>();
+    private Dictionary<Vector2Int, Node> activeNodes = new();
     private Camera mainCamera;
     private Vector2 previousCameraPosition;
     private Vector2 bottomLeft;
     private Vector2 gridWorldCenter;
     private List<Node> openSet;
     private HashSet<Node> closedSet;
-    private Queue<PathFindingInstance> instancePool = new Queue<PathFindingInstance>();
+    private Queue<PathFindingInstance> instancePool = new();
     #endregion
 
     public void Initialize()
@@ -94,10 +94,12 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
 
     private void UpdateGridCenter()
     {
-        if (mainCamera == null) return;
+        if (mainCamera == null)
+            return;
 
         gridWorldCenter = mainCamera.transform.position;
-        bottomLeft = gridWorldCenter - new Vector2(GRID_SIZE * NODE_SIZE / 2, GRID_SIZE * NODE_SIZE / 2);
+        bottomLeft =
+            gridWorldCenter - new Vector2(GRID_SIZE * NODE_SIZE / 2, GRID_SIZE * NODE_SIZE / 2);
     }
 
     private void InitializeNodes()
@@ -106,10 +108,18 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
         float height = 2f * mainCamera.orthographicSize;
         float width = height * mainCamera.aspect;
 
-        int startX = Mathf.FloorToInt((cameraPosition.x - width / 2 - GRID_VIEW_DISTANCE - bottomLeft.x) / NODE_SIZE);
-        int endX = Mathf.CeilToInt((cameraPosition.x + width / 2 + GRID_VIEW_DISTANCE - bottomLeft.x) / NODE_SIZE);
-        int startY = Mathf.FloorToInt((cameraPosition.y - height / 2 - GRID_VIEW_DISTANCE - bottomLeft.y) / NODE_SIZE);
-        int endY = Mathf.CeilToInt((cameraPosition.y + height / 2 + GRID_VIEW_DISTANCE - bottomLeft.y) / NODE_SIZE);
+        int startX = Mathf.FloorToInt(
+            (cameraPosition.x - width / 2 - GRID_VIEW_DISTANCE - bottomLeft.x) / NODE_SIZE
+        );
+        int endX = Mathf.CeilToInt(
+            (cameraPosition.x + width / 2 + GRID_VIEW_DISTANCE - bottomLeft.x) / NODE_SIZE
+        );
+        int startY = Mathf.FloorToInt(
+            (cameraPosition.y - height / 2 - GRID_VIEW_DISTANCE - bottomLeft.y) / NODE_SIZE
+        );
+        int endY = Mathf.CeilToInt(
+            (cameraPosition.y + height / 2 + GRID_VIEW_DISTANCE - bottomLeft.y) / NODE_SIZE
+        );
 
         for (int x = startX; x <= endX; x++)
         {
@@ -122,7 +132,8 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
 
     private void Update()
     {
-        if (mainCamera == null) return;
+        if (mainCamera == null)
+            return;
 
         Vector2 currentCameraPosition = mainCamera.transform.position;
         if (Vector2.Distance(currentCameraPosition, previousCameraPosition) > NODE_SIZE)
@@ -137,21 +148,34 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
     private void CreateNode(int x, int y)
     {
         Vector2 worldPosition = bottomLeft + new Vector2(x * NODE_SIZE, y * NODE_SIZE);
-        bool isWalkable = !Physics2D.OverlapCircle(worldPosition, NODE_SIZE * 0.4f, LayerMask.GetMask("Obstacle"));
+        bool isWalkable = !Physics2D.OverlapCircle(
+            worldPosition,
+            NODE_SIZE * 0.4f,
+            LayerMask.GetMask("Obstacle")
+        );
         activeNodes[new Vector2Int(x, y)] = new Node(isWalkable, worldPosition, x, y);
     }
 
     private void UpdateGrid(Vector2 cameraPosition)
     {
-        bottomLeft = cameraPosition - new Vector2(GRID_SIZE * NODE_SIZE / 2, GRID_SIZE * NODE_SIZE / 2);
+        bottomLeft =
+            cameraPosition - new Vector2(GRID_SIZE * NODE_SIZE / 2, GRID_SIZE * NODE_SIZE / 2);
 
         float height = 2f * mainCamera.orthographicSize;
         float width = height * mainCamera.aspect;
 
-        int startX = Mathf.FloorToInt((cameraPosition.x - width / 2 - GRID_VIEW_DISTANCE - bottomLeft.x) / NODE_SIZE);
-        int endX = Mathf.CeilToInt((cameraPosition.x + width / 2 + GRID_VIEW_DISTANCE - bottomLeft.x) / NODE_SIZE);
-        int startY = Mathf.FloorToInt((cameraPosition.y - height / 2 - GRID_VIEW_DISTANCE - bottomLeft.y) / NODE_SIZE);
-        int endY = Mathf.CeilToInt((cameraPosition.y + height / 2 + GRID_VIEW_DISTANCE - bottomLeft.y) / NODE_SIZE);
+        int startX = Mathf.FloorToInt(
+            (cameraPosition.x - width / 2 - GRID_VIEW_DISTANCE - bottomLeft.x) / NODE_SIZE
+        );
+        int endX = Mathf.CeilToInt(
+            (cameraPosition.x + width / 2 + GRID_VIEW_DISTANCE - bottomLeft.x) / NODE_SIZE
+        );
+        int startY = Mathf.FloorToInt(
+            (cameraPosition.y - height / 2 - GRID_VIEW_DISTANCE - bottomLeft.y) / NODE_SIZE
+        );
+        int endY = Mathf.CeilToInt(
+            (cameraPosition.y + height / 2 + GRID_VIEW_DISTANCE - bottomLeft.y) / NODE_SIZE
+        );
 
         HashSet<Vector2Int> currentVisibleNodes = new HashSet<Vector2Int>();
 
@@ -196,14 +220,19 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
         if (activeNodes.TryGetValue(gridPos, out Node node))
         {
             Vector2 worldPosition = bottomLeft + new Vector2(x * NODE_SIZE, y * NODE_SIZE);
-            node.walkable = !Physics2D.OverlapCircle(worldPosition, NODE_SIZE * 0.4f, LayerMask.GetMask("Obstacle"));
+            node.walkable = !Physics2D.OverlapCircle(
+                worldPosition,
+                NODE_SIZE * 0.4f,
+                LayerMask.GetMask("Obstacle")
+            );
             node.worldPosition = worldPosition;
         }
     }
 
     private void UpdateEnemyColliders(HashSet<Vector2Int> visibleNodes)
     {
-        if (GameManager.Instance?.enemies == null) return;
+        if (GameManager.Instance?.enemies == null)
+            return;
 
         foreach (var enemy in GameManager.Instance.enemies)
         {
@@ -235,7 +264,8 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
         {
             for (int y = -1; y <= 1; y++)
             {
-                if (x == 0 && y == 0) continue;
+                if (x == 0 && y == 0)
+                    continue;
 
                 Vector2Int checkPos = new Vector2Int(node.gridX + x, node.gridY + y);
                 if (activeNodes.TryGetValue(checkPos, out Node neighbour))
@@ -264,7 +294,11 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
         }
     }
 
-    private List<Vector2> ExecutePathfinding(Vector2 startPos, Vector2 targetPos, PathFindingInstance instance)
+    private List<Vector2> ExecutePathfinding(
+        Vector2 startPos,
+        Vector2 targetPos,
+        PathFindingInstance instance
+    )
     {
         openSet = instance.openSet;
         closedSet = instance.closedSet;
@@ -282,7 +316,10 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
         directPath = null;
         float distanceToTarget = Vector2.Distance(startPos, targetPos);
 
-        if (distanceToTarget < NODE_SIZE * 2f && !Physics2D.Linecast(startPos, targetPos, LayerMask.GetMask("Obstacle")))
+        if (
+            distanceToTarget < NODE_SIZE * 2f
+            && !Physics2D.Linecast(startPos, targetPos, LayerMask.GetMask("Obstacle"))
+        )
         {
             directPath = new List<Vector2> { startPos, targetPos };
             return true;
@@ -333,7 +370,12 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
         }
     }
 
-    private List<Vector2> ExecuteAStarAlgorithm(Node startNode, Node targetNode, Vector2 startPos, Vector2 targetPos)
+    private List<Vector2> ExecuteAStarAlgorithm(
+        Node startNode,
+        Node targetNode,
+        Vector2 startPos,
+        Vector2 targetPos
+    )
     {
         int iterations = 0;
         openSet.Add(startNode);
@@ -360,14 +402,16 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
 
             foreach (Node neighbour in GetNeighbours(currentNode))
             {
-                if (closedSet.Contains(neighbour)) continue;
+                if (closedSet.Contains(neighbour))
+                    continue;
                 if (!neighbour.walkable)
                 {
                     closedSet.Add(neighbour);
                     continue;
                 }
 
-                float tentativeGCost = currentNode.gCost + CalculateDistance(currentNode, neighbour);
+                float tentativeGCost =
+                    currentNode.gCost + CalculateDistance(currentNode, neighbour);
                 if (tentativeGCost < neighbour.gCost)
                 {
                     neighbour.previousNode = currentNode;
@@ -391,7 +435,8 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
     #region Path Optimization & Smoothing
     private List<Vector2> OptimizePath(List<Vector2> path)
     {
-        if (path.Count <= 2) return path;
+        if (path.Count <= 2)
+            return path;
 
         var optimizedPath = new List<Vector2>(50);
         optimizedPath.Add(path[0]);
@@ -411,7 +456,11 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
         return optimizedPath;
     }
 
-    private int FindFurthestVisibleNode(List<Vector2> path, int currentIndex, List<Vector2> optimizedPath)
+    private int FindFurthestVisibleNode(
+        List<Vector2> path,
+        int currentIndex,
+        List<Vector2> optimizedPath
+    )
     {
         Vector2 current = path[currentIndex];
         int furthestVisible = currentIndex + 1;
@@ -422,7 +471,8 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
             {
                 furthestVisible = j;
             }
-            else break;
+            else
+                break;
         }
 
         optimizedPath.Add(path[furthestVisible]);
@@ -482,7 +532,8 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
 
     private Node FindNearestWalkableNode(Node node)
     {
-        if (node.walkable) return node;
+        if (node.walkable)
+            return node;
 
         Queue<Node> openNodes = new Queue<Node>();
         HashSet<Node> visitedNodes = new HashSet<Node>();
@@ -514,10 +565,16 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
         Vector2 direction = (end - start).normalized;
         Vector2 perpendicular = Vector2.Perpendicular(direction) * (NODE_SIZE * 0.3f);
 
-        bool leftClear = !Physics2D.Linecast(start + perpendicular, end + perpendicular,
-            LayerMask.GetMask("Obstacle"));
-        bool rightClear = !Physics2D.Linecast(start - perpendicular, end - perpendicular,
-            LayerMask.GetMask("Obstacle"));
+        bool leftClear = !Physics2D.Linecast(
+            start + perpendicular,
+            end + perpendicular,
+            LayerMask.GetMask("Obstacle")
+        );
+        bool rightClear = !Physics2D.Linecast(
+            start - perpendicular,
+            end - perpendicular,
+            LayerMask.GetMask("Obstacle")
+        );
 
         return leftClear && rightClear;
     }
@@ -526,16 +583,18 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
     #region Visualization
     private void OnDrawGizmos()
     {
-        if (mainCamera == null) return;
+        if (mainCamera == null)
+            return;
 
         Gizmos.color = new Color(1, 1, 0, 0.2f);
-        Gizmos.DrawWireCube(gridWorldCenter, new Vector3(GRID_SIZE * NODE_SIZE, GRID_SIZE * NODE_SIZE, 1));
+        Gizmos.DrawWireCube(
+            gridWorldCenter,
+            new Vector3(GRID_SIZE * NODE_SIZE, GRID_SIZE * NODE_SIZE, 1)
+        );
 
         foreach (var node in activeNodes.Values)
         {
-            Gizmos.color = node.walkable ?
-                new Color(1, 1, 1, 0.1f) :
-                new Color(1, 0, 0, 0.2f);
+            Gizmos.color = node.walkable ? new Color(1, 1, 1, 0.1f) : new Color(1, 0, 0, 0.2f);
 
             Gizmos.DrawCube(node.worldPosition, Vector3.one * NODE_SIZE * 0.8f);
         }
@@ -573,8 +632,7 @@ public class PathFindingManager : SingletonManager<PathFindingManager>, IInitial
     public bool IsPositionInGrid(Vector2 position)
     {
         Vector2Int gridPos = WorldToGridPosition(position);
-        return gridPos.x >= 0 && gridPos.x < GRID_SIZE &&
-               gridPos.y >= 0 && gridPos.y < GRID_SIZE;
+        return gridPos.x >= 0 && gridPos.x < GRID_SIZE && gridPos.y >= 0 && gridPos.y < GRID_SIZE;
     }
 
     public Vector2 ClampToGrid(Vector2 position)
